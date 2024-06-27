@@ -1,3 +1,6 @@
-[submodule "RibbonUI"]
-	path = RibbonUI
-	url = https://github.com/mentalfl0w/RibbonUI.git
+[submodule "3rdParty/yaml-cpp"]
+	path = 3rdParty/yaml-cpp
+	url = https://github.com/jbeder/yaml-cpp.git
+[submodule "3rdParty/xdg"]
+	path = 3rdParty/xdg
+	url = git@github.com:azubieta/xdg-utils-cxx.git
