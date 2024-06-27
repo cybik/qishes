@@ -1,0 +1,3 @@
+[submodule "RibbonUI"]
+	path = RibbonUI
+	url = https://github.com/mentalfl0w/RibbonUI.git
