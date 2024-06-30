@@ -1,0 +1,6 @@
+project(qgachafs_libs)
+
+add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/libgachafs")
+add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/libgachasteamstuff")
+
+# shim
