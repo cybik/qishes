@@ -6,8 +6,37 @@
 #include <QDir>
 #include <QFileInfo>
 
+#include <string>
+
+#include <filesystem>
+
+/*
+std::shared_ptr<std::list<std::shared_ptr<QFile>>> gachafs::getFiles(const std::string& filter, std::string& command_game_path) {
+    std::function<void(const std::string&, const std::string&, int)> search_deep;
+    std::list<std::string> matched_files = std::list<std::string>();
+    search_deep = [filter, &search_deep, &matched_files](const std::string& pattern, const std::string& dirname, int level)
+    {
+
+    };
+    return (std::make_shared<std::list<std::shared_ptr<QFile>>>());
+}*/
+
+int gachafs::seek_depth(int level, const QStringList &stringList, const QFileInfo& fileInfo) {
+    /** ** means "any bloody dir" so we don't go deeper */
+    if(stringList.mid(level, 1).first().compare("**") == 0) {
+        /** Getting a hit on ** means we've matched "any" and the next, so skip 2 instead of 1 */
+        if(stringList.mid(level+1, 1).first().compare(fileInfo.baseName()) == 0) return level + 2;
+
+        /** Being on ** but not matching the next means we're still seeking under the filter of ** */
+        return level;
+    }
+
+    /** We matched with something not ** and not a file. */
+    return level + 1;
+}
+
 std::shared_ptr<std::list<std::shared_ptr<QFile>>> gachafs::getFiles(const QString& filter, QString& command_game_path) {
-    /**
+/**
      * Generalized(ish) file finder to get a given file following an ant-styled file filter descriptor.
      * This is unlikely to be truly functional. It's a bit of a hack.
      *
@@ -25,18 +54,7 @@ std::shared_ptr<std::list<std::shared_ptr<QFile>>> gachafs::getFiles(const QStri
             foreach (QFileInfo fileInfo, dir.entryInfoList(stringList.mid(level, 1))) {
             if (fileInfo.isDir() && fileInfo.isReadable()) {
                 // Emulating ** behaviour
-                if(stringList.mid(level, 1).first().compare("**") == 0) {
-                    if(stringList.mid(level+1, 1).first().compare(fileInfo.baseName()) != 0) {
-                        // ** means "any bloody dir" so we don't go deeper into the pattern
-                        search_deep( pattern, fileInfo.filePath(), level );
-                    } else {
-                        // Getting a hit on ** means we've matched "any" and the next, so skip 2 instead of 1
-                        search_deep( pattern, fileInfo.filePath(), level + 2 );
-                    }
-                } else {
-                    // We matched with something not ** and not a file.
-                    search_deep( pattern, fileInfo.filePath(), level + 1 );
-                }
+                search_deep( pattern, fileInfo.filePath(), seek_depth(level, stringList, fileInfo) );
             } else if (stringList.size() == (level + 1) ) {
                 // We hit a file. Nice!
                 matched_files.append(fileInfo.filePath());

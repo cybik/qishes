@@ -5,7 +5,7 @@
 #include <commands/AbstractCommand.h>
 #include <iostream>
 
-#import <gachafs.h>
+#include <gachafs.h>
 
 const QString filter = "**/webCaches/**/Cache/Cache_Data/data_2";
 
