@@ -7,6 +7,7 @@
 #include <iostream>
 
 #include <QFile>
+#include <QRegularExpression>
 
 const QString HistoryCommand::CommandSpecifier = "history";
 
@@ -78,9 +79,61 @@ void HistoryCommand::process(int argc, char **argv) {
     // Obsessed with oneliners, shut up.
     this->command_max_return_num = (parser.isSet(*max_return_num)?parser.value(*max_return_num).toInt():1);
 
-    std::cout << "ayyyyyyyyyyy :: " << this->command_game_path.toStdString() << std::endl;
+    //std::cout << "ayyyyyyyyyyy :: " << this->command_game_path.toStdString() << std::endl;
 
-    this->getGameWishesCache();
+    std::shared_ptr<std::list<std::shared_ptr<QFile>>> caches = this->getGameWishesCache();
+    if(caches->size() <= 0) {
+        parser.showHelp(0);
+    }
+    foreach(std::shared_ptr<QFile> qfile, *caches) {
+        std::shared_ptr<QStringList> results = runFilterForLogs(runUrlCleanup(runUrlSearch(qfile)));
+        std::cout << "[#] Data file: " << qfile->fileName().toStdString() << std::endl;
+        if(this->command_max_return_num == 1 || results->size() == 1) {
+            std::cout << (*results)[0].toStdString() << std::endl;
+        } else {
+            foreach(auto staged, *results) {
+                std::cout<<"- " << staged.toStdString() << std::endl;
+            }
+        }
+    }
+}
 
-    parser.showHelp(0);
+std::shared_ptr<QStringList> HistoryCommand::runUrlSearch(std::shared_ptr<QFile> qfile) {
+    if(!qfile->exists()) return nullptr;
+    qfile->open(QFile::ReadOnly);
+    QRegularExpression qreg("1/0/https(.*)\0\0\0\0\0\0\0\0");
+    QRegularExpressionMatchIterator qrem = qreg.globalMatch(qfile->readAll());
+    std::shared_ptr<QStringList> retList = std::make_shared<QStringList>();
+    while(qrem.hasNext()) {
+        retList->append(qrem.next().captured(0));
+    }
+    qfile->close();
+    return retList;
+}
+std::shared_ptr<QStringList> HistoryCommand::runUrlCleanup(std::shared_ptr<QStringList> ptr) {
+    std::shared_ptr<QStringList> retList = std::make_shared<QStringList>();
+    for(const auto& single_string: (*ptr)) {
+        for(const auto& split_string_1: single_string.split("1/0/")) { /** cut on 1/0/ **/
+            if(split_string_1.startsWith("http")) {
+                for(const auto& split_string_2: split_string_1.split('\0',Qt::SkipEmptyParts)) {
+                    if(split_string_2.startsWith("http")) {
+                        // always split after a cache entry, defined by nullchars
+                        retList->append(split_string_2); // first of the second level
+                    }
+                }
+            }
+        }
+    }
+    ptr->clear(); /** cleanup **/
+    return retList;
+}
+std::shared_ptr<QStringList> HistoryCommand::runFilterForLogs(std::shared_ptr<QStringList> ptr) {
+    std::shared_ptr<QStringList> retList = std::make_shared<QStringList>();
+    for(const auto& single_string: (*ptr)) {
+        if(single_string.contains("gacha-v") && single_string.contains("index.html")) {
+            retList->push_front(single_string);
+        }
+    }
+    ptr->clear();
+    return retList;
 }

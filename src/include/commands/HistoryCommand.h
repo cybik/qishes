@@ -14,7 +14,11 @@ public:
     void process(int, char **) override;
 protected:
 private:
+    std::shared_ptr<QStringList> runUrlSearch(std::shared_ptr<QFile> qfile);
+    std::shared_ptr<QStringList> runUrlCleanup(std::shared_ptr<QStringList> ptr);
+    std::shared_ptr<QStringList> runFilterForLogs(std::shared_ptr<QStringList> ptr);
     bool command_reverse_order;
     bool command_open_url;
     int command_max_return_num;
+
 };

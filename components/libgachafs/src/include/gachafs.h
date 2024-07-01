@@ -13,7 +13,7 @@
 
 class gachafs {
 public:
-    static std::unique_ptr<std::list<std::unique_ptr<QFile>>> getFiles(const QString& filter, QString& command_game_path);
+    static std::shared_ptr<std::list<std::shared_ptr<QFile>>> getFiles(const QString& filter, QString& command_game_path);
 protected:
 private:
     gachafs();

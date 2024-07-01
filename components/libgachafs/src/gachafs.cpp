@@ -6,7 +6,7 @@
 #include <QDir>
 #include <QFileInfo>
 
-std::unique_ptr<std::list<std::unique_ptr<QFile>>> gachafs::getFiles(const QString& filter, QString& command_game_path) {
+std::shared_ptr<std::list<std::shared_ptr<QFile>>> gachafs::getFiles(const QString& filter, QString& command_game_path) {
     /**
      * Generalized(ish) file finder to get a given file following an ant-styled file filter descriptor.
      * This is unlikely to be truly functional. It's a bit of a hack.
@@ -44,16 +44,16 @@ std::unique_ptr<std::list<std::unique_ptr<QFile>>> gachafs::getFiles(const QStri
         }
     };
     search_deep(filter, command_game_path, 0);
-    std::unique_ptr<std::list<std::unique_ptr<QFile>>> stdlist = std::make_unique<std::list<std::unique_ptr<QFile>>>();
+    std::shared_ptr<std::list<std::shared_ptr<QFile>>> stdlist = std::make_shared<std::list<std::shared_ptr<QFile>>>();
     if(!matched_files.empty()) {
-        std::cout << "Caches found" << std::endl;
-                foreach(QString filepath, matched_files) {
-                std::cout << filepath.toStdString() << std::endl;
-                auto f =    std::make_unique<QFile>(filepath);
-                stdlist->push_back(std::move(f));
-            }
+        //std::cout << "Caches found" << std::endl;
+        foreach(QString filepath, matched_files) {
+            //std::cout << filepath.toStdString() << std::endl;
+            auto f =    std::make_unique<QFile>(filepath);
+            stdlist->push_back(std::move(f));
+        }
     }
-    return std::move(stdlist);
+    return stdlist;
 }
 
 gachafs::gachafs() {
