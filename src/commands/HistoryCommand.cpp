@@ -82,16 +82,16 @@ void HistoryCommand::process(int argc, char **argv) {
     //std::cout << "ayyyyyyyyyyy :: " << this->command_game_path.toStdString() << std::endl;
 
     std::shared_ptr<std::list<std::shared_ptr<QFile>>> caches = this->getGameWishesCache();
-    if(caches->size() <= 0) {
+    if(caches->empty()) {
         parser.showHelp(0);
     }
-    foreach(std::shared_ptr<QFile> qfile, *caches) {
+    for(const auto& qfile: *caches) {
         std::shared_ptr<QStringList> results = runFilterForLogs(runUrlCleanup(runUrlSearch(qfile)));
         std::cout << "[#] Data file: " << qfile->fileName().toStdString() << std::endl;
         if(this->command_max_return_num == 1 || results->size() == 1) {
             std::cout << (*results)[0].toStdString() << std::endl;
         } else {
-            foreach(auto staged, *results) {
+            for(auto staged: *results) {
                 std::cout<<"- " << staged.toStdString() << std::endl;
             }
         }

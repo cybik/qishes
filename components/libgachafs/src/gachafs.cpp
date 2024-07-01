@@ -51,7 +51,7 @@ std::shared_ptr<std::list<std::shared_ptr<QFile>>> gachafs::getFiles(const QStri
             QDir::Dirs | QDir::Files | QDir::NoSymLinks | QDir::NoDot | QDir::NoDotDot
         );
         static const QStringList stringList = filter.split('/');
-            foreach (QFileInfo fileInfo, dir.entryInfoList(stringList.mid(level, 1))) {
+        for (QFileInfo fileInfo: dir.entryInfoList(stringList.mid(level, 1))) {
             if (fileInfo.isDir() && fileInfo.isReadable()) {
                 // Emulating ** behaviour
                 search_deep( pattern, fileInfo.filePath(), seek_depth(level, stringList, fileInfo) );
@@ -65,7 +65,7 @@ std::shared_ptr<std::list<std::shared_ptr<QFile>>> gachafs::getFiles(const QStri
     std::shared_ptr<std::list<std::shared_ptr<QFile>>> stdlist = std::make_shared<std::list<std::shared_ptr<QFile>>>();
     if(!matched_files.empty()) {
         //std::cout << "Caches found" << std::endl;
-        foreach(QString filepath, matched_files) {
+        for(auto filepath: matched_files) {
             //std::cout << filepath.toStdString() << std::endl;
             auto f =    std::make_unique<QFile>(filepath);
             stdlist->push_back(std::move(f));
