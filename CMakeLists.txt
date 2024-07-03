@@ -25,6 +25,7 @@ set(PROJECT_3RDPARTY_DIR "${CMAKE_CURRENT_LIST_DIR}/3rdParty")
 
 add_subdirectory("${PROJECT_3RDPARTY_DIR}/xdg")
 add_subdirectory("${PROJECT_3RDPARTY_DIR}/yaml-cpp")
+add_subdirectory("${PROJECT_3RDPARTY_DIR}/termcolor")
 
 add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/components")
 
@@ -46,9 +47,9 @@ include_directories(
 
 include_directories(
     AFTER
-        "${PROJECT_3RDPARTY_DIR}/RibbonUI/lib_source"
         "${PROJECT_3RDPARTY_DIR}/xdg/include"
         "${PROJECT_3RDPARTY_DIR}/yaml-cpp/include"
+        "${PROJECT_3RDPARTY_DIR}/termcolor/include"
 )
 
 # hi https://dev.my-gate.net/2021/08/04/understanding-rpath-with-cmake/

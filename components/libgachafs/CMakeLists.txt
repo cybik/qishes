@@ -13,6 +13,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 include_directories(
     BEFORE
         "${CMAKE_CURRENT_LIST_DIR}/src/include"
+        "${CMAKE_CURRENT_LIST_DIR}/../../3rdParty/termcolor/include"
 )
 set(CMAKE_BUILD_TYPE Release)
 

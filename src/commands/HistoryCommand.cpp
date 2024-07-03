@@ -9,11 +9,9 @@
 #include <QFile>
 #include <QRegularExpression>
 
-const QString HistoryCommand::CommandSpecifier = "history";
+#include <termcolor/termcolor.hpp>
 
-HistoryCommand::HistoryCommand() {
-    // noop for now
-}
+const QString HistoryCommand::CommandSpecifier = "history";
 
 void HistoryCommand::process(int argc, char **argv) {
     QCoreApplication qwishes_history(argc, argv);
@@ -87,18 +85,23 @@ void HistoryCommand::process(int argc, char **argv) {
     }
     for(const auto& qfile: *caches) {
         std::shared_ptr<QStringList> results = runFilterForLogs(runUrlCleanup(runUrlSearch(qfile)));
-        std::cout << "[#] Data file: " << qfile->fileName().toStdString() << std::endl;
+        // formatted, f*ck you
+        std::cout
+            << termcolor::bold << termcolor::cyan  << "[#] " << termcolor::reset
+            << termcolor::bold << termcolor::green << "Data file" << termcolor::reset
+            << ": "
+            << termcolor::yellow << qfile->fileName().toStdString() << std::endl;
         if(this->command_max_return_num == 1 || results->size() == 1) {
             std::cout << (*results)[0].toStdString() << std::endl;
         } else {
-            for(auto staged: *results) {
+            for(const auto& staged: *results) {
                 std::cout<<"- " << staged.toStdString() << std::endl;
             }
         }
     }
 }
 
-std::shared_ptr<QStringList> HistoryCommand::runUrlSearch(std::shared_ptr<QFile> qfile) {
+std::shared_ptr<QStringList> HistoryCommand::runUrlSearch(const std::shared_ptr<QFile>& qfile) {
     if(!qfile->exists()) return nullptr;
     qfile->open(QFile::ReadOnly);
     QRegularExpression qreg("1/0/https(.*)\0\0\0\0\0\0\0\0");
@@ -110,7 +113,7 @@ std::shared_ptr<QStringList> HistoryCommand::runUrlSearch(std::shared_ptr<QFile>
     qfile->close();
     return retList;
 }
-std::shared_ptr<QStringList> HistoryCommand::runUrlCleanup(std::shared_ptr<QStringList> ptr) {
+std::shared_ptr<QStringList> HistoryCommand::runUrlCleanup(const std::shared_ptr<QStringList>& ptr) {
     std::shared_ptr<QStringList> retList = std::make_shared<QStringList>();
     for(const auto& single_string: (*ptr)) {
         for(const auto& split_string_1: single_string.split("1/0/")) { /** cut on 1/0/ **/
@@ -127,7 +130,8 @@ std::shared_ptr<QStringList> HistoryCommand::runUrlCleanup(std::shared_ptr<QStri
     ptr->clear(); /** cleanup **/
     return retList;
 }
-std::shared_ptr<QStringList> HistoryCommand::runFilterForLogs(std::shared_ptr<QStringList> ptr) {
+
+std::shared_ptr<QStringList> HistoryCommand::runFilterForLogs(const std::shared_ptr<QStringList>& ptr) {
     std::shared_ptr<QStringList> retList = std::make_shared<QStringList>();
     for(const auto& single_string: (*ptr)) {
         if(single_string.contains("gacha-v") && single_string.contains("index.html")) {
