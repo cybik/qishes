@@ -20,7 +20,6 @@ int gachafs::seek_depth(int level, const QStringList &stringList, const QFileInf
         /** Being on ** but not matching the next means we're still seeking under the filter of ** */
         return level;
     }
-
     /** We matched with something not ** and not a file. */
     return level + 1;
 }

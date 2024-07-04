@@ -75,6 +75,8 @@ add_executable(
     ${MY_PROJECT_NAME}
         "${CMAKE_CURRENT_LIST_DIR}/src/qmain.cpp"
 
+        "${CMAKE_CURRENT_LIST_DIR}/src/data/wishlog.cpp"
+
         "${CMAKE_CURRENT_LIST_DIR}/src/commands/HistoryCommand.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/src/commands/AbstractCommand.cpp"
 )

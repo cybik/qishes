@@ -84,18 +84,25 @@ void HistoryCommand::process(int argc, char **argv) {
         parser.showHelp(0);
     }
     for(const auto& qfile: *caches) {
-        std::shared_ptr<QStringList> results = runFilterForLogs(runUrlCleanup(runUrlSearch(qfile)));
+        auto results = runFilterForLogs(runUrlCleanup(runUrlSearch(qfile)));
         // formatted, f*ck you
         std::cout
             << termcolor::bold << termcolor::cyan  << "[#] " << termcolor::reset
             << termcolor::bold << termcolor::green << "Data file" << termcolor::reset
             << ": "
             << termcolor::yellow << qfile->fileName().toStdString() << std::endl;
+        if(results->empty()) {
+            std::cout << termcolor::bold << termcolor::red << "No URLs read, detected or otherwise found." << std::endl;
+            return;
+        }
         if(this->command_max_return_num == 1 || results->size() == 1) {
-            std::cout << (*results)[0].toStdString() << std::endl;
+            std::cout << (*results).front().to_stdstring() << std::endl;
+            if(this->command_open_url) {
+                // TODO: use xdg
+            }
         } else {
-            for(const auto& staged: *results) {
-                std::cout<<"- " << staged.toStdString() << std::endl;
+            for(auto& staged: *results) {
+                std::cout << "- " << staged.to_stdstring() << std::endl;
             }
         }
     }
@@ -131,11 +138,20 @@ std::shared_ptr<QStringList> HistoryCommand::runUrlCleanup(const std::shared_ptr
     return retList;
 }
 
-std::shared_ptr<QStringList> HistoryCommand::runFilterForLogs(const std::shared_ptr<QStringList>& ptr) {
-    std::shared_ptr<QStringList> retList = std::make_shared<QStringList>();
+/**
+ * https://gs.hoyoverse.com/nap/event/e20230424gacha/index.html?authkey_ver=1&sign_type=2&auth_appid=webview_gacha&win_mode=fullscreen&gacha_id=2c1f5692fdfbb733a08733f9eb69d32aed1d37&timestamp=1719887753&init_log_gacha_type=2001&init_log_gacha_base_type=2&ui_layout=&button_mode=default&plat_type=3&authkey=qEsfaOAGzSmE%2BfjT2l14NFp0K70%2Fd86qsRFNGhdkaGG6B5nAe00a%2FPZbTNgS0YvOYbdfUy9Ve%2BTxfGd0INMaTAE1%2Fwh3R9FcgpTAJqRypxokZ198SDQKDU3z%2B5JoZ%2FuT99LTTP1XeaG1wy3FT4XpDh9uCfqGYjecMejRCM7k2CdbdGAcRS2I5n5MGmBCjUET6m34uu4gTBgRZdlEkBNDfs%2BcFSixMydaFUnES7FwpdhkGXOm6QSq7JlvvZTnfKw0PYDlkJhVBlqgYvzdgqOA%2FDqYcPRgD%2F%2FektTZbj5Lc9y1%2FAuX9ax5TzBeszrdT%2BA%2BmdqGzhV6K9m%2B8C89oBRJOTTnervrpG8h2jmV%2BmUew86%2FqoCzaSF8kbBLWWvcotRLtVqhYYlK5H%2FWrMlntBsqKEZCS1pSjDMlDCiSHr5wUOljjsoOmnWhAYo5sjqTdG1KZ0Jj8qDmhYodd1eI0O8RNBk55auuKytopN2IgBwJ1O5scolIEjb3uUb6z%2BXOSSFvIqGY%2Fo8IqQWLnkdRoRhkrkTIql1%2BYNDpdOfghEOEW7V290T99PgNbCm%2BjPa1%2Bk5n6tG0quCltCVifpU1UCR2SFN0dUkIZVpmFzpQ4kNgcokv09XDcg0exOphilP5gG9ncMNXxZci%2FchwFqFywUsJY2wwIc6BjHccfigrYc6HFSM%3D&lang=en&region=prod_gf_us&game_biz=nap_global
+ * */
+std::shared_ptr<std::list<WishLog>> HistoryCommand::runFilterForLogs(const std::shared_ptr<QStringList>& ptr) {
+    std::shared_ptr<std::list<WishLog>> retList = std::make_shared<std::list<WishLog>>();
     for(const auto& single_string: (*ptr)) {
-        if(single_string.contains("gacha-v") && single_string.contains("index.html")) {
-            retList->push_front(single_string);
+        if(  single_string.contains("index.html") &&
+            (single_string.contains("gacha-v")
+                || (single_string.contains("game_biz=nap_global") && single_string.contains("gacha"))
+            )
+        ) {
+            WishLog::WishLogGame wlg = WishLog::Genshin;
+            if(single_string.contains("nap")) wlg = WishLog::ZZZ;
+            retList->push_front(WishLog(single_string, WishLog::History, wlg));
         }
     }
     ptr->clear();
