@@ -3,7 +3,6 @@
 //
 
 #include <commands/AbstractCommand.h>
-#include <iostream>
 
 #include <gachafs.h>
 

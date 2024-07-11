@@ -13,7 +13,7 @@
 class AbstractCommand {
 
 public:
-    virtual void process(int, char **) = 0;
+    virtual void cmd_main(int, char **) = 0;
 protected:
     QString command_game_path;
     std::shared_ptr<std::list<std::shared_ptr<QFile>>> getGameWishesCache();

@@ -12,7 +12,7 @@ class HistoryCommand : public AbstractCommand {
 public:
     static const QString CommandSpecifier;
     HistoryCommand() = default;
-    void process(int, char **) override;
+    void cmd_main(int, char **) override;
 protected:
 private:
     std::shared_ptr<QStringList> runUrlSearch(const std::shared_ptr<QFile>& qfile);
