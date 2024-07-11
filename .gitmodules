@@ -7,3 +7,6 @@
 [submodule "3rdParty/termcolor"]
 	path = 3rdParty/termcolor
 	url = https://github.com/ikalnytskyi/termcolor.git
+[submodule "3rdParty/spinnerspp"]
+	path = 3rdParty/spinnerspp
+	url = https://github.com/jkuri/spinners
