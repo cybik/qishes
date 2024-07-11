@@ -18,8 +18,12 @@ public:
         HSR,
         ZZZ
     } WishLogGame;
-    WishLog(const QString& wishurl, WishLogType log_type, WishLogGame log_game);
+    WishLog(const QString &wishurl, WishLogType log_type);
     [[nodiscard]] std::string to_stdstring();
+    [[nodiscard]] QString to_qstring();
+    static bool is_accepted_url(const QString& url);
+protected:
+    WishLogGame guess_game(const QString& url);
 private:
     QString log_url;
     int log_type;

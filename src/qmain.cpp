@@ -7,6 +7,7 @@
 
 #include <commands/AbstractCommand.h>
 #include <commands/HistoryCommand.h>
+#include <commands/LauncherCommand.h>
 
 #include <common.h>
 
@@ -22,6 +23,8 @@ static const QStringList list_commands = {{
 std::unique_ptr<AbstractCommand> process_command(QString command) {
     if(command.compare(HistoryCommand::CommandSpecifier, Qt::CaseInsensitive) == 0) {
         return std::make_unique<HistoryCommand>();
+    } else if(command.compare(LauncherCommand::CommandSpecifier, Qt::CaseInsensitive) == 0) {
+        return std::make_unique<LauncherCommand>();
     }
     return nullptr;
 }
@@ -57,7 +60,7 @@ int main(int argc, char *argv[]) {
         parser.showHelp();
     }
 
-    command->process(argc, argv);
+    command->cmd_main(argc, argv);
     //QCommandLineParser parser;
     //return QCoreApplication::exec();
     return 0;
