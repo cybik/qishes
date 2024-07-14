@@ -12,8 +12,8 @@ jobs:
         run: |
           find ${{ gitea.workspace }} -type f
       - run: |
-          mkdir -p "${{ gitea.workspace }}"/build
+          mkdir -p "${{ gitea.workspace }}/build"
       - run: |
-          cd ""${{ gitea.workspace }}/build"
+          cd "${{ gitea.workspace }}/build"
           cmake ..
           make -j7
