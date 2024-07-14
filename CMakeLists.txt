@@ -79,6 +79,8 @@ add_executable(
 
         "${CMAKE_CURRENT_LIST_DIR}/src/data/wishlog.cpp"
 
+        "${CMAKE_CURRENT_LIST_DIR}/src/util/log.cpp"
+
         "${CMAKE_CURRENT_LIST_DIR}/src/commands/DataCommand.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/src/commands/DaemonCommand.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/src/commands/HistoryCommand.cpp"

@@ -27,14 +27,16 @@ void HistoryCommand::cmd_main(int argc, char **argv) {
 
     parser.addPositionalArgument(
         "command",
-        QCoreApplication::translate("main", "Command to run. MUST be History.")
+        QCoreApplication::translate("main", "Command to run. MUST be history.")
     );
 
     std::shared_ptr<QCommandLineOption> game_path, reverse_order, open_url, max_return_num;
     parser.addOption(
         *(game_path = std::make_shared<QCommandLineOption>(
             QStringList() << "g" << "game_path",
-            QCoreApplication::translate("history", "Path to the game installation."),
+            QCoreApplication::translate(
+                CommandSpecifier.toStdString().c_str(), "Path to the game installation."
+            ),
             "game_path",
             nullptr
         ))
@@ -42,19 +44,25 @@ void HistoryCommand::cmd_main(int argc, char **argv) {
     parser.addOption(
         *(reverse_order = std::make_shared<QCommandLineOption>(
             QStringList() << "r" << "reverse_order",
-            QCoreApplication::translate("history", "Return URLs in reversed order (from oldest to most recent).")
+            QCoreApplication::translate(
+                CommandSpecifier.toStdString().c_str(), "Return URLs in reversed order (from oldest to most recent)."
+            )
         ))
     );
     parser.addOption(
         *(open_url = std::make_shared<QCommandLineOption>(
             QStringList() << "o" << "open_url",
-            QCoreApplication::translate("history", "Open URL in system browser.")
+            QCoreApplication::translate(
+                CommandSpecifier.toStdString().c_str(), "Open URL in system browser."
+            )
         ))
     );
     parser.addOption(
         *(max_return_num = std::make_shared<QCommandLineOption>(
             QStringList() << "m" << "max_return_num",
-            QCoreApplication::translate("history", "Maximum number of URLs to return."),
+            QCoreApplication::translate(
+                CommandSpecifier.toStdString().c_str(), "Maximum number of URLs to return."
+            ),
             "max_return_num",
             "1"
         ))
@@ -69,7 +77,7 @@ void HistoryCommand::cmd_main(int argc, char **argv) {
     }
 
     if(!parser.isSet(*game_path)) {
-        std::cout << "need game path oi" << std::endl;
+        Log::get_logger()->warning("No game path was provided. Cannot deduce the path.");
         parser.showHelp(1);
     }
 
@@ -97,9 +105,7 @@ void HistoryCommand::cmd_main(int argc, char **argv) {
 
         auto results = runFilterForLogs(runUrlCleanup(runUrlSearch(qfile)));
         if(!results || results->empty()) {
-            std::cout
-                << termcolor::bold << termcolor::red << "No URLs read, detected or otherwise found." << termcolor::reset
-                << std::endl;
+            Log::get_logger()->critical("No URLs read, detected or otherwise found.");
             return;
         }
         if(this->command_max_return_num == 1 || results->size() == 1) {
@@ -132,7 +138,7 @@ std::shared_ptr<QStringList> HistoryCommand::runUrlCleanup(const std::shared_ptr
     std::shared_ptr<QStringList> retList; // don't initialize unless necessary
     for(const auto& single_string: (*ptr)) {
         for(const auto& split_string_1: single_string.split("1/0/")) { /** cut on 1/0/ **/
-            for(const auto& split_string_2: split_string_1.split('\0',Qt::SkipEmptyParts)) {
+            for(const auto& split_string_2: split_string_1.split('\0', Qt::SkipEmptyParts)) {
                 if(split_string_2.startsWith("http")) {
                     if(!retList) retList = std::make_shared<QStringList>();
                     // always split after a cache entry, defined by nullchars

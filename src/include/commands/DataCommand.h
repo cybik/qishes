@@ -5,6 +5,8 @@
 #pragma once
 
 #include "AbstractCommand.h"
+#include <QString>
+#include <data/wishlog.h>
 
 class DataCommand : public AbstractCommand {
 public:
@@ -14,5 +16,6 @@ public:
 
 protected:
 private:
+    QString command_known_url;
 
 };

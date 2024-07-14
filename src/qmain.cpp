@@ -7,6 +7,7 @@
 
 #include <commands/AbstractCommand.h>
 #include <commands/HistoryCommand.h>
+#include <commands/DataCommand.h>
 #include <commands/LauncherCommand.h>
 
 #include <common.h>
@@ -25,6 +26,8 @@ std::unique_ptr<AbstractCommand> process_command(QString command) {
         return std::make_unique<HistoryCommand>();
     } else if(command.compare(LauncherCommand::CommandSpecifier, Qt::CaseInsensitive) == 0) {
         return std::make_unique<LauncherCommand>();
+    } else if(command.compare(DataCommand::CommandSpecifier, Qt::CaseInsensitive) == 0) {
+        return std::make_unique<DataCommand>();
     }
     return nullptr;
 }
