@@ -3,7 +3,7 @@
 	url = https://github.com/jbeder/yaml-cpp.git
 [submodule "3rdParty/xdg"]
 	path = 3rdParty/xdg
-	url = git@github.com:azubieta/xdg-utils-cxx.git
+	url = https://github.com/azubieta/xdg-utils-cxx.git
 [submodule "3rdParty/termcolor"]
 	path = 3rdParty/termcolor
 	url = https://github.com/ikalnytskyi/termcolor.git

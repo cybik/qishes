@@ -13,9 +13,11 @@ jobs:
       - name: List files in the repository
         run: |
           find ${{ gitea.workspace }} -type f
-      - run: |
+      - name: Create workspace
+        run: |
           mkdir -p "${{ gitea.workspace }}/build"
-      - run: |
+      - name: Compile
+        run: |
           cd "${{ gitea.workspace }}/build"
           cmake ..
           make -j7
