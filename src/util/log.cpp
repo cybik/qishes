@@ -1,6 +1,8 @@
 //
 // Created by cybik on 24-07-13.
 //
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "readability-convert-member-functions-to-static"
 
 #include <util/log.h>
 #include <termcolor/termcolor.hpp>
@@ -13,7 +15,7 @@ std::shared_ptr<Log> Log::get_logger() {
     }
     return log_instance;
 }
-void Log::info(QString message) {
+void Log::info(const QString& message) {
     std::cout
             << termcolor::bold
                 << termcolor::bright_cyan  << "[INFO] "
@@ -23,7 +25,7 @@ void Log::info(QString message) {
             << std::endl;
 }
 
-void Log::warning(QString message) {
+void Log::warning(const QString& message) {
     std::cout
             << termcolor::bold
                 << termcolor::bright_yellow  << "[WARNING] "
@@ -32,7 +34,7 @@ void Log::warning(QString message) {
             << termcolor::reset
             << std::endl;
 }
-void Log::debug(QString message) {
+void Log::debug(const QString& message) {
     std::cout
             << termcolor::bold
                 << termcolor::bright_green  << "[DEBUG] "
@@ -41,7 +43,7 @@ void Log::debug(QString message) {
             << termcolor::reset
             << std::endl;
 }
-void Log::critical(QString message) {
+void Log::critical(const QString& message) {
     std::cout
             << termcolor::bold
                 << termcolor::bright_red  << "[CRITICAL] "
@@ -50,3 +52,5 @@ void Log::critical(QString message) {
             << termcolor::reset
             << std::endl;
 }
+
+#pragma clang diagnostic pop

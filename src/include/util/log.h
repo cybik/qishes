@@ -11,10 +11,10 @@
 class Log {
 public:
     static std::shared_ptr<Log> get_logger();
-    void warning(QString message);
-    void debug(QString message);
-    void critical(QString message);
-    void info(QString message);
+    void warning(const QString& message);
+    void debug(const QString& message);
+    void critical(const QString& message);
+    void info(const QString& message);
 private:
     Log() = default;
     static std::shared_ptr<Log> log_instance;
