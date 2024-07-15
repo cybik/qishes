@@ -14,5 +14,5 @@ jobs:
         run: |
           mkdir -p "${{ gitea.workspace }}/build"
           cd "${{ gitea.workspace }}/build"
-          cmake .. -DCMAKE_COLOR_DIAGNOSTICS=ON -DCMAKE_COLOR_MAKEFILE=ON -DCLICOLOR_FORCE=1
-          make -j7
+          cmake .. -DCMAKE_COLOR_DIAGNOSTICS=ON -DCMAKE_COLOR_MAKEFILE=ON
+          cmake --build . -j9 
