@@ -33,6 +33,9 @@ std::unique_ptr<AbstractCommand> process_command(QString command) {
 }
 
 int main(int argc, char *argv[]) {
+    // for now, blast
+    Log::get_logger()->log_level(Log::LogLevel::Debug);
+
     QCoreApplication qwishes(argc, argv);
     QCoreApplication::setApplicationName(APPLICATION_NAME_GENERATOR());
     QCoreApplication::setApplicationVersion(APP_VERSION);
