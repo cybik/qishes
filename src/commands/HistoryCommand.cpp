@@ -89,19 +89,11 @@ void HistoryCommand::cmd_main(int argc, char **argv) {
     this->command_max_return_num = (parser.isSet(*max_return_num)?parser.value(*max_return_num).toInt():1);
 
     //std::cout << "ayyyyyyyyyyy :: " << this->command_game_path.toStdString() << std::endl;
+    std::shared_ptr<std::list<std::shared_ptr<QFile>>> caches = this->getGameWishesCache(&parser);
 
-    std::shared_ptr<std::list<std::shared_ptr<QFile>>> caches = this->getGameWishesCache();
-    if(caches->empty()) {
-        parser.showHelp(0);
-    }
     for(const auto& qfile: *caches) {
         // Header. C++ yet formatted, f*ck you.
-        std::cout
-            << termcolor::bold << termcolor::cyan  << "[#] "        << termcolor::reset
-            << termcolor::bold << termcolor::green << "Data file"   << termcolor::reset
-            << ": "
-            << termcolor::yellow << qfile->fileName().toStdString() << termcolor::reset
-            << std::endl;
+        printSingleFilePath(qfile->fileName());
 
         auto results = runFilterForLogs(runUrlCleanup(runUrlSearch(qfile)));
         if(!results || results->empty()) {
@@ -115,6 +107,7 @@ void HistoryCommand::cmd_main(int argc, char **argv) {
                 //QDesktopServices::openUrl(QUrl((*results).front().to_qstring()));
             }
         } else {
+            if(command_reverse_order) results->reverse();
             for(auto& staged: *results) {
                 std::cout << "- " << staged.to_stdstring() << std::endl;
             }
@@ -122,43 +115,3 @@ void HistoryCommand::cmd_main(int argc, char **argv) {
     }
 }
 
-std::shared_ptr<QStringList> HistoryCommand::runUrlSearch(const std::shared_ptr<QFile>& qfile) {
-    if(!qfile->exists()) return nullptr;
-    qfile->open(QFile::ReadOnly);
-    QRegularExpression qreg("1/0/https(.*)\0\0\0\0\0\0\0\0");
-    QRegularExpressionMatchIterator qrem = qreg.globalMatch(qfile->readAll());
-    std::shared_ptr<QStringList> retList = std::make_shared<QStringList>();
-    while(qrem.hasNext()) {
-        retList->append(qrem.next().captured(0));
-    }
-    qfile->close();
-    return retList;
-}
-std::shared_ptr<QStringList> HistoryCommand::runUrlCleanup(const std::shared_ptr<QStringList>& ptr) {
-    std::shared_ptr<QStringList> retList; // don't initialize unless necessary
-    for(const auto& single_string: (*ptr)) {
-        for(const auto& split_string_1: single_string.split("1/0/")) { /** cut on 1/0/ **/
-            for(const auto& split_string_2: split_string_1.split('\0', Qt::SkipEmptyParts)) {
-                if(split_string_2.startsWith("http")) {
-                    if(!retList) retList = std::make_shared<QStringList>();
-                    // always split after a cache entry, defined by nullchars
-                    retList->append(split_string_2); // first of the second level
-                }
-            }
-        }
-    }
-    ptr->clear(); /** cleanup **/
-    return retList;
-}
-
-std::shared_ptr<std::list<WishLog>> HistoryCommand::runFilterForLogs(const std::shared_ptr<QStringList>& ptr) {
-    if(!ptr) return nullptr;
-    std::shared_ptr<std::list<WishLog>> retList = std::make_shared<std::list<WishLog>>();
-    for(const auto& single_string: (*ptr)) {
-        if(WishLog::is_accepted_url(single_string)) {
-            retList->emplace_front(single_string, WishLog::History);
-        }
-    }
-    ptr->clear();
-    return retList;
-}

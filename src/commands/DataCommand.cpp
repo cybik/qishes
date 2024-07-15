@@ -56,5 +56,21 @@ void DataCommand::cmd_main(int argc, char **argv) {
         parser.showHelp(2);
     }
 
+    std::shared_ptr<std::list<std::shared_ptr<QFile>>> caches = this->getGameWishesCache(&parser);
+    if(caches->empty()) {
+        Log::get_logger()->warning("No URL was found in the detected cache.");
+        parser.showHelp(3);
+    }
+    printSingleFilePath((*caches).begin()->get()->fileName());
+
+    auto results = runFilterForLogs(runUrlCleanup(runUrlSearch(*(*caches).begin())));
+    if(!results || results->empty()) {
+        Log::get_logger()->critical("No URLs read, detected or otherwise found.");
+        parser.showHelp(4);
+    }
+    Log::get_logger()->info(results->front().to_qstring());
+    Log::get_logger()->critical(results->front().regenerate_data_url().url());
+
+    // identify the most likely url
     abort();
 }
