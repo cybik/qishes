@@ -1,6 +1,7 @@
-name: Gitea Actions Test
-run-name: ${{ gitea.actor }} testing
-on: [push]
+name: Standard pipeline
+run-name: ${{ gitea.actor }}
+on:
+  - push
 
 jobs:
   build-wishes-qt:
