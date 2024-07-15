@@ -30,7 +30,7 @@ void HistoryCommand::cmd_main(int argc, char **argv) {
         QCoreApplication::translate("main", "Command to run. MUST be history.")
     );
 
-    std::shared_ptr<QCommandLineOption> game_path, reverse_order, open_url, max_return_num;
+    std::shared_ptr<QCommandLineOption> game_path, file_path, reverse_order, open_url, max_return_num;
     parser.addOption(
         *(game_path = std::make_shared<QCommandLineOption>(
             QStringList() << "g" << "game_path",
@@ -38,6 +38,16 @@ void HistoryCommand::cmd_main(int argc, char **argv) {
                 CommandSpecifier.toStdString().c_str(), "Path to the game installation."
             ),
             "game_path",
+            nullptr
+        ))
+    );
+    parser.addOption(
+        *(file_path = std::make_shared<QCommandLineOption>(
+            QStringList() << "f" << "file_path",
+            QCoreApplication::translate(
+                CommandSpecifier.toStdString().c_str(), "Path to the cache file directly."
+            ),
+            "file_path",
             nullptr
         ))
     );
@@ -76,12 +86,8 @@ void HistoryCommand::cmd_main(int argc, char **argv) {
         parser.showHelp(0);
     }
 
-    if(!parser.isSet(*game_path)) {
-        Log::get_logger()->warning("No game path was provided. Cannot deduce the path.");
-        parser.showHelp(1);
-    }
-
     this->command_game_path =       parser.value(*game_path);
+    this->command_file_path =       parser.value(*file_path);
     this->command_reverse_order =   parser.isSet(*reverse_order);   // if set, always true
     this->command_open_url =        parser.isSet(*open_url);        // if set, always true
 
@@ -89,7 +95,16 @@ void HistoryCommand::cmd_main(int argc, char **argv) {
     this->command_max_return_num = (parser.isSet(*max_return_num)?parser.value(*max_return_num).toInt():1);
 
     //std::cout << "ayyyyyyyyyyy :: " << this->command_game_path.toStdString() << std::endl;
-    std::shared_ptr<std::list<std::shared_ptr<QFile>>> caches = this->getGameWishesCache(&parser);
+    std::shared_ptr<std::list<std::shared_ptr<QFile>>> caches;
+    if(!this->command_file_path.isEmpty() && QFileInfo::exists(command_file_path)) {
+        caches = std::make_shared<std::list<std::shared_ptr<QFile>>>();
+        (*caches).emplace_front(std::make_shared<QFile>(QFileInfo(command_file_path).absoluteFilePath()));
+    } else if(!this->command_game_path.isEmpty()) {
+        caches = this->getGameWishesCache(&parser);
+    } else {
+        Log::get_logger()->critical("No good source of information was provided to extract a history URL from.");
+        parser.showHelp(5);
+    }
 
     for(const auto& qfile: *caches) {
         // Header. C++ yet formatted, f*ck you.
