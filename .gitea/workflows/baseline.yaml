@@ -10,14 +10,9 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: true
-      - name: List files in the repository
-        run: |
-          find ${{ gitea.workspace }} -type f
-      - name: Create workspace
-        run: |
-          mkdir -p "${{ gitea.workspace }}/build"
       - name: Compile
         run: |
+          mkdir -p "${{ gitea.workspace }}/build"
           cd "${{ gitea.workspace }}/build"
-          cmake ..
+          cmake .. -DCMAKE_COLOR_DIAGNOSTICS=ON
           make -j7
