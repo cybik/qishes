@@ -4,7 +4,7 @@ on: [push]
 
 jobs:
   build-wishes-qt:
-    runs-on: wishes-qtcontainer-latest
+    runs-on: qtcontainer-latest
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
