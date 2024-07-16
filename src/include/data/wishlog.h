@@ -34,6 +34,7 @@ public:
 
     WishLogGame game();
 
+    QUrl getQuickInitUrl();
     QUrl regenerate_data_url();
     QUrl regenerate_preview_url();
     static bool is_accepted_url(const QString& url);

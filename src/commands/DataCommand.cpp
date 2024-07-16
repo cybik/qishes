@@ -7,13 +7,18 @@
 #include <QCommandLineParser>
 
 #include <common.h>
+#include <qjsondocument.h>
 
 #include <XdgUtils/BaseDir/BaseDir.h>
+
+#include <QNetworkReply>
+#include <QNetworkAccessManager>
+#include <unistd.h>
 
 const QString DataCommand::CommandSpecifier = "data";
 
 void DataCommand::cmd_main(int argc, char **argv) {
-    QCoreApplication qwishes_data(argc, argv);
+    qwishes_data = new QCoreApplication(argc, argv);
     QCoreApplication::setApplicationName(APPLICATION_NAME_GENERATOR(.data));
     QCoreApplication::setApplicationVersion(APP_VERSION);
 
@@ -51,7 +56,7 @@ void DataCommand::cmd_main(int argc, char **argv) {
             nullptr
         ))
     );
-    parser.process(qwishes_data);
+    parser.process(*qwishes_data);
 
     this->command_game_path =   parser.value(*game_path);
     this->command_file_path =   parser.value(*file_path);
@@ -87,35 +92,72 @@ void DataCommand::cmd_main(int argc, char **argv) {
     }
 
     initialize(results->front());
-    // identify the most likely url
-    abort();
+    qwishes_data->exec();
+
 }
 
 
 void DataCommand::initialize(WishLog& log) {
-    data_dir = QDir(std::filesystem::path(XdgUtils::BaseDir::XdgDataHome())
-                    .append(APPLICATION_BASE_NAME)
-                    .append(get_local_storage_folder(log.game()))
+    auto qnam = new QNetworkAccessManager(qwishes_data);
+    qnam->setRedirectPolicy(QNetworkRequest::RedirectPolicy::ManualRedirectPolicy);
+    qnam->get(QNetworkRequest(log.getQuickInitUrl()));
+    QObject::connect(
+        qnam, &QNetworkAccessManager::finished,
+        [&](QNetworkReply* reply) {
+            if(reply->error() == QNetworkReply::NoError) {
+                process_with_initial_data(log, reply);
+            }
+        }
     );
+}
 
-    Log::get_logger()->info(log.to_qstring());
-    Log::get_logger()->critical(log.regenerate_data_url().url(QUrl::FullyEncoded));
+void DataCommand::process_with_initial_data(WishLog& log, QNetworkReply* reply) {
+    QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
+    if( doc["data"].isUndefined() || doc["data"]["list"].isUndefined() ||
+        doc["data"]["list"][0].isUndefined() || doc["data"]["list"][0]["uid"].isUndefined()
+    ) abort();
 
+    // Generate data using first page UID.
+    data_dir = QDir(
+        std::filesystem::path(XdgUtils::BaseDir::XdgDataHome())
+            .append(APPLICATION_BASE_NAME)
+            .append(get_local_storage_folder(log.game()))
+            .append(doc["data"]["list"][0]["uid"].toString().toStdString())
+    );
+    load_local_data();
     Log::get_logger()->info(data_dir.absolutePath());
+    qwishes_data->quit();
+    abort();
+}
+
+void DataCommand::load_local_data() {
+    QDir load_data_dir(data_dir);
+    load_data_dir.setFilter(QDir::Files | QDir::NoDotAndDotDot);
+    load_data_dir.nameFilters() << "*.cache";
+    if(load_data_dir.exists()) {
+        for(const QFileInfo& file : load_data_dir.entryInfoList()) {
+            QFile loaded(file.absoluteFilePath());
+            loaded.open(QIODevice::ReadOnly);
+            loaded_data.emplace(file.baseName(), QJsonDocument::fromJson(loaded.readAll()));
+            Log::get_logger()->warning("Loaded data from file.");
+            Log::get_logger()->critical(loaded_data[file.baseName()].toJson());
+
+        }
+    } else {
+        Log::get_logger()->warning("No pre-existing cache.");
+    }
 }
 
 std::string DataCommand::get_local_storage_folder(WishLog::WishLogGame game) {
     switch(game) {
-        case WishLog::Genshin:
-            return "yuanshen";
-        case WishLog::HSR:
-            return "hkrpg";
-        case WishLog::ZZZ:
-            return "nap";
+        case WishLog::Genshin: return "yuanshen";
+        case WishLog::HSR: return "hkrpg";
+        case WishLog::ZZZ: return "nap";
         default:
             abort();
     }
 }
+
 /*
 https://gs.hoyoverse.com/nap/event/e20230424gacha/index.html?
     authkey_ver=1&sign_type=2&auth_appid=webview_gacha&win_mode=fullscreen&gacha_id=2c1f5692fdfbb733a08733f9eb69d32aed1d37&timestamp=1720620373&init_log_gacha_type=2001&init_log_gacha_base_type=2&ui_layout=&button_mode=default&plat_type=3&authkey=qEsfaOAGzSmE%2BfjT2l14NFp0K70%2Fd86qsRFNGhdkaGG6B5nAe00a%2FPZbTNgS0YvOYbdfUy9Ve%2BTxfGd0INMaTAE1%2Fwh3R9FcgpTAJqRypxokZ198SDQKDU3z%2B5JoZ%2FuT99LTTP1XeaG1wy3FT4XpDh9uCfqGYjecMejRCM7k2CcSb2tkVo%2F0bXweV9R%2FPD9eGrGLoTuiRmj%2Fjko4jDrB3nvmSpUnh3fqukoMmxpQiFdWP6V1VQlBOZSrZTGp%2FTGClsXOtlqq3UVlPYHZg8hutp5BJnEYD4Erw1mSDEc0l7CFB2COoTBoNpZaBXz3VaZK9wsuAA3hqSOBOk0VOI%2Bf%2B331EWIgCNDnQ0yDji%2BPOIw4rEcrwuiPPzVuQCxzN3X3OwsbG%2FhdFpwaTCiWAowBBeXNwYiZPoVc7%2BIKFwCIBF%2BHcmnfgPkzapMZGjeIfIJP2SxZtrCJ%2F7hI6owbrAcpULMtEVqrU4%2FjYlpGimr6ZeS3Hx8xCqTaJhq4s%2B7ZE6GYOBpMNpTKXk%2BjqfrcSLKnBQH6bXm4uLJpSPzhri%2FKrlKAE9cDZbUHx8EsaakFBCZCRyd68IAahF6wh%2BHs6fcllGk1foU3CEdjhWCqo4VRagDpJZDMdcl5VqslIe31U4YOY9OxgvdiXPoXoJUMZ8SnHhpBzSa25y5qZ6%2BSpVEA%2BR8%3D&lang=en&region=prod_gf_us&game_biz=nap_global#/info

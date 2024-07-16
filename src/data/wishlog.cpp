@@ -66,6 +66,17 @@ bool WishLog::is_accepted_url(const QString& url) {
     return false;
 }
 
+QUrl WishLog::getQuickInitUrl() {
+    QUrl interim = regenerate_data_url();
+    QUrlQuery interim_query = QUrlQuery(interim.query());
+    for(auto item: QList<QPair<QString,QString>>({{"page","1"}, {"end_id",""}, {"size","1"}})) {
+        interim_query.removeQueryItem(item.first);
+        interim_query.addQueryItem(item.first, item.second);
+    }
+    interim.setQuery(interim_query);
+    return interim;
+}
+
 QUrl WishLog::regenerate_data_url() {
     // TODO: make this more nimble to be able to hit one method call with page, end_id
     // TODO: huge chain calls for init_type:*
