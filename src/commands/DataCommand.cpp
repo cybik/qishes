@@ -8,6 +8,8 @@
 
 #include <common.h>
 
+#include <XdgUtils/BaseDir/BaseDir.h>
+
 const QString DataCommand::CommandSpecifier = "data";
 
 void DataCommand::cmd_main(int argc, char **argv) {
@@ -28,9 +30,7 @@ void DataCommand::cmd_main(int argc, char **argv) {
     parser.addOption(
         *(game_path = std::make_shared<QCommandLineOption>(
             QStringList() << "g" << "game_path",
-            QCoreApplication::translate(
-                CommandSpecifier.toStdString().c_str(), "Path to the game installation. May or may not be provided."
-            ),
+            SPEC_TRANSLATE("Path to the game installation. May or may not be provided."),
             "game_path",
             nullptr
         ))
@@ -38,9 +38,7 @@ void DataCommand::cmd_main(int argc, char **argv) {
     parser.addOption(
         *(file_path = std::make_shared<QCommandLineOption>(
             QStringList() << "f" << "file_path",
-            QCoreApplication::translate(
-                CommandSpecifier.toStdString().c_str(), "Path to the cache file directly."
-            ),
+            SPEC_TRANSLATE("Path to the cache file directly."),
             "file_path",
             nullptr
         ))
@@ -48,9 +46,7 @@ void DataCommand::cmd_main(int argc, char **argv) {
     parser.addOption(
         *(known_url = std::make_shared<QCommandLineOption>(
             QStringList() << "u" << "known_url",
-            QCoreApplication::translate(
-                CommandSpecifier.toStdString().c_str(), "Known URL. May or may not be provided."
-            ),
+            SPEC_TRANSLATE("Known URL. May or may not be provided."),
             "known_url_path",
             nullptr
         ))
@@ -89,11 +85,36 @@ void DataCommand::cmd_main(int argc, char **argv) {
         Log::get_logger()->critical("No URLs read, detected or otherwise found.");
         parser.showHelp(4);
     }
-    Log::get_logger()->info(results->front().to_qstring());
-    Log::get_logger()->critical(results->front().regenerate_data_url().url(QUrl::FullyEncoded));
 
+    initialize(results->front());
     // identify the most likely url
     abort();
+}
+
+
+void DataCommand::initialize(WishLog& log) {
+    data_dir = QDir(std::filesystem::path(XdgUtils::BaseDir::XdgDataHome())
+                    .append(APPLICATION_BASE_NAME)
+                    .append(get_local_storage_folder(log.game()))
+    );
+
+    Log::get_logger()->info(log.to_qstring());
+    Log::get_logger()->critical(log.regenerate_data_url().url(QUrl::FullyEncoded));
+
+    Log::get_logger()->info(data_dir.absolutePath());
+}
+
+std::string DataCommand::get_local_storage_folder(WishLog::WishLogGame game) {
+    switch(game) {
+        case WishLog::Genshin:
+            return "yuanshen";
+        case WishLog::HSR:
+            return "hkrpg";
+        case WishLog::ZZZ:
+            return "nap";
+        default:
+            abort();
+    }
 }
 /*
 https://gs.hoyoverse.com/nap/event/e20230424gacha/index.html?

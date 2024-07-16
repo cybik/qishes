@@ -20,10 +20,11 @@ void Log::debug(const QString& message) {
     if(mlogLevel > LogLevel::Debug) return;
     std::cout
         << termcolor::bold
-            << termcolor::bright_green
-            << "[DEBUG] "
+            << termcolor::on_bright_green
+            << "[DEBUG]"
         << termcolor::reset
             << termcolor::green
+            << " "
             << message.toStdString()
         << termcolor::reset
         << std::endl;
@@ -33,10 +34,11 @@ void Log::info(const QString& message) {
     if(mlogLevel > LogLevel::Info) return;
     std::cout
         << termcolor::bold
-            << termcolor::bright_cyan
-            << "[INFO] "
+            << termcolor::on_bright_cyan
+            << "[INFO]"
         << termcolor::reset
             << termcolor::cyan
+            << " "
             << message.toStdString()
         << termcolor::reset
         << std::endl;
@@ -46,10 +48,11 @@ void Log::warning(const QString& message) {
     if(mlogLevel > LogLevel::Warning) return;
     std::cout
         << termcolor::bold
-            << termcolor::bright_yellow
-            << "[WARNING] "
+            << termcolor::on_bright_yellow
+            << "[WARNING]"
         << termcolor::reset
             << termcolor::yellow
+            << " "
             << message.toStdString()
         << termcolor::reset
         << std::endl;
@@ -59,10 +62,11 @@ void Log::critical(const QString& message) {
     if(mlogLevel > LogLevel::Critical) return;
     std::cout
         << termcolor::bold
-            << termcolor::bright_red
-            << "[CRITICAL] "
+            << termcolor::on_bright_red
+            << "[CRITICAL]"
         << termcolor::reset
             << termcolor::red
+            << " "
             << message.toStdString()
         << termcolor::reset
         << std::endl;

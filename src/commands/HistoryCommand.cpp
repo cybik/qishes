@@ -34,9 +34,7 @@ void HistoryCommand::cmd_main(int argc, char **argv) {
     parser.addOption(
         *(game_path = std::make_shared<QCommandLineOption>(
             QStringList() << "g" << "game_path",
-            QCoreApplication::translate(
-                CommandSpecifier.toStdString().c_str(), "Path to the game installation."
-            ),
+            SPEC_TRANSLATE("Path to the game installation."),
             "game_path",
             nullptr
         ))
@@ -44,9 +42,7 @@ void HistoryCommand::cmd_main(int argc, char **argv) {
     parser.addOption(
         *(file_path = std::make_shared<QCommandLineOption>(
             QStringList() << "f" << "file_path",
-            QCoreApplication::translate(
-                CommandSpecifier.toStdString().c_str(), "Path to the cache file directly."
-            ),
+            SPEC_TRANSLATE("Path to the cache file directly."),
             "file_path",
             nullptr
         ))
@@ -54,25 +50,19 @@ void HistoryCommand::cmd_main(int argc, char **argv) {
     parser.addOption(
         *(reverse_order = std::make_shared<QCommandLineOption>(
             QStringList() << "r" << "reverse_order",
-            QCoreApplication::translate(
-                CommandSpecifier.toStdString().c_str(), "Return URLs in reversed order (from oldest to most recent)."
-            )
+            SPEC_TRANSLATE("Return URLs in reversed order (from oldest to most recent).")
         ))
     );
     parser.addOption(
         *(open_url = std::make_shared<QCommandLineOption>(
             QStringList() << "o" << "open_url",
-            QCoreApplication::translate(
-                CommandSpecifier.toStdString().c_str(), "Open URL in system browser."
-            )
+            SPEC_TRANSLATE("Open URL in system browser.")
         ))
     );
     parser.addOption(
         *(max_return_num = std::make_shared<QCommandLineOption>(
             QStringList() << "m" << "max_return_num",
-            QCoreApplication::translate(
-                CommandSpecifier.toStdString().c_str(), "Maximum number of URLs to return."
-            ),
+            SPEC_TRANSLATE("Maximum number of URLs to return."),
             "max_return_num",
             "1"
         ))
@@ -98,7 +88,7 @@ void HistoryCommand::cmd_main(int argc, char **argv) {
     std::shared_ptr<std::list<std::shared_ptr<QFile>>> caches;
     if(!this->command_file_path.isEmpty() && QFileInfo::exists(command_file_path)) {
         caches = std::make_shared<std::list<std::shared_ptr<QFile>>>();
-        (*caches).emplace_front(std::make_shared<QFile>(QFileInfo(command_file_path).absoluteFilePath()));
+        caches->emplace_front(std::make_shared<QFile>(QFileInfo(command_file_path).absoluteFilePath()));
     } else if(!this->command_game_path.isEmpty()) {
         caches = this->getGameWishesCache(&parser);
     } else {

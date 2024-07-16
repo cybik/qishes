@@ -12,8 +12,11 @@
 class WishLog {
 public:
     typedef struct {
-
-    } WishLogPage;
+        int current_page;
+        int base_gacha_type; // Common to Genshin, HSR, Nap
+        int real_gacha_type; // Nap-specific
+        QString end_id;
+    } WishLogPage; // Will likely get refactored elsewhere. For now, describes common shit to deduce pages from.
     typedef enum {
         History,
         Data
@@ -21,11 +24,16 @@ public:
     typedef enum {
         Genshin,
         HSR,
-        ZZZ
+        ZZZ,
+
+        Unsupported
     } WishLogGame;
     WishLog(const QString &wishurl, WishLogType log_type);
     [[nodiscard]] std::string to_stdstring();
     [[nodiscard]] QString to_qstring();
+
+    WishLogGame game();
+
     QUrl regenerate_data_url();
     QUrl regenerate_preview_url();
     static bool is_accepted_url(const QString& url);
@@ -44,5 +52,5 @@ private:
     QString  base_gacha_type    = ""; // TODO: This is unique to ZZZ
     QString  end_id             = ""; // will be used
 
-    QString get_log_ext_url();
+    QString get_log_ext_url() const;
 };

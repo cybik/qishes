@@ -100,7 +100,7 @@ target_link_libraries(
         gachafs
         gachasteam
         #Ribbon
-        #XdgUtils::BaseDir
+        XdgUtils::BaseDir
         #QEasyDownloader
         #QArchive
 

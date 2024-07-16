@@ -14,11 +14,11 @@ WishLog::WishLog(const QString &wishurl, WishLogType log_type) {
     this->log_url = QUrl(log_url_str);
 }
 
-QString WishLog::get_log_ext_url() {
-    if(log_type == WishLogType::History) {
-        if (log_game == WishLogGame::Genshin) { return "#/log"; }
-        else if (log_game == WishLogGame::ZZZ) { return "#/info"; }
-    }
+QString WishLog::get_log_ext_url() const {
+    if(log_type == WishLogType::History)
+        if (log_game == WishLogGame::Genshin)
+            return "#/log";
+
     return "";
 }
 
@@ -30,16 +30,21 @@ QString WishLog::to_qstring() {
     return (log_url_str + get_log_ext_url());
 }
 
+WishLog::WishLogGame WishLog::game() {
+    return this->log_game;
+}
+
 WishLog::WishLogGame WishLog::guess_game(const QString& url) {
     if(url.contains("nap")) return WishLogGame::ZZZ;
     if(url.contains("hkrpg")) return WishLogGame::HSR;
+    if(url.contains("hk4e_")) return WishLogGame::Genshin;
     // TODO: support WuWa?
     // TODO: support other games??
-    return WishLog::Genshin;
+    return WishLog::Unsupported;
 }
 
 bool WishLog::is_accepted_url(const QString& url) {
-    // 0th Check: baselines event endpoint
+    // 0th Check: baselines event endpoint check
     if(!url.contains("/event/")) return false;
     if(!url.contains("authkey=")) return false;
 
@@ -80,14 +85,14 @@ QUrl WishLog::regenerate_data_url() {
                 if(item.first == "size")           missing_size                 = false;
                 if(item.first == "end_id")         missing_end_id               = false;
 
-                if(item.first == "init_type")      real_gacha_type              = item.second;
+                if(item.first == "init_type")      base_gacha_type              = item.second;
             }
 
             if(missing_page)  reprocess_query.addQueryItem("page", QString::number(log_data_page));
             if(missing_size)  reprocess_query.addQueryItem("size", QString::number(log_data_page_size));
             if(missing_end_id) reprocess_query.addQueryItem("end_id", end_id);
 
-            reprocess_query.addQueryItem("gacha_type", real_gacha_type);
+            reprocess_query.addQueryItem("gacha_type", base_gacha_type);
             break;
         }
         case(WishLog::HSR): {
