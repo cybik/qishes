@@ -9,6 +9,7 @@ project(
     LANGUAGES
         CXX
 )
+set(USE_QT6 ON)
 find_package(Qt6 REQUIRED COMPONENTS Core)
 qt_standard_project_setup()
 
@@ -26,9 +27,12 @@ set(PROJECT_3RDPARTY_DIR "${CMAKE_CURRENT_LIST_DIR}/3rdParty")
 add_subdirectory("${PROJECT_3RDPARTY_DIR}/xdg")
 add_subdirectory("${PROJECT_3RDPARTY_DIR}/yaml-cpp")
 add_subdirectory("${PROJECT_3RDPARTY_DIR}/termcolor")
+add_subdirectory("${PROJECT_3RDPARTY_DIR}/discord-game-sdk")
 #add_subdirectory("${PROJECT_3RDPARTY_DIR}/spinnerspp")
 
 add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/components")
+
+#add_subdirectory("${PROJECT_3RDPARTY_DIR}/QAdwaitaDeco")
 
 find_package(
     Qt6
@@ -40,10 +44,11 @@ find_package(
         WebEngineCore
         WebEngineWidgets
 )
+set(PROJECT_SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/src")
 
 include_directories(
     BEFORE
-        "${CMAKE_CURRENT_LIST_DIR}/src/include"
+        "${PROJECT_SOURCE_DIR}/include"
 )
 
 include_directories(
@@ -52,6 +57,7 @@ include_directories(
         "${PROJECT_3RDPARTY_DIR}/yaml-cpp/include"
         "${PROJECT_3RDPARTY_DIR}/termcolor/include"
         "${PROJECT_3RDPARTY_DIR}/spinnerspp/include"
+        "${PROJECT_3RDPARTY_DIR}/discord-game-sdk/include"
 )
 
 # hi https://dev.my-gate.net/2021/08/04/understanding-rpath-with-cmake/
@@ -72,24 +78,24 @@ if(ASAN)
     add_link_options(-fsanitize=address)
 endif()
 
-set(PROJECT_SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/src")
 add_executable(
     ${MY_PROJECT_NAME}
-        "${CMAKE_CURRENT_LIST_DIR}/src/qmain.cpp"
+        "${PROJECT_SOURCE_DIR}/qmain.cpp"
 
-        "${CMAKE_CURRENT_LIST_DIR}/src/data/wishlog.cpp"
+        "${PROJECT_SOURCE_DIR}/data/wishlog.cpp"
 
-        "${CMAKE_CURRENT_LIST_DIR}/src/util/log.cpp"
+        "${PROJECT_SOURCE_DIR}/util/log.cpp"
 
-        "${CMAKE_CURRENT_LIST_DIR}/src/commands/DataCommand.cpp"
-        "${CMAKE_CURRENT_LIST_DIR}/src/commands/DaemonCommand.cpp"
-        "${CMAKE_CURRENT_LIST_DIR}/src/commands/HistoryCommand.cpp"
-        "${CMAKE_CURRENT_LIST_DIR}/src/commands/LauncherCommand.cpp"
-        "${CMAKE_CURRENT_LIST_DIR}/src/commands/AbstractCommand.cpp"
+        "${PROJECT_SOURCE_DIR}/commands/DataCommand.cpp"
+        "${PROJECT_SOURCE_DIR}/commands/DaemonCommand.cpp"
+        "${PROJECT_SOURCE_DIR}/commands/HistoryCommand.cpp"
+        "${PROJECT_SOURCE_DIR}/commands/LauncherCommand.cpp"
+        "${PROJECT_SOURCE_DIR}/commands/AbstractCommand.cpp"
 )
 
 target_link_libraries(
     ${MY_PROJECT_NAME}
+    PUBLIC
         yaml-cpp
         Qt6::Gui
         Qt6::Xml
@@ -100,10 +106,15 @@ target_link_libraries(
         gachafs
         gachasteam
         #Ribbon
+        discord-game-sdk-interface
         XdgUtils::BaseDir
         #QEasyDownloader
         #QArchive
+        #QAdwaitaDecorations::qadwaitadecorations
 
         #"${PROJECT_SOURCE_DIR}/3rdParty/libsass/lib/libsass.a"
 )
 
+target_link_libraries(${MY_PROJECT_NAME} PRIVATE
+    "${PROJECT_3RDPARTY_DIR}/discord-game-sdk/lib/linux/x86_64/libdiscord_game_sdk.so"
+)

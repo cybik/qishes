@@ -23,6 +23,7 @@ protected:
 private:
     std::string get_local_storage_folder(WishLog::WishLogGame game);
     QString command_known_url;
+    bool command_all_targets;
 
     void initialize(WishLog& log);
 

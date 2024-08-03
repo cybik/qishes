@@ -12,15 +12,20 @@
 
 #include <iostream>
 
+#include <QMessageBox>
+#include <QWindow>
+#include <commands/LauncherCommand.h>
+
+
 const QString LauncherCommand::CommandSpecifier = "launcher";
 
 std::shared_ptr<QAction> LauncherCommand::get_action_exit() {
     action_exit = std::make_shared<QAction>();
 
-    action_exit->setText("Test");
+    action_exit->setText("Test yeet");
     QObject::connect(
             action_exit.get(), &QAction::triggered, // Signal
-            [=](bool) {
+            [&](bool) {
                 std::cout << "mikkiku" << std::endl;
                 abort();
             }
@@ -28,10 +33,70 @@ std::shared_ptr<QAction> LauncherCommand::get_action_exit() {
 
     return action_exit;
 }
+std::shared_ptr<QAction> LauncherCommand::get_action_rpc_init() {
+    action_init = std::make_shared<QAction>();
+
+    action_init->setText("Test init");
+    QObject::connect(
+        action_init.get(), &QAction::triggered, // Signal
+        [&](bool) {
+            std::cout << "mikkiku" << std::endl;
+
+            disco = std::make_shared<discord::Activity>();
+            disco->SetApplicationId(478233407323897871);
+        }
+    );
+
+    return action_init;
+}
+
+std::shared_ptr<QAction> LauncherCommand::get_action_rpc_ping() {
+    action_ping = std::make_shared<QAction>();
+
+    action_ping->setText("Test rpc");
+    QObject::connect(
+        action_ping.get(), &QAction::triggered, // Signal
+        [&](bool) {
+            disco->SetState("Bumming Around");
+            disco->SetType(discord::ActivityType::Playing);
+            disco->SetName("Derping Around");
+        }
+    );
+
+    return action_ping;
+}
+
+void LauncherCommand::mbox() {
+
+    qmw = std::make_shared<QMainWindow>(nullptr, Qt::Window);
+    qmw->setFixedSize(800, 600);
+    qmw->setWindowTitle("Test Dialog");
+    qmw->setWindowState(Qt::WindowActive);
+    qmw->setBaseSize(800, 600);
+    qmw->show();
+}
+
+
+std::shared_ptr<QAction> LauncherCommand::get_action_dialog_test() {
+    action_dial = std::make_shared<QAction>();
+
+    action_dial->setText("Test Dialog");
+    QObject::connect(
+        action_dial.get(), &QAction::triggered, // Signal
+        [&](bool) {
+            mbox();
+        }
+    );
+
+    return action_dial;
+}
 
 std::shared_ptr<QMenu> LauncherCommand::generate_menu() {
     tray_menu = std::make_shared<QMenu>();
 
+    tray_menu->addAction(get_action_rpc_init().get());
+    tray_menu->addAction(get_action_rpc_ping().get());
+    tray_menu->addAction(get_action_dialog_test().get());
     tray_menu->addAction(get_action_exit().get());
     //tray_menu->triggered(get_action_exit().get());
 

@@ -7,6 +7,7 @@
 #include <QCommandLineParser>
 
 #include <common.h>
+#include <iostream>
 #include <qjsondocument.h>
 
 #include <XdgUtils/BaseDir/BaseDir.h>
@@ -31,10 +32,10 @@ void DataCommand::cmd_main(int argc, char **argv) {
         QCoreApplication::translate("main", "Command to run. MUST be data.")
     );
 
-    std::shared_ptr<QCommandLineOption> game_path, file_path, known_url;
+    std::shared_ptr<QCommandLineOption> game_path, file_path, known_url, all_targets;
     parser.addOption(
         *(game_path = std::make_shared<QCommandLineOption>(
-            QStringList() << "g" << "game_path",
+            QStringList() << "g" << "game-path",
             SPEC_TRANSLATE("Path to the game installation. May or may not be provided."),
             "game_path",
             nullptr
@@ -42,7 +43,7 @@ void DataCommand::cmd_main(int argc, char **argv) {
     );
     parser.addOption(
         *(file_path = std::make_shared<QCommandLineOption>(
-            QStringList() << "f" << "file_path",
+            QStringList() << "f" << "file-path",
             SPEC_TRANSLATE("Path to the cache file directly."),
             "file_path",
             nullptr
@@ -50,17 +51,26 @@ void DataCommand::cmd_main(int argc, char **argv) {
     );
     parser.addOption(
         *(known_url = std::make_shared<QCommandLineOption>(
-            QStringList() << "u" << "known_url",
+            QStringList() << "u" << "known-url",
             SPEC_TRANSLATE("Known URL. May or may not be provided."),
             "known_url_path",
             nullptr
         ))
     );
+    parser.addOption(
+        *(all_targets = std::make_shared<QCommandLineOption>(
+            QStringList() << "a" << "all-targets",
+            SPEC_TRANSLATE("Get all Gacha targets."),
+            "all_Targets",
+            nullptr
+        ))
+    );
     parser.process(*qwishes_data);
 
-    this->command_game_path =   parser.value(*game_path);
-    this->command_file_path =   parser.value(*file_path);
-    this->command_known_url =   parser.value(*known_url);   // if set, always true
+    this->command_game_path   =   parser.value(*game_path);
+    this->command_file_path   =   parser.value(*file_path);
+    this->command_known_url   =   parser.value(*known_url);
+    this->command_all_targets =   parser.isSet(*all_targets);   // if set, always true
 
     if(command_known_url.isEmpty() && command_game_path.isEmpty() && command_file_path.isEmpty()) {
         Log::get_logger()->warning("No game path nor known URL was provided.");
@@ -101,6 +111,7 @@ void DataCommand::initialize(WishLog& log) {
     auto qnam = new QNetworkAccessManager(qwishes_data);
     qnam->setRedirectPolicy(QNetworkRequest::RedirectPolicy::ManualRedirectPolicy);
     qnam->get(QNetworkRequest(log.getQuickInitUrl()));
+    std::cout << log.getQuickInitUrl().toString().toStdString() << std::endl;
     QObject::connect(
         qnam, &QNetworkAccessManager::finished,
         [&](QNetworkReply* reply) {
@@ -113,9 +124,23 @@ void DataCommand::initialize(WishLog& log) {
 
 void DataCommand::process_with_initial_data(WishLog& log, QNetworkReply* reply) {
     QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
-    if( doc["data"].isUndefined() || doc["data"]["list"].isUndefined() ||
-        doc["data"]["list"][0].isUndefined() || doc["data"]["list"][0]["uid"].isUndefined()
-    ) abort();
+    //std::cout << doc.toJson().toStdString() << std::endl;
+    if( doc["data"].isUndefined() ) {
+        abort();
+    } else {
+        std::cout << doc["data"].toString().toStdString() << std::endl;
+        if(doc["data"]["list"].isUndefined() ) {
+            abort();
+        } else {
+            if( doc["data"]["list"][0].isUndefined() ) {
+                abort();
+            } else {
+                if( doc["data"]["list"][0]["uid"].isUndefined() ) {
+                    abort();
+                }
+            }
+        }
+    }
 
     // Generate data using first page UID.
     data_dir = QDir(

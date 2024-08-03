@@ -12,6 +12,8 @@
 #include <QCommandLineParser>
 #include <data/wishlog.h>
 
+#include <discord.h>
+
 class AbstractCommand {
 
 public:

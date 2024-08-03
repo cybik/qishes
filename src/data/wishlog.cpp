@@ -69,7 +69,7 @@ bool WishLog::is_accepted_url(const QString& url) {
 QUrl WishLog::getQuickInitUrl() {
     QUrl interim = regenerate_data_url();
     QUrlQuery interim_query = QUrlQuery(interim.query());
-    for(auto item: QList<QPair<QString,QString>>({{"page","1"}, {"end_id",""}, {"size","1"}})) {
+    for(auto item: QList<QPair<QString,QString>>({{"page","1"}, {"size","1"}, {"end_id",""}})) {
         interim_query.removeQueryItem(item.first);
         interim_query.addQueryItem(item.first, item.second);
     }
@@ -85,7 +85,8 @@ QUrl WishLog::regenerate_data_url() {
     //Log::get_logger()->critical(reprocess_query.toString());
     switch(log_game) {
         case(WishLog::Genshin): {
-            data_url.setHost("hk4e-api-os.hoyoverse.com");
+            //data_url.setHost("hk4e-api-os.hoyoverse.com");
+            data_url.setHost("public-operation-hk4e-sg.hoyoverse.com");
             data_url.setPath("/gacha_info/api/getGachaLog");
             bool    missing_page            = true,
                     missing_size            = true,

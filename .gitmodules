@@ -10,3 +10,6 @@
 [submodule "3rdParty/spinnerspp"]
 	path = 3rdParty/spinnerspp
 	url = https://github.com/jkuri/spinners
+[submodule "3rdParty/QAdwaitaDeco"]
+	path = 3rdParty/QAdwaitaDeco
+	url = https://github.com/FedoraQt/QAdwaitaDecorations.git
