@@ -20,7 +20,7 @@
 
 const QString filter = "**/webCaches/**/Cache/Cache_Data/data_2";
 
-std::shared_ptr<std::list<std::shared_ptr<QFile>>> AbstractCommand::getGameWishesCache(QCommandLineParser* parser) {
+std::shared_ptr<std::list<std::shared_ptr<QFile>>> AbstractCommand::getGameWishesCache() {
     std::shared_ptr<std::list<std::shared_ptr<QFile>>> caches = gachafs::getFiles(filter, this->command_game_path);
     if(caches->empty()) {
         parser->showHelp(0);
@@ -78,5 +78,12 @@ std::shared_ptr<std::list<WishLog>> AbstractCommand::runFilterForLogs(const std:
     ptr->clear();
     return retList;
 }
+
+void AbstractCommand::warnHelp(const QString& message, int exit_code)
+{
+    Log::get_logger()->critical(message);
+    if(parser) parser->showHelp(exit_code);
+}
+
 
 #pragma clang diagnostic pop

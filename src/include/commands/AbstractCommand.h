@@ -23,10 +23,13 @@ protected:
     QString command_file_path;
 
     // common calls
-    std::shared_ptr<std::list<std::shared_ptr<QFile>>> getGameWishesCache(QCommandLineParser* parser);
+    std::shared_ptr<std::list<std::shared_ptr<QFile>>> getGameWishesCache();
     void printSingleFilePath(const QString& filename);
     std::shared_ptr<QStringList> runUrlSearch(const std::shared_ptr<QFile>& qfile);
     std::shared_ptr<QStringList> runUrlCleanup(const std::shared_ptr<QStringList>& ptr);
     std::shared_ptr<std::list<WishLog>> runFilterForLogs(const std::shared_ptr<QStringList>& ptr);
+
+    void warnHelp(const QString& message, int exit_code);
+    std::shared_ptr<QCommandLineParser> parser;
 private:
 };

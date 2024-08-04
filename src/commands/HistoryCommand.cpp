@@ -21,17 +21,17 @@ void HistoryCommand::cmd_main(int argc, char **argv) {
     QCoreApplication::setApplicationName(APPLICATION_NAME_GENERATOR(.history));
     QCoreApplication::setApplicationVersion(APP_VERSION);
 
-    QCommandLineParser parser;
-    parser.addHelpOption();
-    parser.addVersionOption();
+    parser = std::make_shared<QCommandLineParser>();
+    parser->addHelpOption();
+    parser->addVersionOption();
 
-    parser.addPositionalArgument(
+    parser->addPositionalArgument(
         "command",
         QCoreApplication::translate("main", "Command to run. MUST be history.")
     );
 
     std::shared_ptr<QCommandLineOption> game_path, file_path, reverse_order, open_url, max_return_num;
-    parser.addOption(
+    parser->addOption(
         *(game_path = std::make_shared<QCommandLineOption>(
             QStringList() << "g" << "game_path",
             SPEC_TRANSLATE("Path to the game installation."),
@@ -39,7 +39,7 @@ void HistoryCommand::cmd_main(int argc, char **argv) {
             nullptr
         ))
     );
-    parser.addOption(
+    parser->addOption(
         *(file_path = std::make_shared<QCommandLineOption>(
             QStringList() << "f" << "file_path",
             SPEC_TRANSLATE("Path to the cache file directly."),
@@ -47,19 +47,19 @@ void HistoryCommand::cmd_main(int argc, char **argv) {
             nullptr
         ))
     );
-    parser.addOption(
+    parser->addOption(
         *(reverse_order = std::make_shared<QCommandLineOption>(
             QStringList() << "r" << "reverse_order",
             SPEC_TRANSLATE("Return URLs in reversed order (from oldest to most recent).")
         ))
     );
-    parser.addOption(
+    parser->addOption(
         *(open_url = std::make_shared<QCommandLineOption>(
             QStringList() << "o" << "open_url",
             SPEC_TRANSLATE("Open URL in system browser.")
         ))
     );
-    parser.addOption(
+    parser->addOption(
         *(max_return_num = std::make_shared<QCommandLineOption>(
             QStringList() << "m" << "max_return_num",
             SPEC_TRANSLATE("Maximum number of URLs to return."),
@@ -68,21 +68,21 @@ void HistoryCommand::cmd_main(int argc, char **argv) {
         ))
     );
 
-    parser.process(qwishes_history);
+    parser->process(qwishes_history);
 
-    if( parser.positionalArguments().empty() ||
-        parser.positionalArguments()[0].compare(CommandSpecifier, Qt::CaseInsensitive) != 0
+    if( parser->positionalArguments().empty() ||
+        parser->positionalArguments()[0].compare(CommandSpecifier, Qt::CaseInsensitive) != 0
     ) {
-        parser.showHelp(0);
+        parser->showHelp(0);
     }
 
-    this->command_game_path =       parser.value(*game_path);
-    this->command_file_path =       parser.value(*file_path);
-    this->command_reverse_order =   parser.isSet(*reverse_order);   // if set, always true
-    this->command_open_url =        parser.isSet(*open_url);        // if set, always true
+    this->command_game_path =       parser->value(*game_path);
+    this->command_file_path =       parser->value(*file_path);
+    this->command_reverse_order =   parser->isSet(*reverse_order);   // if set, always true
+    this->command_open_url =        parser->isSet(*open_url);        // if set, always true
 
     // Obsessed with oneliners, shut up.
-    this->command_max_return_num = (parser.isSet(*max_return_num)?parser.value(*max_return_num).toInt():1);
+    this->command_max_return_num = (parser->isSet(*max_return_num)?parser->value(*max_return_num).toInt():1);
 
     //std::cout << "ayyyyyyyyyyy :: " << this->command_game_path.toStdString() << std::endl;
     std::shared_ptr<std::list<std::shared_ptr<QFile>>> caches;
@@ -90,10 +90,10 @@ void HistoryCommand::cmd_main(int argc, char **argv) {
         caches = std::make_shared<std::list<std::shared_ptr<QFile>>>();
         caches->emplace_front(std::make_shared<QFile>(QFileInfo(command_file_path).absoluteFilePath()));
     } else if(!this->command_game_path.isEmpty()) {
-        caches = this->getGameWishesCache(&parser);
+        caches = this->getGameWishesCache();
     } else {
         Log::get_logger()->critical("No good source of information was provided to extract a history URL from.");
-        parser.showHelp(5);
+        parser->showHelp(5);
     }
 
     for(const auto& qfile: *caches) {

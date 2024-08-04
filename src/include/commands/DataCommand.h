@@ -26,9 +26,9 @@ private:
     bool command_all_targets;
 
     void initialize(WishLog& log);
+    void check_initial_doc(QJsonDocument& doc);
 
     void process_with_initial_data(WishLog& log, QNetworkReply* reply);
-    void load_local_data();
     QDir data_dir;
 
     std::map<QString, QJsonDocument> loaded_data;
