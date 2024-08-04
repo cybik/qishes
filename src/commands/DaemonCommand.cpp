@@ -5,6 +5,6 @@
 #include <commands/DaemonCommand.h>
 const QString DaemonCommand::CommandSpecifier = "daemon";
 
-void DaemonCommand::cmd_main(int, char **) {
+int DaemonCommand::cmd_main(int, char **) {
     abort();
 }

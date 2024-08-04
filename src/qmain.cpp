@@ -37,7 +37,7 @@ int main(int argc, char *argv[]) {
     Log::get_logger()->log_level(Log::LogLevel::Debug);
 
     QCoreApplication qwishes(argc, argv);
-    QCoreApplication::setApplicationName(APPLICATION_NAME_GENERATOR());
+    QCoreApplication::setApplicationName(APPNAME_GEN());
     QCoreApplication::setApplicationVersion(APP_VERSION);
     QCoreApplication::setOrganizationDomain("cybik.moe");
 
@@ -66,8 +66,5 @@ int main(int argc, char *argv[]) {
         parser.showHelp();
     }
 
-    command->cmd_main(argc, argv);
-    //QCommandLineParser parser;
-    //return QCoreApplication::exec();
-    return 0;
+    return command->cmd_main(argc, argv);
 }

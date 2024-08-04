@@ -3,7 +3,7 @@
 //
 
 #include <commands/DataCommand.h>
-#include <QCoreApplication>
+#include <QApplication>
 #include <QCommandLineParser>
 
 #include <common.h>
@@ -18,46 +18,43 @@
 
 const QString DataCommand::CommandSpecifier = "data";
 
-void DataCommand::cmd_main(int argc, char **argv) {
-    qwishes_data = new QCoreApplication(argc, argv);
-    QCoreApplication::setApplicationName(APPLICATION_NAME_GENERATOR(.data));
-    QCoreApplication::setApplicationVersion(APP_VERSION);
+int DataCommand::cmd_main(int argc, char **argv) {
+    qwishes_data = std::make_shared<QApplication>(argc, argv);
+    QApplication::setApplicationName(APPNAME_GEN(.data));
+    QApplication::setApplicationVersion(APP_VERSION);
 
     parser = std::make_shared<QCommandLineParser>();
     parser->addHelpOption();
     parser->addVersionOption();
 
-    parser->addPositionalArgument(
-        "command",
-        QCoreApplication::translate("main", "Command to run. MUST be data.")
-    );
+    parser->addPositionalArgument( "command", L18N_M("Command to run. MUST be data.") );
 
     std::shared_ptr<QCommandLineOption> game_path, file_path, known_url, all_targets;
     parser->addOption(
         *(game_path = std::make_shared<QCommandLineOption>(
             QStringList() << "g" << "game-path",
-            SPEC_TRANSLATE("Path to the game installation. May or may not be provided."),
+            L18N("Path to the game installation. May or may not be provided."),
             "game_path", nullptr
         ))
     );
     parser->addOption(
         *(file_path = std::make_shared<QCommandLineOption>(
             QStringList() << "f" << "file-path",
-            SPEC_TRANSLATE("Path to the cache file directly."),
+            L18N("Path to the cache file directly."),
             "file_path", nullptr
         ))
     );
     parser->addOption(
         *(known_url = std::make_shared<QCommandLineOption>(
             QStringList() << "u" << "known-url",
-            SPEC_TRANSLATE("Known URL. May or may not be provided."),
+            L18N("Known URL. May or may not be provided."),
             "known_url_path", nullptr
         ))
     );
     parser->addOption(
         *(all_targets = std::make_shared<QCommandLineOption>(
             QStringList() << "a" << "all-targets",
-            SPEC_TRANSLATE("Get all Gacha targets."),
+            L18N("Get all Gacha targets."),
             "all_Targets", nullptr
         ))
     );
@@ -68,11 +65,8 @@ void DataCommand::cmd_main(int argc, char **argv) {
     this->command_known_url   =   parser->value(*known_url);
     this->command_all_targets =   parser->isSet(*all_targets);   // if set, always true
 
-    if(command_known_url.isEmpty() && command_game_path.isEmpty() && command_file_path.isEmpty()) {
-        Log::get_logger()->warning("No game path nor known URL was provided.");
-        Log::get_logger()->warning("One of the two must be provided.");
-        parser->showHelp(2);
-    }
+    if(command_known_url.isEmpty() && command_game_path.isEmpty() && command_file_path.isEmpty())
+        warnHelp("No game path nor known URL was provided.\nOne of the two must be provided.", 2);
 
     std::shared_ptr<std::list<std::shared_ptr<QFile>>> caches;
     if(!this->command_file_path.isEmpty() && QFileInfo::exists(command_file_path)) {
@@ -80,38 +74,28 @@ void DataCommand::cmd_main(int argc, char **argv) {
         (*caches).emplace_front(std::make_shared<QFile>(QFileInfo(command_file_path).absoluteFilePath()));
     } else if(!this->command_game_path.isEmpty()) {
         caches = this->getGameWishesCache();
-    } else {
-        Log::get_logger()->critical("No good source of information was provided to extract a history URL from.");
-        parser->showHelp(5);
-    }
+    } else
+        warnHelp("No good source of information was provided to extract a history URL from.", 5);
 
-    if(caches->empty()) {
-        Log::get_logger()->warning("No URL was found in the detected cache.");
-        parser->showHelp(3);
-    }
+    if(caches->empty()) warnHelp("No URL was found in the detected cache.", 3);
     printSingleFilePath((*caches).begin()->get()->fileName());
 
     auto results = runFilterForLogs(runUrlCleanup(runUrlSearch(*(*caches).begin())));
-    if(!results || results->empty()) {
-        Log::get_logger()->critical("No URLs read, detected or otherwise found.");
-        parser->showHelp(4);
-    }
+    if(!results || results->empty()) warnHelp("No URLs read, detected or otherwise found.", 4);
 
     initialize(results->front());
-    qwishes_data->exec();
+    return qwishes_data->exec();
 }
 
 void DataCommand::initialize(WishLog& log) {
-    auto qnam = new QNetworkAccessManager(qwishes_data);
+    auto qnam = new QNetworkAccessManager(qwishes_data.get());
     qnam->setRedirectPolicy(QNetworkRequest::RedirectPolicy::ManualRedirectPolicy);
     qnam->get(QNetworkRequest(log.getQuickInitUrl()));
     std::cout << log.getQuickInitUrl().toString().toStdString() << std::endl;
     QObject::connect(
         qnam, &QNetworkAccessManager::finished,
         [&](QNetworkReply* reply) {
-            if(reply->error() == QNetworkReply::NoError) {
-                process_with_initial_data(log, reply);
-            }
+            if(reply->error() == QNetworkReply::NoError) process_with_initial_data(log, reply);
         }
     );
 }
@@ -132,7 +116,7 @@ void DataCommand::process_with_initial_data(WishLog& log, QNetworkReply* reply) 
     // Generate data using first page UID.
     data_dir = QDir(
         std::filesystem::path(XdgUtils::BaseDir::XdgDataHome())
-            .append(APPLICATION_BASE_NAME)
+            .append(APPNAME_BASE)
             .append(get_local_storage_folder(log.game()))
             .append(doc["data"]["list"][0]["uid"].toString().toStdString()),
             "*.cache",
@@ -151,8 +135,7 @@ void DataCommand::process_with_initial_data(WishLog& log, QNetworkReply* reply) 
         Log::get_logger()->critical(loaded_data[file.baseName()].toJson());
     }
     Log::get_logger()->info(data_dir.absolutePath());
-    qwishes_data->quit();
-    abort();
+    qwishes_data->exit(131);
 }
 
 std::string DataCommand::get_local_storage_folder(WishLog::WishLogGame game) {

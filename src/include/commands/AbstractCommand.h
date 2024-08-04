@@ -17,7 +17,7 @@
 class AbstractCommand {
 
 public:
-    virtual void cmd_main(int, char **) = 0;
+    virtual int cmd_main(int, char **) = 0;
 protected:
     QString command_game_path;
     QString command_file_path;

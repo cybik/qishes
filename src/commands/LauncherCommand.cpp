@@ -118,9 +118,9 @@ std::shared_ptr<QSystemTrayIcon> LauncherCommand::generate_tray_icon() {
     return tray;
 }
 
-void LauncherCommand::cmd_main(int argc, char **argv) {
+int LauncherCommand::cmd_main(int argc, char **argv) {
     this_app = std::make_shared<QApplication>(argc, argv);
-    QApplication::setApplicationName(APPLICATION_NAME_GENERATOR(.launcher));
+    QApplication::setApplicationName(APPNAME_GEN(.launcher));
     QApplication::setApplicationVersion(APP_VERSION);
 
     generate_tray_icon()->show();
@@ -128,4 +128,5 @@ void LauncherCommand::cmd_main(int argc, char **argv) {
     this_app->exec();
 
     abort();
+    return 0;
 }

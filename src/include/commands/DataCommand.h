@@ -16,7 +16,7 @@ class DataCommand : public AbstractCommand {
 public:
     static const QString CommandSpecifier;
     DataCommand() = default;
-    void cmd_main(int, char **) override;
+    int cmd_main(int, char **) override;
 
 
 protected:
@@ -32,5 +32,5 @@ private:
     QDir data_dir;
 
     std::map<QString, QJsonDocument> loaded_data;
-    QCoreApplication* qwishes_data;
+    std::shared_ptr<QApplication> qwishes_data;
 };

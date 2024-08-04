@@ -2,7 +2,7 @@
 // Created by cybik on 24-06-27.
 //
 #include <commands/HistoryCommand.h>
-#include <QCoreApplication>
+#include <QApplication>
 #include <QCommandLineParser>
 #include <iostream>
 
@@ -16,59 +16,53 @@
 
 const QString HistoryCommand::CommandSpecifier = "history";
 
-void HistoryCommand::cmd_main(int argc, char **argv) {
-    QCoreApplication qwishes_history(argc, argv);
-    QCoreApplication::setApplicationName(APPLICATION_NAME_GENERATOR(.history));
-    QCoreApplication::setApplicationVersion(APP_VERSION);
+int HistoryCommand::cmd_main(int argc, char **argv) {
+    qwishes_history = std::make_shared<QApplication>(argc, argv);
+    QApplication::setApplicationName(APPNAME_GEN(.history));
+    QApplication::setApplicationVersion(APP_VERSION);
 
     parser = std::make_shared<QCommandLineParser>();
     parser->addHelpOption();
     parser->addVersionOption();
 
-    parser->addPositionalArgument(
-        "command",
-        QCoreApplication::translate("main", "Command to run. MUST be history.")
-    );
+    parser->addPositionalArgument( "command", L18N_M("Command to run. MUST be history.") );
 
     std::shared_ptr<QCommandLineOption> game_path, file_path, reverse_order, open_url, max_return_num;
     parser->addOption(
         *(game_path = std::make_shared<QCommandLineOption>(
             QStringList() << "g" << "game_path",
-            SPEC_TRANSLATE("Path to the game installation."),
-            "game_path",
-            nullptr
+            L18N("Path to the game installation."),
+            "game_path", nullptr
         ))
     );
     parser->addOption(
         *(file_path = std::make_shared<QCommandLineOption>(
             QStringList() << "f" << "file_path",
-            SPEC_TRANSLATE("Path to the cache file directly."),
-            "file_path",
-            nullptr
+            L18N("Path to the cache file directly."),
+            "file_path", nullptr
         ))
     );
     parser->addOption(
         *(reverse_order = std::make_shared<QCommandLineOption>(
             QStringList() << "r" << "reverse_order",
-            SPEC_TRANSLATE("Return URLs in reversed order (from oldest to most recent).")
+            L18N("Return URLs in reversed order (from oldest to most recent).")
         ))
     );
     parser->addOption(
         *(open_url = std::make_shared<QCommandLineOption>(
             QStringList() << "o" << "open_url",
-            SPEC_TRANSLATE("Open URL in system browser.")
+            L18N("Open URL in system browser.")
         ))
     );
     parser->addOption(
         *(max_return_num = std::make_shared<QCommandLineOption>(
             QStringList() << "m" << "max_return_num",
-            SPEC_TRANSLATE("Maximum number of URLs to return."),
-            "max_return_num",
-            "1"
+            L18N("Maximum number of URLs to return."),
+            "max_return_num", "1"
         ))
     );
 
-    parser->process(qwishes_history);
+    parser->process(*qwishes_history);
 
     if( parser->positionalArguments().empty() ||
         parser->positionalArguments()[0].compare(CommandSpecifier, Qt::CaseInsensitive) != 0
@@ -92,8 +86,7 @@ void HistoryCommand::cmd_main(int argc, char **argv) {
     } else if(!this->command_game_path.isEmpty()) {
         caches = this->getGameWishesCache();
     } else {
-        Log::get_logger()->critical("No good source of information was provided to extract a history URL from.");
-        parser->showHelp(5);
+        warnHelp("No good source of information was provided to extract a history URL from.", 5);
     }
 
     for(const auto& qfile: *caches) {
@@ -103,13 +96,13 @@ void HistoryCommand::cmd_main(int argc, char **argv) {
         auto results = runFilterForLogs(runUrlCleanup(runUrlSearch(qfile)));
         if(!results || results->empty()) {
             Log::get_logger()->critical("No URLs read, detected or otherwise found.");
-            return;
+            return 0;
         }
         if(this->command_max_return_num == 1 || results->size() == 1) {
-            std::cout << (*results).front().to_stdstring() << std::endl;
+            std::cout << results->front().to_stdstring() << std::endl;
             if(this->command_open_url) {
                 // seems qt doesn't want to allow use desktop services in cli
-                //QDesktopServices::openUrl(QUrl((*results).front().to_qstring()));
+                QDesktopServices::openUrl(QUrl(results->front().to_qstring()));
             }
         } else {
             if(command_reverse_order) results->reverse();
@@ -119,4 +112,3 @@ void HistoryCommand::cmd_main(int argc, char **argv) {
         }
     }
 }
-

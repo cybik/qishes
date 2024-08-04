@@ -14,7 +14,7 @@ class LauncherCommand : public AbstractCommand {
 public:
     static const QString CommandSpecifier;
     LauncherCommand() = default;
-    void cmd_main(int, char **) override;
+    int cmd_main(int, char **) override;
 
 protected:
     void mbox();

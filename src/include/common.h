@@ -10,6 +10,7 @@
 
 static const QString APP_VERSION = "0.0.1";
 
-#define APPLICATION_BASE_NAME "moe.cybik.wishes"
-#define APPLICATION_NAME_GENERATOR(X) APPLICATION_BASE_NAME#X
-#define SPEC_TRANSLATE(X) QCoreApplication::translate(CommandSpecifier.toStdString().c_str(), ""#X )
+#define APPNAME_BASE "moe.cybik.wishes"
+#define APPNAME_GEN(X) APPNAME_BASE#X
+#define L18N_M(X) QApplication::translate("main", ""#X )
+#define L18N(X) QApplication::translate(CommandSpecifier.toStdString().c_str(), ""#X )
