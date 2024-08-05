@@ -8,7 +8,7 @@ set(CPACK_PACKAGE_VERSION_PATCH "0")
 set(CPACK_PACKAGE_VERSION "${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
 set(CPACK_PACKAGE_VENDOR "Cybik's Base")
 set(CPACK_PACKAGE_NAME "${MY_PROJECT_NAME}")
-set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "x86_64")
+set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "amd64")
 set(CPACK_PACKAGE_CONTACT "root+gacha@cybik.moe")
 
 project(
@@ -33,7 +33,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(PROJECT_3RDPARTY_DIR "${CMAKE_CURRENT_LIST_DIR}/3rdParty")
 
-add_subdirectory("${PROJECT_3RDPARTY_DIR}/xdg")
+#add_subdirectory("${PROJECT_3RDPARTY_DIR}/xdg")
 add_subdirectory("${PROJECT_3RDPARTY_DIR}/yaml-cpp")
 add_subdirectory("${PROJECT_3RDPARTY_DIR}/termcolor")
 add_subdirectory("${PROJECT_3RDPARTY_DIR}/discord-game-sdk")
@@ -62,7 +62,7 @@ include_directories(
 
 include_directories(
     AFTER
-        "${PROJECT_3RDPARTY_DIR}/xdg/include"
+        #"${PROJECT_3RDPARTY_DIR}/xdg/include"
         "${PROJECT_3RDPARTY_DIR}/yaml-cpp/include"
         "${PROJECT_3RDPARTY_DIR}/termcolor/include"
         "${PROJECT_3RDPARTY_DIR}/spinnerspp/include"
@@ -134,5 +134,7 @@ install(
     RUNTIME
         DESTINATION bin
 )
+
+set(CPACK_GENERATOR ${CPACK_GENERATOR} "DEB")
 
 include(CPack)
