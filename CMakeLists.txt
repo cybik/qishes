@@ -2,10 +2,19 @@ cmake_minimum_required(VERSION 3.21)
 
 set(MY_PROJECT_NAME "qgachawishes")
 
+set(CPACK_PACKAGE_VERSION_MAJOR "1")
+set(CPACK_PACKAGE_VERSION_MINOR "0")
+set(CPACK_PACKAGE_VERSION_PATCH "0")
+set(CPACK_PACKAGE_VERSION "${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
+set(CPACK_PACKAGE_VENDOR "Cybik's Base")
+set(CPACK_PACKAGE_NAME "${MY_PROJECT_NAME}")
+set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "x86_64")
+set(CPACK_PACKAGE_CONTACT "root+gacha@cybik.moe")
+
 project(
     ${MY_PROJECT_NAME}
     VERSION
-        0.0.1
+        ${CPACK_PACKAGE_VERSION}
     LANGUAGES
         CXX
 )
@@ -107,7 +116,7 @@ target_link_libraries(
         gachasteam
         #Ribbon
         discord-game-sdk-interface
-        XdgUtils::BaseDir
+        #XdgUtils::BaseDir
         #QEasyDownloader
         #QArchive
         #QAdwaitaDecorations::qadwaitadecorations
@@ -118,3 +127,12 @@ target_link_libraries(
 target_link_libraries(${MY_PROJECT_NAME} PRIVATE
     "${PROJECT_3RDPARTY_DIR}/discord-game-sdk/lib/linux/x86_64/libdiscord_game_sdk.so"
 )
+
+install(
+    TARGETS
+        ${MY_PROJECT_NAME}
+    RUNTIME
+        DESTINATION bin
+)
+
+include(CPack)

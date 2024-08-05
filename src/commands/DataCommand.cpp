@@ -5,12 +5,14 @@
 #include <commands/DataCommand.h>
 #include <QApplication>
 #include <QCommandLineParser>
+#include <QJsonArray>
 
 #include <common.h>
 #include <iostream>
 #include <qjsondocument.h>
 
-#include <XdgUtils/BaseDir/BaseDir.h>
+//#include <XdgUtils/BaseDir/BaseDir.h>
+#include <QStandardPaths>
 
 #include <QNetworkReply>
 #include <QNetworkAccessManager>
@@ -83,11 +85,11 @@ int DataCommand::cmd_main(int argc, char **argv) {
     auto results = runFilterForLogs(runUrlCleanup(runUrlSearch(*(*caches).begin())));
     if(!results || results->empty()) warnHelp("No URLs read, detected or otherwise found.", 4);
 
-    initialize(results->front());
+    run_data_sync(results->front());
     return qwishes_data->exec();
 }
 
-void DataCommand::initialize(WishLog& log) {
+void DataCommand::run_data_sync(WishLog& log) {
     auto qnam = new QNetworkAccessManager(qwishes_data.get());
     qnam->setRedirectPolicy(QNetworkRequest::RedirectPolicy::ManualRedirectPolicy);
     qnam->get(QNetworkRequest(log.getQuickInitUrl()));
@@ -95,31 +97,49 @@ void DataCommand::initialize(WishLog& log) {
     QObject::connect(
         qnam, &QNetworkAccessManager::finished,
         [&](QNetworkReply* reply) {
-            if(reply->error() == QNetworkReply::NoError) process_with_initial_data(log, reply);
+            if(reply->error() == QNetworkReply::NoError) start_sync_process(log, reply);
         }
     );
 }
 
-void DataCommand::check_initial_doc(QJsonDocument& doc)
-{
-    if( doc["data"].isUndefined() )                         abort();
-    if( doc["data"]["list"].isUndefined() )               abort();
-    if( doc["data"]["list"][0].isUndefined() )            abort();
-    if( doc["data"]["list"][0]["uid"].isUndefined() )   abort();
+void DataCommand::early_exit(const QString& message, int exit_code) {
+    Log::get_logger()->warning(message);
+    qwishes_data->exit(exit_code);
 }
 
-void DataCommand::process_with_initial_data(WishLog& log, QNetworkReply* reply) {
+void DataCommand::check_initial_doc(QJsonDocument& doc)
+{
+    if( doc["data"].isUndefined() )                       early_exit("data absent", 10);
+    if( doc["data"]["list"].isUndefined() )             early_exit("datalist absent", 11);
+    if( doc["data"]["list"][0].isUndefined() )          early_exit("datalist element absent", 12);
+    if( doc["data"]["list"][0]["uid"].isUndefined() ) early_exit("data element unexpected", 13);
+}
+
+void DataCommand::start_sync_process(WishLog& log, QNetworkReply* reply) {
+    process_initial_data(log, reply);
+    for(const auto& [key, _]: loaded_data) {
+        Log::get_logger()->critical("Key: " + key);
+        Log::get_logger()->warning("Value array count: " + QString::number(loaded_data[key].array().count()));
+        Log::get_logger()->warning("Value array first: "
+            + loaded_data[key].array().first().type()
+        );
+    }
+    early_exit("Cleared out.", 131);
+}
+
+void DataCommand::process_initial_data(WishLog& log, QNetworkReply* reply) {
     QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
-    //std::cout << doc.toJson().toStdString() << std::endl;
     check_initial_doc(doc);
 
     // Generate data using first page UID.
     data_dir = QDir(
-        std::filesystem::path(XdgUtils::BaseDir::XdgDataHome())
-            .append(APPNAME_BASE)
+        std::filesystem::path(
+                QStandardPaths::standardLocations(QStandardPaths::GenericDataLocation)[0]
+                    .toStdString()
+            ).append(APPNAME_BASE)
             .append(get_local_storage_folder(log.game()))
             .append(doc["data"]["list"][0]["uid"].toString().toStdString()),
-            "*.cache",
+        "*.cache",
         QDir::SortFlags(QDir::NoSort),
         QDir::Filters(QDir::Files | QDir::NoDotAndDotDot)
     );
@@ -131,11 +151,10 @@ void DataCommand::process_with_initial_data(WishLog& log, QNetworkReply* reply) 
         QFile loaded(file.absoluteFilePath());
         loaded.open(QIODevice::ReadOnly);
         loaded_data.emplace(file.baseName(), QJsonDocument::fromJson(loaded.readAll()));
-        Log::get_logger()->warning("Loaded data from file.");
-        Log::get_logger()->critical(loaded_data[file.baseName()].toJson());
+        Log::get_logger()->warning("Loaded data from file: " + file.baseName());
+        //Log::get_logger()->critical(loaded_data[file.baseName()].toJson());
     }
     Log::get_logger()->info(data_dir.absolutePath());
-    qwishes_data->exit(131);
 }
 
 std::string DataCommand::get_local_storage_folder(WishLog::WishLogGame game) {
