@@ -35,7 +35,7 @@ public:
     WishLogGame game();
 
     QUrl getQuickInitUrl();
-    QUrl regenerate_data_url();
+    QUrl regenerate_data_url(int target_gacha_type = -1);
     QUrl regenerate_preview_url();
     static bool is_accepted_url(const QString& url);
 protected:
@@ -54,4 +54,5 @@ private:
     QString  end_id             = ""; // will be used
 
     QString get_log_ext_url() const;
+    void decode();
 };

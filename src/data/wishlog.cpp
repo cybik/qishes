@@ -12,6 +12,8 @@ WishLog::WishLog(const QString &wishurl, WishLogType log_type) {
     this->log_game = guess_game(wishurl);
 
     this->log_url = QUrl(log_url_str);
+
+    this->decode();
 }
 
 QString WishLog::get_log_ext_url() const {
@@ -21,6 +23,29 @@ QString WishLog::get_log_ext_url() const {
 
     return "";
 }
+
+void WishLog::decode() {
+    QUrlQuery que = QUrlQuery(log_url.query());
+
+    switch(log_game) {
+        case(WishLog::Genshin): {
+            for(const auto& item: que.queryItems()) {
+                if(item.first == "init_type")      base_gacha_type              = item.second;
+            }
+            break;
+        }
+        case(WishLog::HSR): {
+            break;
+        }
+        case(WishLog::ZZZ): {
+            for(const auto& item: que.queryItems()) {
+                if(item.first == "init_log_gacha_type")      real_gacha_type    = item.second;
+                if(item.first == "init_log_gacha_base_type") base_gacha_type    = item.second;
+            }
+        }
+    }
+}
+
 
 std::string WishLog::to_stdstring() {
     return to_qstring().toStdString();
@@ -77,7 +102,7 @@ QUrl WishLog::getQuickInitUrl() {
     return interim;
 }
 
-QUrl WishLog::regenerate_data_url() {
+QUrl WishLog::regenerate_data_url(int target_gacha_type) {
     // TODO: make this more nimble to be able to hit one method call with page, end_id
     // TODO: huge chain calls for init_type:*
     QUrl data_url = QUrl(log_url);
@@ -90,20 +115,32 @@ QUrl WishLog::regenerate_data_url() {
             data_url.setPath("/gacha_info/api/getGachaLog");
             bool    missing_page            = true,
                     missing_size            = true,
-                    missing_end_id          = true;
+                    missing_end_id          = true,
+                    reset_init_type         = false
+            ;
             log_data_page = 1;
             for(const auto& item: reprocess_query.queryItems()) {
-                if(item.first == "page")           missing_page                 = false;
-                if(item.first == "size")           missing_size                 = false;
-                if(item.first == "end_id")         missing_end_id               = false;
+                if(item.first == "page")        missing_page    = false;
+                if(item.first == "size")        missing_size    = false;
+                if(item.first == "end_id")      missing_end_id  = false;
 
-                if(item.first == "init_type")      base_gacha_type              = item.second;
+                if(item.first == "init_type") {
+                    base_gacha_type = (target_gacha_type!=-1?QString::number(target_gacha_type):item.second);
+                    if(target_gacha_type != -1 && item.second.toInt() != target_gacha_type) {
+                        reset_init_type = true;
+                    }
+                }
             }
 
             if(missing_page)  reprocess_query.addQueryItem("page", QString::number(log_data_page));
             if(missing_size)  reprocess_query.addQueryItem("size", QString::number(log_data_page_size));
             if(missing_end_id) reprocess_query.addQueryItem("end_id", end_id);
 
+            // Regenerating a "fresh" url
+            if(reset_init_type) {
+                reprocess_query.removeQueryItem("init_type");
+                reprocess_query.addQueryItem("init_type", QString::number(target_gacha_type));
+            }
             reprocess_query.addQueryItem("gacha_type", base_gacha_type);
             break;
         }

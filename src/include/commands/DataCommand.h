@@ -33,6 +33,8 @@ private:
     void process_initial_data(WishLog& log, QNetworkReply* reply);
     QDir data_dir;
 
+    void decode_initial_url(WishLog& log);
+
     std::map<QString, QJsonDocument> loaded_data;
     std::shared_ptr<QApplication> qwishes_data;
 };
