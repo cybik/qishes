@@ -1,3 +1,9 @@
+# Ramblings
+
+## xdg-utils-cxx-dev
+
+???
+
 # Packages needed, probably
 
 * qt6-base-private-dev

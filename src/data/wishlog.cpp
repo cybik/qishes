@@ -102,7 +102,7 @@ QUrl WishLog::getQuickInitUrl() {
     return interim;
 }
 
-QUrl WishLog::regenerate_data_url(int target_gacha_type) {
+QUrl WishLog::regenerate_data_url(int target_gacha_type, int target_gacha_page) {
     // TODO: make this more nimble to be able to hit one method call with page, end_id
     // TODO: huge chain calls for init_type:*
     QUrl data_url = QUrl(log_url);
@@ -118,7 +118,7 @@ QUrl WishLog::regenerate_data_url(int target_gacha_type) {
                     missing_end_id          = true,
                     reset_init_type         = false
             ;
-            log_data_page = 1;
+            log_data_page = target_gacha_page;
             for(const auto& item: reprocess_query.queryItems()) {
                 if(item.first == "page")        missing_page    = false;
                 if(item.first == "size")        missing_size    = false;

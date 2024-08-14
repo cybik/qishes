@@ -92,11 +92,12 @@ int DataCommand::cmd_main(int argc, char **argv) {
 
 void DataCommand::run_data_sync(WishLog& log) {
     decode_initial_url(log);
-    auto qnam = new QNetworkAccessManager(qwishes_data.get());
-    qnam->setRedirectPolicy(QNetworkRequest::RedirectPolicy::ManualRedirectPolicy);
-    qnam->get(QNetworkRequest(log.getQuickInitUrl()));
+    qwishes_qnam = std::make_shared<QNetworkAccessManager>(qwishes_data.get());
+    qwishes_qnam->setRedirectPolicy(QNetworkRequest::RedirectPolicy::ManualRedirectPolicy);
+    auto req = QNetworkRequest(log.getQuickInitUrl());
+    qwishes_qnam->get(req);
     QObject::connect(
-        qnam, &QNetworkAccessManager::finished,
+        qwishes_qnam.get(), &QNetworkAccessManager::finished,
         [&](QNetworkReply* reply) {
             if(reply->error() == QNetworkReply::NoError) start_sync_process(log, reply);
         }
@@ -123,12 +124,34 @@ void DataCommand::check_initial_doc(QJsonDocument& doc)
 void DataCommand::start_sync_process(WishLog& log, QNetworkReply* reply) {
     process_initial_data(log, reply);
     for(const auto& [key, value]: loaded_data) {
-        Log::get_logger()->critical("Key: " + key);
-        Log::get_logger()->warning("Value array count: " + QString::number(loaded_data[key].array().count()));
-        Log::get_logger()->warning(loaded_data[key].array()[0].toObject().value("id").toString());
-        Log::get_logger()->warning(loaded_data[key].array()[0].toObject().value("id").toString());
+        qwishes_network_requests.emplace(
+            key,
+            std::make_shared<QNetworkAccessManager>(qwishes_data.get())
+        );
+        qwishes_network_requests[key]->setRedirectPolicy(QNetworkRequest::RedirectPolicy::ManualRedirectPolicy);
+        run_sync_loop(log, key);
     }
-    early_exit("Cleared out.", 131);
+    //qwishes_qnam.reset(); // clean out ay
+    //early_exit("Cleared out.", 131);
+}
+
+void DataCommand::run_sync_loop(WishLog& log, const QString& key, int page) {
+    Log::get_logger()->critical("Key: " + key);
+    Log::get_logger()->warning("Value array count: " + QString::number(loaded_data[key].array().count()));
+    Log::get_logger()->warning(loaded_data[key].array()[0].toObject().value("id").toString());
+    Log::get_logger()->warning(loaded_data[key].array()[0].toObject().value("id").toString());
+
+    QString target_url = log.regenerate_data_url(key.toInt(), page).toString();
+    auto req = QNetworkRequest(target_url);
+    QObject::connect(
+        qwishes_network_requests[key].get(), &QNetworkAccessManager::finished,
+        [&](QNetworkReply* reply) {
+            if(reply->error() == QNetworkReply::NoError) {
+                Log::get_logger()->critical("First group clear! " + key);
+            }
+        }
+    );
+    qwishes_network_requests[key]->get(req);
 }
 
 void DataCommand::process_initial_data(WishLog& log, QNetworkReply* reply) {
@@ -154,9 +177,10 @@ void DataCommand::process_initial_data(WishLog& log, QNetworkReply* reply) {
     for(const QFileInfo& file : data_dir.entryInfoList()) {
         QFile loaded(file.absoluteFilePath());
         loaded.open(QIODevice::ReadOnly);
-        loaded_data.emplace(file.baseName(), QJsonDocument::fromJson(loaded.readAll()));
+        QString target_url = log.regenerate_data_url(file.baseName().toInt()).toString();
+        loaded_data.emplace(file.baseName(),QJsonDocument::fromJson(loaded.readAll()));
         Log::get_logger()->warning("Loaded data from file: " + file.baseName());
-        Log::get_logger()->info(log.regenerate_data_url(file.baseName().toInt()).toString());
+        Log::get_logger()->info(target_url);
         //Log::get_logger()->critical(loaded_data[file.baseName()].toJson());
     }
     Log::get_logger()->info(data_dir.absolutePath());

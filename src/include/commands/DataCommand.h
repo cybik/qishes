@@ -9,6 +9,7 @@
 #include <QDir>
 #include <qnetworkreply.h>
 #include <data/wishlog.h>
+#include <utility>
 
 #include <QJsonDocument>
 
@@ -30,6 +31,7 @@ private:
     void check_initial_doc(QJsonDocument& doc);
 
     void start_sync_process(WishLog& log, QNetworkReply* reply);
+    void run_sync_loop(WishLog& log, const QString& key, int page = 1);
     void process_initial_data(WishLog& log, QNetworkReply* reply);
     QDir data_dir;
 
@@ -37,4 +39,6 @@ private:
 
     std::map<QString, QJsonDocument> loaded_data;
     std::shared_ptr<QApplication> qwishes_data;
+    std::shared_ptr<QNetworkAccessManager> qwishes_qnam;
+    std::map<QString, std::shared_ptr<QNetworkAccessManager>> qwishes_network_requests;
 };
