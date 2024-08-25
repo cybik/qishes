@@ -29,7 +29,7 @@ protected:
     std::shared_ptr<QStringList> runUrlCleanup(const std::shared_ptr<QStringList>& ptr);
     std::shared_ptr<std::list<WishLog>> runFilterForLogs(const std::shared_ptr<QStringList>& ptr);
 
-    void warnHelp(const QString& message, int exit_code);
+    void warnHelp(int exit_code, const QString& message = "");
     std::shared_ptr<QCommandLineParser> parser;
 private:
 };

@@ -86,7 +86,7 @@ int HistoryCommand::cmd_main(int argc, char **argv) {
     } else if(!this->command_game_path.isEmpty()) {
         caches = this->getGameWishesCache();
     } else {
-        warnHelp("No good source of information was provided to extract a history URL from.", 5);
+        warnHelp(5, "No good source of information was provided to extract a history URL from.");
     }
 
     for(const auto& qfile: *caches) {

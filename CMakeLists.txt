@@ -87,8 +87,8 @@ if(ASAN)
     add_link_options(-fsanitize=address)
 endif()
 
-add_executable(
-    ${MY_PROJECT_NAME}
+set(
+    SOURCES_CPP
         "${PROJECT_SOURCE_DIR}/qmain.cpp"
 
         "${PROJECT_SOURCE_DIR}/data/wishlog.cpp"
@@ -100,6 +100,22 @@ add_executable(
         "${PROJECT_SOURCE_DIR}/commands/HistoryCommand.cpp"
         "${PROJECT_SOURCE_DIR}/commands/LauncherCommand.cpp"
         "${PROJECT_SOURCE_DIR}/commands/AbstractCommand.cpp"
+)
+
+# For AutoMOC
+set(
+    SOURCES_H
+        "${PROJECT_SOURCE_DIR}/include/commands/DataCommand.h"
+        "${PROJECT_SOURCE_DIR}/include/commands/AbstractCommand.h"
+        "${PROJECT_SOURCE_DIR}/include/commands/HistoryCommand.h"
+        "${PROJECT_SOURCE_DIR}/include/commands/LauncherCommand.h"
+        "${PROJECT_SOURCE_DIR}/include/commands/DaemonCommand.h"
+)
+
+add_executable(
+    ${MY_PROJECT_NAME}
+        ${SOURCES_CPP}
+        ${SOURCES_H}
 )
 
 target_link_libraries(

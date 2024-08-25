@@ -4,28 +4,26 @@
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "performance-unnecessary-value-param"
 
-#include <QUrl>
 #include <QDesktopServices>
 #include <QRegularExpression>
-#include <QFile>
 #include <iostream>
-#include <QCommandLineParser>
-#include <QCoreApplication>
-#include <commands/HistoryCommand.h>
 #include <commands/AbstractCommand.h>
 
 #include <termcolor/termcolor.hpp>
 
 #include <gachafs.h>
 
+#include "egachafs.h"
+
 const QString filter = "**/webCaches/**/Cache/Cache_Data/data_2";
 
 std::shared_ptr<std::list<std::shared_ptr<QFile>>> AbstractCommand::getGameWishesCache() {
-    std::shared_ptr<std::list<std::shared_ptr<QFile>>> caches = gachafs::getFiles(filter, this->command_game_path);
-    if(caches->empty()) {
-        parser->showHelp(0);
+    try {
+        return gachafs::getFiles(filter, this->command_game_path);
+    } catch (EGachaFS_Exception& e) {
+        warnHelp(0);
     }
-    return caches;
+    return nullptr;
 }
 
 void AbstractCommand::printSingleFilePath(const QString &filename) {
@@ -40,12 +38,10 @@ void AbstractCommand::printSingleFilePath(const QString &filename) {
 std::shared_ptr<QStringList> AbstractCommand::runUrlSearch(const std::shared_ptr<QFile>& qfile) {
     if(!qfile->exists()) return nullptr;
     qfile->open(QFile::ReadOnly);
-    QRegularExpression qreg("1/0/https(.*)\0\0\0\0\0\0\0\0");
-    QRegularExpressionMatchIterator qrem = qreg.globalMatch(qfile->readAll());
+    QRegularExpressionMatchIterator qrem =
+        QRegularExpression("1/0/https(.*)\0\0\0\0\0\0\0\0").globalMatch(qfile->readAll());
     std::shared_ptr<QStringList> retList = std::make_shared<QStringList>();
-    while(qrem.hasNext()) {
-        retList->append(qrem.next().captured(0));
-    }
+    while(qrem.hasNext()) retList->append(qrem.next().captured(0));
     qfile->close();
     return retList;
 }
@@ -79,7 +75,7 @@ std::shared_ptr<std::list<WishLog>> AbstractCommand::runFilterForLogs(const std:
     return retList;
 }
 
-void AbstractCommand::warnHelp(const QString& message, int exit_code)
+void AbstractCommand::warnHelp(int exit_code, const QString& message)
 {
     Log::get_logger()->critical(message);
     if(parser) parser->showHelp(exit_code);

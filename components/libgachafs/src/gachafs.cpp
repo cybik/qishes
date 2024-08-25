@@ -9,19 +9,19 @@
 #include <string>
 #include <filesystem>
 
-#include <termcolor/termcolor.hpp>
+#include <egachafs.h>
 
 int gachafs::seek_depth(int level, const QStringList &stringList, const QFileInfo& fileInfo) {
     /** ** means "any bloody dir" so we don't go deeper */
-    if(stringList.mid(level, 1).first().compare("**") == 0) {
-        /** Getting a hit on ** means we've matched "any" and the next, so skip 2 instead of 1 */
-        if(stringList.mid(level+1, 1).first().compare(fileInfo.baseName()) == 0) return level + 2;
 
-        /** Being on ** but not matching the next means we're still seeking under the filter of ** */
-        return level;
-    }
     /** We matched with something not ** and not a file. */
-    return level + 1;
+    if(stringList.mid(level, 1).first().compare("**") != 0) return level + 1;
+
+    /** Getting a hit on ** means we've matched "any" and the next, so skip 2 instead of 1 */
+    if(stringList.mid(level+1, 1).first().compare(fileInfo.baseName()) == 0) return level + 2;
+
+    /** Being on ** but not matching the next means we're still seeking under the filter of ** */
+    return level;
 }
 
 std::shared_ptr<std::list<std::shared_ptr<QFile>>> gachafs::getFiles(const QString& filter, QString& game_path) {
@@ -58,6 +58,9 @@ std::shared_ptr<std::list<std::shared_ptr<QFile>>> gachafs::getFiles(const QStri
         for(const auto& filepath: matched_files) {
             stdlist->push_back(std::make_shared<QFile>(filepath));
         }
+    }
+    if(stdlist->empty()) {
+        throw EGachaFS_Exception("No files found");
     }
     return stdlist;
 }

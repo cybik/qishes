@@ -31,7 +31,9 @@ set(PROJECT_SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/src")
 add_library(
     gachafs
     SHARED
-        "${CMAKE_CURRENT_LIST_DIR}/src/gachafs.cpp"
+        "${PROJECT_SOURCE_DIR}/gachafs.cpp"
+        "${PROJECT_SOURCE_DIR}/include/gachafs.h"
+        "${PROJECT_SOURCE_DIR}/include/egachafs.h"
 )
 
 target_link_libraries(
@@ -44,7 +46,7 @@ target_link_libraries(
 target_include_directories(
     gachafs
     PUBLIC
-        "${CMAKE_CURRENT_LIST_DIR}/src/include"
+        "${PROJECT_SOURCE_DIR}/include"
 )
 
 # shim

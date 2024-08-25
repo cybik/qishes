@@ -13,12 +13,15 @@
 
 #include <QJsonDocument>
 
-class DataCommand : public AbstractCommand {
+class DataCommand : public QObject, public AbstractCommand{
+    Q_OBJECT
 public:
     static const QString CommandSpecifier;
     DataCommand() = default;
     int cmd_main(int, char **) override;
 
+public slots:
+    void started();
 
 protected:
 private:
@@ -41,4 +44,5 @@ private:
     std::shared_ptr<QApplication> qwishes_data;
     std::shared_ptr<QNetworkAccessManager> qwishes_qnam;
     std::map<QString, std::shared_ptr<QNetworkAccessManager>> qwishes_network_requests;
+    std::shared_ptr<std::list<std::shared_ptr<QFile>>> caches;
 };

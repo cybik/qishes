@@ -17,7 +17,7 @@ std::shared_ptr<Log> Log::get_logger() {
 }
 
 void Log::debug(const QString& message) {
-    if(mlogLevel > LogLevel::Debug) return;
+    if(mlogLevel > LogLevel::Debug || message.isEmpty()) return;
     std::cout
         << termcolor::bold
             << termcolor::on_bright_green
@@ -31,7 +31,7 @@ void Log::debug(const QString& message) {
 }
 
 void Log::info(const QString& message) {
-    if(mlogLevel > LogLevel::Info) return;
+    if(mlogLevel > LogLevel::Info || message.isEmpty() ) return;
     std::cout
         << termcolor::bold
             << termcolor::on_bright_cyan
@@ -45,7 +45,7 @@ void Log::info(const QString& message) {
 }
 
 void Log::warning(const QString& message) {
-    if(mlogLevel > LogLevel::Warning) return;
+    if(mlogLevel > LogLevel::Warning || message.isEmpty() ) return;
     std::cout
         << termcolor::bold
             << termcolor::on_bright_yellow
@@ -59,7 +59,7 @@ void Log::warning(const QString& message) {
 }
 
 void Log::critical(const QString& message) {
-    if(mlogLevel > LogLevel::Critical) return;
+    if( mlogLevel > LogLevel::Critical || message.isEmpty() ) return;
     std::cout
         << termcolor::bold
             << termcolor::on_bright_red

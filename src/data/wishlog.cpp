@@ -105,6 +105,9 @@ QUrl WishLog::getQuickInitUrl() {
 QUrl WishLog::regenerate_data_url(int target_gacha_type, int target_gacha_page) {
     // TODO: make this more nimble to be able to hit one method call with page, end_id
     // TODO: huge chain calls for init_type:*
+
+    // probably the lifecycle of a referenced variable in an odd setup getting nuked.
+    // maybe start throwing around shared_ptrs or even unique_ptrs in this context.
     QUrl data_url = QUrl(log_url);
     QUrlQuery reprocess_query = QUrlQuery(log_url.query());
     //Log::get_logger()->critical(reprocess_query.toString());

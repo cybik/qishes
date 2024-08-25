@@ -69,26 +69,30 @@ int DataCommand::cmd_main(int argc, char **argv) {
     this->command_all_targets =   parser->isSet(*all_targets);   // if set, always true
 
     if(command_known_url.isEmpty() && command_game_path.isEmpty() && command_file_path.isEmpty())
-        warnHelp("No game path nor known URL was provided.\nOne of the two must be provided.", 2);
+        warnHelp(2, "No game path nor known URL was provided.\nOne of the two must be provided.");
 
-    std::shared_ptr<std::list<std::shared_ptr<QFile>>> caches;
+    //std::shared_ptr<std::list<std::shared_ptr<QFile>>> caches;
     if(!this->command_file_path.isEmpty() && QFileInfo::exists(command_file_path)) {
         caches = std::make_shared<std::list<std::shared_ptr<QFile>>>();
         (*caches).emplace_front(std::make_shared<QFile>(QFileInfo(command_file_path).absoluteFilePath()));
     } else if(!this->command_game_path.isEmpty()) {
         caches = this->getGameWishesCache();
     } else
-        warnHelp("No good source of information was provided to extract a history URL from.", 5);
+        warnHelp(5, "No good source of information was provided to extract a history URL from.");
 
-    if(caches->empty()) warnHelp("No URL was found in the detected cache.", 3);
+    if(caches->empty()) warnHelp(3, "No URL was found in the detected cache.");
     printSingleFilePath((*caches).begin()->get()->fileName());
 
-    auto results = runFilterForLogs(runUrlCleanup(runUrlSearch(*(*caches).begin())));
-    if(!results || results->empty()) warnHelp("No URLs read, detected or otherwise found.", 4);
-
-    run_data_sync(results->front());
+    emit started();
     return qwishes_data->exec();
 }
+
+void DataCommand::started() {
+    auto results = runFilterForLogs(runUrlCleanup(runUrlSearch(*(*caches).begin())));
+    if(!results || results->empty()) warnHelp(4, "No URLs read, detected or otherwise found.");
+    run_data_sync(results->front());
+}
+
 
 void DataCommand::run_data_sync(WishLog& log) {
     decode_initial_url(log);
