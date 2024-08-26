@@ -13,3 +13,6 @@
 [submodule "3rdParty/QAdwaitaDeco"]
 	path = 3rdParty/QAdwaitaDeco
 	url = https://github.com/FedoraQt/QAdwaitaDecorations.git
+[submodule "3rdParty/qthttpclient"]
+	path = 3rdParty/qthttpclient
+	url = https://github.com/abiiranathan/httpclient.git

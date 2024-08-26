@@ -12,6 +12,7 @@
 #include <utility>
 
 #include <QJsonDocument>
+#include <httpclient/httpclient.h>
 
 class DataCommand : public QObject, public AbstractCommand{
     Q_OBJECT
@@ -30,12 +31,13 @@ private:
     QString command_known_url;
     bool command_all_targets;
 
+
     void run_data_sync(WishLog& log);
+    void start_sync_process(WishLog& log, QByteArray result);
+    void run_sync_loop(WishLog& log, const QString& key, int page = 1);
     void check_initial_doc(QJsonDocument& doc);
 
-    void start_sync_process(WishLog& log, QNetworkReply* reply);
-    void run_sync_loop(WishLog& log, const QString& key, int page = 1);
-    void process_initial_data(WishLog& log, QNetworkReply* reply);
+    void process_initial_data(WishLog& log, QNetworkReply* reply = nullptr, const QString& reply_as_str = "");
     QDir data_dir;
 
     void decode_initial_url(WishLog& log);
@@ -45,4 +47,6 @@ private:
     std::shared_ptr<QNetworkAccessManager> qwishes_qnam;
     std::map<QString, std::shared_ptr<QNetworkAccessManager>> qwishes_network_requests;
     std::shared_ptr<std::list<std::shared_ptr<QFile>>> caches;
+
+    std::shared_ptr<HttpClient> mHttpClient;
 };

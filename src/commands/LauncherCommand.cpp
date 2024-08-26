@@ -7,14 +7,11 @@
 #include <QApplication>
 
 
-#include <QDialog>
 #include <QObject>
 
 #include <iostream>
 
-#include <QMessageBox>
 #include <QWindow>
-#include <commands/LauncherCommand.h>
 
 
 const QString LauncherCommand::CommandSpecifier = "launcher";

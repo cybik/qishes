@@ -37,6 +37,7 @@ set(PROJECT_3RDPARTY_DIR "${CMAKE_CURRENT_LIST_DIR}/3rdParty")
 add_subdirectory("${PROJECT_3RDPARTY_DIR}/yaml-cpp")
 add_subdirectory("${PROJECT_3RDPARTY_DIR}/termcolor")
 add_subdirectory("${PROJECT_3RDPARTY_DIR}/discord-game-sdk")
+add_subdirectory("${PROJECT_3RDPARTY_DIR}/qthttpclient")
 #add_subdirectory("${PROJECT_3RDPARTY_DIR}/spinnerspp")
 
 add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/components")
@@ -130,6 +131,7 @@ target_link_libraries(
         Qt6::WebEngineWidgets
         gachafs
         gachasteam
+        httpclient
         #Ribbon
         discord-game-sdk-interface
         #XdgUtils::BaseDir

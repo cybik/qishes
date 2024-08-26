@@ -19,6 +19,7 @@
 #include <QNetworkAccessManager>
 #include <unistd.h>
 
+
 const QString DataCommand::CommandSpecifier = "data";
 
 int DataCommand::cmd_main(int argc, char **argv) {
@@ -83,6 +84,8 @@ int DataCommand::cmd_main(int argc, char **argv) {
     if(caches->empty()) warnHelp(3, "No URL was found in the detected cache.");
     printSingleFilePath((*caches).begin()->get()->fileName());
 
+    mHttpClient = std::make_shared<HttpClient>();
+
     emit started();
     return qwishes_data->exec();
 }
@@ -93,19 +96,11 @@ void DataCommand::started() {
     run_data_sync(results->front());
 }
 
-
 void DataCommand::run_data_sync(WishLog& log) {
     decode_initial_url(log);
-    qwishes_qnam = std::make_shared<QNetworkAccessManager>(qwishes_data.get());
-    qwishes_qnam->setRedirectPolicy(QNetworkRequest::RedirectPolicy::ManualRedirectPolicy);
-    auto req = QNetworkRequest(log.getQuickInitUrl());
-    qwishes_qnam->get(req);
-    QObject::connect(
-        qwishes_qnam.get(), &QNetworkAccessManager::finished,
-        [&](QNetworkReply* reply) {
-            if(reply->error() == QNetworkReply::NoError) start_sync_process(log, reply);
-        }
-    );
+    auto ret = mHttpClient->get_sync(log.getQuickInitUrl().toString());
+    Log::get_logger()->critical(ret);
+    start_sync_process(log, ret);
 }
 
 void DataCommand::decode_initial_url(WishLog& log) {
@@ -125,8 +120,8 @@ void DataCommand::check_initial_doc(QJsonDocument& doc)
     if( doc["data"]["list"][0]["uid"].isUndefined() ) early_exit("data element unexpected", 13);
 }
 
-void DataCommand::start_sync_process(WishLog& log, QNetworkReply* reply) {
-    process_initial_data(log, reply);
+void DataCommand::start_sync_process(WishLog& log, QByteArray result) {
+    process_initial_data(log, nullptr, result);
     for(const auto& [key, value]: loaded_data) {
         qwishes_network_requests.emplace(
             key,
@@ -135,10 +130,9 @@ void DataCommand::start_sync_process(WishLog& log, QNetworkReply* reply) {
         qwishes_network_requests[key]->setRedirectPolicy(QNetworkRequest::RedirectPolicy::ManualRedirectPolicy);
         run_sync_loop(log, key);
     }
-    //qwishes_qnam.reset(); // clean out ay
-    //early_exit("Cleared out.", 131);
 }
 
+// todo: add delays because too many requests. DoS detect.
 void DataCommand::run_sync_loop(WishLog& log, const QString& key, int page) {
     Log::get_logger()->critical("Key: " + key);
     Log::get_logger()->warning("Value array count: " + QString::number(loaded_data[key].array().count()));
@@ -146,20 +140,12 @@ void DataCommand::run_sync_loop(WishLog& log, const QString& key, int page) {
     Log::get_logger()->warning(loaded_data[key].array()[0].toObject().value("id").toString());
 
     QString target_url = log.regenerate_data_url(key.toInt(), page).toString();
-    auto req = QNetworkRequest(target_url);
-    QObject::connect(
-        qwishes_network_requests[key].get(), &QNetworkAccessManager::finished,
-        [&](QNetworkReply* reply) {
-            if(reply->error() == QNetworkReply::NoError) {
-                Log::get_logger()->critical("First group clear! " + key);
-            }
-        }
-    );
-    qwishes_network_requests[key]->get(req);
+    auto ret = mHttpClient->get_sync(target_url);
+    Log::get_logger()->critical("First group clear! " + key + ": " + ret);
 }
 
-void DataCommand::process_initial_data(WishLog& log, QNetworkReply* reply) {
-    QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
+void DataCommand::process_initial_data(WishLog& log, QNetworkReply* reply, const QString& reply_as_str) {
+    QJsonDocument doc = QJsonDocument::fromJson(reply==nullptr?reply_as_str.toLocal8Bit():reply->readAll());
     check_initial_doc(doc);
 
     // Generate data using first page UID.
