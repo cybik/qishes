@@ -10,16 +10,28 @@ set(CMAKE_BUILD_TYPE Release)
 
 set(PROJECT_SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/src")
 
+set(
+    SOURCES_CPP
+        "${PROJECT_SOURCE_DIR}/gachasteam.cpp"
+)
+
+# For AutoMOC
+set(
+    SOURCES_H
+        "${PROJECT_SOURCE_DIR}/include/gachasteam.h"
+)
+
 add_library(
     gachasteam
     SHARED
-        "${CMAKE_CURRENT_LIST_DIR}/src/gachasteam.cpp"
+        ${SOURCES_CPP}
+        ${SOURCES_H}
 )
 
 target_include_directories(
     gachasteam
     PUBLIC
-        "${CMAKE_CURRENT_LIST_DIR}/src/include"
+        "${PROJECT_SOURCE_DIR}/include"
 )
 
 # shim

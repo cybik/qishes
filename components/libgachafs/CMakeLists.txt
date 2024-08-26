@@ -27,13 +27,24 @@ find_package(
 
 
 set(PROJECT_SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/src")
+set(
+    SOURCES_CPP
+        "${PROJECT_SOURCE_DIR}/gachafs.cpp"
+
+)
+
+# For AutoMOC
+set(
+    SOURCES_H
+        "${PROJECT_SOURCE_DIR}/include/gachafs.h"
+        "${PROJECT_SOURCE_DIR}/include/egachafs.h"
+)
 
 add_library(
     gachafs
     SHARED
-        "${PROJECT_SOURCE_DIR}/gachafs.cpp"
-        "${PROJECT_SOURCE_DIR}/include/gachafs.h"
-        "${PROJECT_SOURCE_DIR}/include/egachafs.h"
+        ${SOURCES_CPP}
+        ${SOURCES_H}
 )
 
 target_link_libraries(

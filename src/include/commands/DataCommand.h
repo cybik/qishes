@@ -43,7 +43,7 @@ private:
     void decode_initial_url(WishLog& log);
 
     std::map<QString, QJsonDocument> loaded_data;
-    std::shared_ptr<QApplication> qwishes_data;
+    std::shared_ptr<QCoreApplication> qwishes_data;
     std::shared_ptr<QNetworkAccessManager> qwishes_qnam;
     std::map<QString, std::shared_ptr<QNetworkAccessManager>> qwishes_network_requests;
     std::shared_ptr<std::list<std::shared_ptr<QFile>>> caches;

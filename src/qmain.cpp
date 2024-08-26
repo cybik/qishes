@@ -15,21 +15,24 @@
 #include <gachafs.h>
 #include <gachasteam.h>
 
+#include "commands/DaemonCommand.h"
+
 static const QStringList list_commands = {{
     "history",
     "data",
     "daemon"
 }};
 
-std::unique_ptr<AbstractCommand> process_command(QString command) {
-    if(command.compare(HistoryCommand::CommandSpecifier, Qt::CaseInsensitive) == 0) {
-        return std::make_unique<HistoryCommand>();
-    } else if(command.compare(LauncherCommand::CommandSpecifier, Qt::CaseInsensitive) == 0) {
-        return std::make_unique<LauncherCommand>();
-    } else if(command.compare(DataCommand::CommandSpecifier, Qt::CaseInsensitive) == 0) {
-        return std::make_unique<DataCommand>();
-    }
-    return nullptr;
+int process_command(QString command, int argc, char** argv) {
+    if(command.compare(HistoryCommand::CommandSpecifier, Qt::CaseInsensitive) == 0)
+        return HistoryCommand().cmd_main(argc, argv);
+    if(command.compare(LauncherCommand::CommandSpecifier, Qt::CaseInsensitive) == 0)
+        return LauncherCommand().cmd_main(argc, argv);
+    if(command.compare(DataCommand::CommandSpecifier, Qt::CaseInsensitive) == 0)
+        return DataCommand().cmd_main(argc, argv);
+    if(command.compare(DaemonCommand::CommandSpecifier, Qt::CaseInsensitive) == 0)
+        return DaemonCommand().cmd_main(argc, argv);
+    return -1;
 }
 
 int main(int argc, char *argv[]) {
@@ -58,13 +61,10 @@ int main(int argc, char *argv[]) {
         parser.showHelp(0);
     }
 
-    std::unique_ptr<AbstractCommand> command = process_command(
-        parser.positionalArguments().at(0)
-    );
-
-    if(command == nullptr) {
+    const int ret = process_command(parser.positionalArguments().at(0), argc, argv);
+    if(ret < 0) {
         parser.showHelp();
     }
 
-    return command->cmd_main(argc, argv);
+    return ret;
 }

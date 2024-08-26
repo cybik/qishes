@@ -86,8 +86,9 @@ int DataCommand::cmd_main(int argc, char **argv) {
 
     mHttpClient = std::make_shared<HttpClient>();
 
-    emit started();
-    return qwishes_data->exec();
+    //emit started();
+    started();
+    return 0;
 }
 
 void DataCommand::started() {
@@ -123,11 +124,7 @@ void DataCommand::check_initial_doc(QJsonDocument& doc)
 void DataCommand::start_sync_process(WishLog& log, QByteArray result) {
     process_initial_data(log, nullptr, result);
     for(const auto& [key, value]: loaded_data) {
-        qwishes_network_requests.emplace(
-            key,
-            std::make_shared<QNetworkAccessManager>(qwishes_data.get())
-        );
-        qwishes_network_requests[key]->setRedirectPolicy(QNetworkRequest::RedirectPolicy::ManualRedirectPolicy);
+        sleep(1);
         run_sync_loop(log, key);
     }
 }
@@ -136,7 +133,6 @@ void DataCommand::start_sync_process(WishLog& log, QByteArray result) {
 void DataCommand::run_sync_loop(WishLog& log, const QString& key, int page) {
     Log::get_logger()->critical("Key: " + key);
     Log::get_logger()->warning("Value array count: " + QString::number(loaded_data[key].array().count()));
-    Log::get_logger()->warning(loaded_data[key].array()[0].toObject().value("id").toString());
     Log::get_logger()->warning(loaded_data[key].array()[0].toObject().value("id").toString());
 
     QString target_url = log.regenerate_data_url(key.toInt(), page).toString();
