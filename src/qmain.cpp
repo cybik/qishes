@@ -9,30 +9,25 @@
 #include <commands/HistoryCommand.h>
 #include <commands/DataCommand.h>
 #include <commands/LauncherCommand.h>
+#include <commands/DaemonCommand.h>
 
 #include <common.h>
 
 #include <gachafs.h>
 #include <gachasteam.h>
 
-#include "commands/DaemonCommand.h"
+#define DEFINE_COMMAND(COMMNAME) \
+    if(command.compare(COMMNAME::CommandSpecifier, Qt::CaseInsensitive) == 0) \
+        return [](int argc, char** argv) { \
+            return COMMNAME().cmd_main(argc, argv); \
+        };
 
-static const QStringList list_commands = {{
-    "history",
-    "data",
-    "daemon"
-}};
-
-int process_command(QString command, int argc, char** argv) {
-    if(command.compare(HistoryCommand::CommandSpecifier, Qt::CaseInsensitive) == 0)
-        return HistoryCommand().cmd_main(argc, argv);
-    if(command.compare(LauncherCommand::CommandSpecifier, Qt::CaseInsensitive) == 0)
-        return LauncherCommand().cmd_main(argc, argv);
-    if(command.compare(DataCommand::CommandSpecifier, Qt::CaseInsensitive) == 0)
-        return DataCommand().cmd_main(argc, argv);
-    if(command.compare(DaemonCommand::CommandSpecifier, Qt::CaseInsensitive) == 0)
-        return DaemonCommand().cmd_main(argc, argv);
-    return -1;
+std::function<int(int, char**)> process_command_func(QString command) {
+    DEFINE_COMMAND(HistoryCommand);
+    DEFINE_COMMAND(LauncherCommand);
+    DEFINE_COMMAND(DataCommand);
+    DEFINE_COMMAND(DaemonCommand);
+    return nullptr;
 }
 
 int main(int argc, char *argv[]) {
@@ -61,8 +56,9 @@ int main(int argc, char *argv[]) {
         parser.showHelp(0);
     }
 
-    const int ret = process_command(parser.positionalArguments().at(0), argc, argv);
-    if(ret < 0) {
+    int ret = -1;
+    auto retf = process_command_func(parser.positionalArguments().at(0));
+    if((ret = retf(argc, argv)) < 0) {
         parser.showHelp();
     }
 
