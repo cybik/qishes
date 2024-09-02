@@ -19,8 +19,10 @@
 #include <QNetworkAccessManager>
 #include <unistd.h>
 
+#include <spinners.hpp>
 
 const QString DataCommand::CommandSpecifier = "data";
+std::shared_ptr<jms::Spinner> sSpinner;
 
 int DataCommand::cmd_main(int argc, char **argv) {
     qwishes_data = std::make_shared<QApplication>(argc, argv);
@@ -121,8 +123,14 @@ void DataCommand::check_initial_doc(QJsonDocument& doc)
 }
 
 void DataCommand::start_sync_process(WishLog& log, QByteArray result) {
+    sSpinner = std::make_shared<jms::Spinner>("Processing initial data", jms::dots);
+    sSpinner->start();
     process_initial_data(log, nullptr, result);
+    sSpinner->setText("Initial data done!");
+    sSpinner->finish(jms::FinishedState::SUCCESS);
     for(const auto& [key, value]: loaded_data) {
+        sSpinner->setText("Processing data for " + key.toStdString());
+        sSpinner->start();
         sleep(1);
         auto sync_result = run_sync_loop(log, key);
         int initial_count = loaded_data[key].array().count();
@@ -142,7 +150,12 @@ void DataCommand::start_sync_process(WishLog& log, QByteArray result) {
         if(initial_count < loaded_data[key].array().count()) {
             write_back(key);
         }
+        sSpinner->setText(key.toStdString() + " is done!");
+        sSpinner->finish(jms::FinishedState::SUCCESS);
     }
+    sSpinner->start();
+    sSpinner->setText("All done!");
+    sSpinner->finish(jms::FinishedState::SUCCESS);
 }
 
 void DataCommand::write_back(const QString& key) {

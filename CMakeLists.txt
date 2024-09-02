@@ -66,7 +66,8 @@ include_directories(
         #"${PROJECT_3RDPARTY_DIR}/xdg/include"
         "${PROJECT_3RDPARTY_DIR}/yaml-cpp/include"
         "${PROJECT_3RDPARTY_DIR}/termcolor/include"
-        "${PROJECT_3RDPARTY_DIR}/spinnerspp/include"
+        #"${PROJECT_3RDPARTY_DIR}/spinnerspp/include"
+        "${PROJECT_3RDPARTY_DIR}/spinnersplusplus"
         "${PROJECT_3RDPARTY_DIR}/discord-game-sdk/include"
 )
 

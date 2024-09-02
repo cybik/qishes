@@ -15,7 +15,8 @@
 #include <QJsonDocument>
 #include <httpclient/httpclient.h>
 
-class DataCommand : public QObject, public AbstractCommand{
+
+class DataCommand : public QObject, public AbstractCommand {
     Q_OBJECT
 public:
     static const QString CommandSpecifier;
@@ -59,4 +60,5 @@ private:
     void write_back(const QString& key);
 
     QString get_latest_id_from_key(const QString& key);
+
 };
