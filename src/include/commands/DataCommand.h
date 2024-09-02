@@ -10,6 +10,7 @@
 #include <qnetworkreply.h>
 #include <data/wishlog.h>
 #include <utility>
+#include <tuple>
 
 #include <QJsonDocument>
 #include <httpclient/httpclient.h>
@@ -34,7 +35,8 @@ private:
 
     void run_data_sync(WishLog& log);
     void start_sync_process(WishLog& log, QByteArray result);
-    void run_sync_loop(WishLog& log, const QString& key, int page = 1);
+    std::unique_ptr<QJsonArray>
+    run_sync_loop(WishLog& log, const QString& key, int page = 1, std::shared_ptr<QJsonValue> id_val = nullptr);
     void check_initial_doc(QJsonDocument& doc);
 
     void process_initial_data(WishLog& log, QNetworkReply* reply = nullptr, const QString& reply_as_str = "");
@@ -49,4 +51,12 @@ private:
     std::shared_ptr<std::list<std::shared_ptr<QFile>>> caches;
 
     std::shared_ptr<HttpClient> mHttpClient;
+    std::tuple<int, std::shared_ptr<QJsonDocument>>
+    get_sync_json(const QString& target_url);
+    std::tuple<bool, std::shared_ptr<QJsonValue>>
+    is_latest_id_in_incoming(const QString& latest, std::shared_ptr<QJsonDocument> doc);
+
+    void write_back(const QString& key);
+
+    QString get_latest_id_from_key(const QString& key);
 };

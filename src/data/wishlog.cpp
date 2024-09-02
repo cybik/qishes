@@ -105,7 +105,7 @@ QUrl WishLog::getQuickInitUrl() {
 QUrl WishLog::regenerate_data_url(
     int target_gacha_type,
     int target_gacha_page,
-    int target_end_id
+    const QString& target_end_id
 ) {
     // TODO: make this more nimble to be able to hit one method call with page, end_id
     // TODO: huge chain calls for init_type:*
@@ -141,13 +141,21 @@ QUrl WishLog::regenerate_data_url(
 
             if(missing_page)  reprocess_query.addQueryItem("page", QString::number(log_data_page));
             if(missing_size)  reprocess_query.addQueryItem("size", QString::number(log_data_page_size));
-            if(missing_end_id) reprocess_query.addQueryItem("end_id", end_id);
 
             // Regenerating a "fresh" url
             if(reset_init_type) {
                 reprocess_query.removeQueryItem("init_type");
                 reprocess_query.addQueryItem("init_type", QString::number(target_gacha_type));
             }
+
+            // specify end_id override. or reset
+            if(target_end_id != end_id) {
+                if(!missing_end_id) reprocess_query.removeQueryItem("end_id");
+                end_id = target_end_id;
+                missing_end_id = true;
+            }
+            if(missing_end_id) reprocess_query.addQueryItem("end_id", end_id);
+
             reprocess_query.addQueryItem("gacha_type", base_gacha_type);
             break;
         }
