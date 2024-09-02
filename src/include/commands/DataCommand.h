@@ -43,8 +43,6 @@ private:
     void process_initial_data(WishLog& log, QNetworkReply* reply = nullptr, const QString& reply_as_str = "");
     QDir data_dir;
 
-    void decode_initial_url(WishLog& log);
-
     std::map<QString, QJsonDocument> loaded_data;
     std::shared_ptr<QCoreApplication> qwishes_data;
     std::shared_ptr<QNetworkAccessManager> qwishes_qnam;
