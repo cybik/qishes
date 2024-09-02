@@ -42,7 +42,7 @@ add_subdirectory("${PROJECT_3RDPARTY_DIR}/qthttpclient")
 
 add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/components")
 
-#add_subdirectory("${PROJECT_3RDPARTY_DIR}/QAdwaitaDeco")
+add_subdirectory("${PROJECT_3RDPARTY_DIR}/QAdwaitaDeco")
 
 find_package(
     Qt6
@@ -70,18 +70,29 @@ include_directories(
         "${PROJECT_3RDPARTY_DIR}/discord-game-sdk/include"
 )
 
+# Bringing in past experience / knowledge
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
+set(OUTDIR_FINAL_ASSEMBLAGE_BASE "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
+set(OUTDIR_FINAL_ASSEMBLAGE "${OUTDIR_FINAL_ASSEMBLAGE_BASE}/lib/${CMAKE_LIBRARY_ARCHITECTURE}/")
+
 # hi https://dev.my-gate.net/2021/08/04/understanding-rpath-with-cmake/
 # use, i.e. don't skip the full RPATH for the build tree
 set(CMAKE_SKIP_BUILD_RPATH FALSE)
 
 # when building, don't use the install RPATH already
 # (but later on when installing)
-set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
-set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+set(CMAKE_INSTALL_RPATH "${OUTDIR_FINAL_ASSEMBLAGE_BASE}/lib")
 
 # add the automatically determined parts of the RPATH
 # which point to directories outside the build tree to the install RPATH
-set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+
+# Fun options
+#set(CMAKE_SKIP_BUILD_RPATH FALSE)
+#set(CMAKE_BUILD_WITH_INSTALL_RPATH ON)
+#set(CMAKE_INSTALL_RPATH_USE_LINK_PATH ON)
+#set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 
 if(ASAN)
     add_compile_options(-fsanitize=address)
@@ -119,31 +130,90 @@ add_executable(
         ${SOURCES_H}
 )
 
+set_target_properties(
+    ${MY_PROJECT_NAME}
+    PROPERTIES
+        INSTALL_RPATH "\$ORIGIN/lib/${CMAKE_LIBRARY_ARCHITECTURE}"
+)
+
 target_link_libraries(
     ${MY_PROJECT_NAME}
     PUBLIC
-        yaml-cpp
+        # Qt
         Qt6::Gui
         Qt6::Xml
         Qt6::Core
         Qt6::Widgets
         Qt6::WebEngineCore
         Qt6::WebEngineWidgets
+        # Not Qt
+        yaml-cpp
         gachafs
         gachasteam
         httpclient
-        #Ribbon
         discord-game-sdk-interface
+        #Ribbon
         #XdgUtils::BaseDir
         #QEasyDownloader
         #QArchive
-        #QAdwaitaDecorations::qadwaitadecorations
+        #qadwaitadecorations
 
         #"${PROJECT_SOURCE_DIR}/3rdParty/libsass/lib/libsass.a"
 )
 
-target_link_libraries(${MY_PROJECT_NAME} PRIVATE
-    "${PROJECT_3RDPARTY_DIR}/discord-game-sdk/lib/linux/x86_64/libdiscord_game_sdk.so"
+add_dependencies(
+    ${MY_PROJECT_NAME}
+        qadwaitadecorations
+)
+
+add_custom_command(
+    TARGET ${PROJECT_NAME}
+    POST_BUILD
+    COMMAND
+        mkdir -p "${OUTDIR_FINAL_ASSEMBLAGE_BASE}/lib/${CMAKE_LIBRARY_ARCHITECTURE}/"
+)
+
+foreach(PROJECT_TO_INSTALL IN ITEMS gachafs gachasteam discord-game-sdk-interface qadwaitadecorations)
+    add_custom_command(
+        TARGET ${PROJECT_NAME}
+        POST_BUILD
+        COMMAND
+            echo "- Subproject Lib :: Processing $<TARGET_FILE:${PROJECT_TO_INSTALL}>" &&
+            bash -c '[[ $<TARGET_FILE:${PROJECT_TO_INSTALL}> == *.a ]]'
+                && echo "Static lib, skipping"
+                || cp -Lf $<TARGET_FILE:${PROJECT_TO_INSTALL}> ${OUTDIR_FINAL_ASSEMBLAGE}
+    )
+endforeach()
+
+# Discord SDK library
+set(DISCORD_FORCED_LIB_FILE "${PROJECT_3RDPARTY_DIR}/discord-game-sdk/lib/linux/x86_64/libdiscord_game_sdk.so")
+target_link_libraries(
+    ${MY_PROJECT_NAME}
+    PRIVATE
+        "${DISCORD_FORCED_LIB_FILE}"
+)
+
+foreach(PROJECT_TO_INSTALL IN ITEMS ${DISCORD_FORCED_LIB_FILE})
+    add_custom_command(
+        TARGET
+            ${MY_PROJECT_NAME}
+        POST_BUILD
+        COMMAND
+            echo "- Forced Lib :: Processing ${PROJECT_TO_INSTALL}" &&
+            bash -c '[[ ${PROJECT_TO_INSTALL} == *.a ]]'
+                && echo "Static lib, skipping"
+                || cp -Lf ${PROJECT_TO_INSTALL} ${OUTDIR_FINAL_ASSEMBLAGE}
+    )
+endforeach()
+
+# From past life still
+add_custom_command(
+    TARGET
+        ${MY_PROJECT_NAME}
+    POST_BUILD
+    COMMAND
+        echo "- Restoring SOnames and autocreating symlinks where needed"
+            && bash ${CMAKE_CURRENT_SOURCE_DIR}/tools/restore_soname.sh ${OUTDIR_FINAL_ASSEMBLAGE}
 )
 
 install(

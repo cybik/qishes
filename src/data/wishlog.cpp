@@ -102,7 +102,11 @@ QUrl WishLog::getQuickInitUrl() {
     return interim;
 }
 
-QUrl WishLog::regenerate_data_url(int target_gacha_type, int target_gacha_page) {
+QUrl WishLog::regenerate_data_url(
+    int target_gacha_type,
+    int target_gacha_page,
+    int target_end_id
+) {
     // TODO: make this more nimble to be able to hit one method call with page, end_id
     // TODO: huge chain calls for init_type:*
 
