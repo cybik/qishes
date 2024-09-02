@@ -30,7 +30,14 @@ std::function<int(int, char**)> process_command_func(QString command) {
     return nullptr;
 }
 
+void enforce_qsg() {
+    // Set QSG_RENDER_LOOP to basic only if it doesn't exist.
+    setenv("QSG_RENDER_LOOP", "basic", 0);
+}
+
 int main(int argc, char *argv[]) {
+    // QT6 Linux workaround - somehow QSG Render Loop must be set for CLI apps that don't do windowing bollocks
+    enforce_qsg();
     // for now, blast
     Log::get_logger()->log_level(Log::LogLevel::Debug);
 
