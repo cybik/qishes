@@ -40,7 +40,7 @@ private:
     void run_data_sync(WishLog& log);
     void start_sync_process(WishLog& log, QByteArray result);
     std::unique_ptr<QJsonArray>
-    run_sync_loop(WishLog& log, const QString& key, int page = 1, std::shared_ptr<QJsonValue> id_val = nullptr);
+    sync_loop(WishLog& log, const QString& key, int page = 1, std::shared_ptr<QJsonValue> id_val = nullptr);
     void check_initial_doc(QJsonDocument& doc);
 
     void process_initial_data(WishLog& log, QNetworkReply* reply = nullptr, const QString& reply_as_str = "");

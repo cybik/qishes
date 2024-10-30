@@ -22,11 +22,10 @@ void HistoryCommand::command_create_application(int& argc, char **argv) {
     QApplication::setApplicationVersion(APP_VERSION);
 }
 void HistoryCommand::command_setup_parser() {
-    parser = std::make_shared<QCommandLineParser>();
-    parser->addHelpOption();
-    parser->addVersionOption();
-
-    parser->addPositionalArgument( "command", L18N_M("Command to run. MUST be history.") );
+    parser->addPositionalArgument(
+        "command",
+        L18N_M("Command to run. MUST be history.")
+    );
 
     parser->addOption(
         *(game_path = std::make_shared<QCommandLineOption>(

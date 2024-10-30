@@ -28,6 +28,11 @@ std::shared_ptr<std::list<std::shared_ptr<QFile>>> AbstractCommand::getGameWishe
 
 int AbstractCommand::cmd_main(int argc, char **argv) {
     this->command_create_application(argc, argv);
+    // Unified parser create.
+    parser = std::make_shared<QCommandLineParser>();
+    parser->addHelpOption();
+    parser->addVersionOption();
+    // specific options
     this->command_setup_parser();
     this->command_process_parser();
     return this->command_run();

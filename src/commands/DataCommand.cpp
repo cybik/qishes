@@ -31,11 +31,10 @@ void DataCommand::command_create_application(int& argc, char **argv) {
 }
 
 void DataCommand::command_setup_parser() {
-    parser = std::make_shared<QCommandLineParser>();
-    parser->addHelpOption();
-    parser->addVersionOption();
-
-    parser->addPositionalArgument( "command", L18N_M("Command to run. MUST be data.") );
+    parser->addPositionalArgument(
+        "command",
+        L18N_M("Command to run. MUST be data.")
+    );
 
     parser->addOption(
         *(verbose = std::make_shared<QCommandLineOption>(
@@ -94,8 +93,9 @@ int DataCommand::command_run() {
         (*caches).emplace_front(std::make_shared<QFile>(QFileInfo(command_file_path).absoluteFilePath()));
     } else if(!this->command_game_path.isEmpty()) {
         caches = this->getGameWishesCache();
-    } else
+    } else {
         warnHelp(5, "No good source of information was provided to extract a history URL from.");
+    }
 
     if(caches->empty()) warnHelp(3, "No URL was found in the detected cache.");
     printSingleFilePath((*caches).begin()->get()->fileName());
@@ -142,7 +142,7 @@ void DataCommand::start_sync_process(WishLog& log, QByteArray result) {
         lSpinner.start();
         sleep(1);
 
-        auto sync_result = run_sync_loop(log, key);
+        auto sync_result = sync_loop(log, key);
         auto initial_count = loaded_data[key].array().count();
 
         // we know the last one has matched. This is the cleanest data unification we can possibly have.
@@ -220,7 +220,7 @@ QString DataCommand::get_latest_id_from_key(const QString& key) {
 
 // todo: add delays because too many requests. DoS detect.
 std::unique_ptr<QJsonArray>
-DataCommand::run_sync_loop(WishLog& log, const QString& key, int page, std::shared_ptr<QJsonValue> id_val) {
+DataCommand::sync_loop(WishLog& log, const QString& key, int page, std::shared_ptr<QJsonValue> id_val) {
     if(page > 1) sleep(2); // anti-ddos
 
     QString target_url = log.regenerate_data_url(
@@ -228,14 +228,13 @@ DataCommand::run_sync_loop(WishLog& log, const QString& key, int page, std::shar
         page,
         (id_val == nullptr ? "" : id_val->toObject().value("id").toString())
     ).toString();
-    const auto [tuple_l, tuple_r] = get_sync_json(target_url);
-    const auto [tuple_l_2, tuple_r_2] = is_latest_id_in_incoming(get_latest_id_from_key(key), tuple_r);
-    auto ret_arr = QJsonArray(tuple_r->object().value("list").toArray());
-    if(!tuple_l_2) {
-        auto sync_loop = run_sync_loop(log, key, page + 1, tuple_r_2);
-        for(auto arr_el: *sync_loop ) {
-            ret_arr.append(QJsonObject(arr_el.toObject()));
-            if(arr_el.toObject().value("id").toString().compare(get_latest_id_from_key(key)) == 0) break;
+    const auto [retcode, data] = get_sync_json(target_url);
+    const auto [is_latest, id_list] = is_latest_id_in_incoming(get_latest_id_from_key(key), data);
+    auto ret_arr = QJsonArray(data->object().value("list").toArray());
+    if(!is_latest) {
+        for(auto loop = sync_loop(log, key, page + 1, id_list); auto el: *loop) {
+            ret_arr.append(QJsonObject(el.toObject()));
+            if(el.toObject().value("id").toString().compare(get_latest_id_from_key(key)) == 0) break;
         }
         return std::move(std::make_unique<QJsonArray>(ret_arr));
     }
