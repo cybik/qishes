@@ -12,11 +12,9 @@
 #include <iostream>
 #include <qjsondocument.h>
 
-//#include <XdgUtils/BaseDir/BaseDir.h>
 #include <QStandardPaths>
 
 #include <QNetworkReply>
-#include <QNetworkAccessManager>
 #include <unistd.h>
 
 #include <spinners.hpp>
@@ -126,10 +124,14 @@ void DataCommand::early_exit(const QString& message, int exit_code) {
 
 void DataCommand::check_initial_doc(QJsonDocument& doc)
 {
-    if( doc["data"].isUndefined() )                       early_exit("data absent", 10);
-    if( doc["data"]["list"].isUndefined() )             early_exit("datalist absent", 11);
-    if( doc["data"]["list"][0].isUndefined() )          early_exit("datalist element absent", 12);
-    if( doc["data"]["list"][0]["uid"].isUndefined() ) early_exit("data element unexpected", 13);
+    if( doc["data"].isUndefined() )
+        early_exit("data absent", 10);
+    if( doc["data"]["list"].isUndefined() )
+        early_exit("datalist absent", 11);
+    if( doc["data"]["list"][0].isUndefined() )
+        early_exit("datalist element absent", 12);
+    if( doc["data"]["list"][0]["uid"].isUndefined() )
+        early_exit("data element unexpected", 13);
 }
 
 void DataCommand::start_sync_process(WishLog& log, QByteArray result) {
@@ -146,8 +148,8 @@ void DataCommand::start_sync_process(WishLog& log, QByteArray result) {
         auto initial_count = loaded_data[key].array().count();
 
         // we know the last one has matched. This is the cleanest data unification we can possibly have.
-        if(loaded_data[key].array().first().toObject().value("id").toString()
-            == sync_result->last().toObject().value("id").toString()
+        if(loaded_data[key].array().first().toObject()["id"].toString()
+            == sync_result->last().toObject()["id"].toString()
         ) sync_result->removeLast();
 
         // Only do the switcheroo if there's anything to add.
@@ -187,15 +189,14 @@ void DataCommand::write_back(const QString& key) {
 
 std::tuple<int, std::shared_ptr<QJsonDocument>>
 DataCommand::get_sync_json(const QString& target_url) {
-    auto incoming = mHttpClient->get_sync(target_url);
-    QJsonDocument ret = QJsonDocument::fromJson(incoming);
-    if(!ret.isEmpty()) {
-        if( !( ret["retcode"].isUndefined() || ret["data"].isUndefined() ) ) {
-            return {
-                ret["retcode"].toInt(-1),
-                std::make_shared<QJsonDocument>(ret["data"].toObject())
-            };
-        }
+    //auto incoming = mHttpClient->get_sync(target_url);
+    if(QJsonDocument ret = QJsonDocument::fromJson(mHttpClient->get_sync(target_url));
+        !ret.isEmpty() && ( !( ret["retcode"].isUndefined() || ret["data"].isUndefined() ) )
+    ) {
+        return {
+            ret["retcode"].toInt(-1),
+            std::make_shared<QJsonDocument>(ret["data"].toObject())
+        };
     }
     return { -1, nullptr };
 }
@@ -203,18 +204,18 @@ DataCommand::get_sync_json(const QString& target_url) {
 std::tuple<bool, std::shared_ptr<QJsonValue>>
 DataCommand::is_latest_id_in_incoming(const QString& latest, std::shared_ptr<QJsonDocument> doc) {
     // doc is the whole doc.
-    for(auto array_element: doc->object().value("list").toArray()) {
-        if(array_element.toObject().contains("id")) {
-            if (array_element.toObject().value("id").toString().compare(latest) == 0) {
-                return { true, nullptr };
-            }
+    for(auto array_element: (*doc)["list"].toArray()) {
+        if( array_element.toObject().contains("id")
+            && array_element.toObject()["id"].toString().compare(latest) == 0
+        ) {
+            return { true, nullptr };
         }
     }
     return { false, std::make_shared<QJsonValue>(doc->object().value("list").toArray().last()) };
 }
 
 QString DataCommand::get_latest_id_from_key(const QString& key) {
-    //    if( doc["data"]["list"][0]["uid"].isUndefined() ) early_exit("data element unexpected", 13);
+    // if( doc["data"]["list"][0]["uid"].isUndefined() ) early_exit("data element unexpected", 13);
     return loaded_data[key][0]["id"].toString();
 }
 
@@ -226,15 +227,15 @@ DataCommand::sync_loop(WishLog& log, const QString& key, int page, std::shared_p
     QString target_url = log.regenerate_data_url(
         key.toInt(),
         page,
-        (id_val == nullptr ? "" : id_val->toObject().value("id").toString())
+        (id_val == nullptr ? "" : id_val->toObject()["id"].toString())
     ).toString();
     const auto [retcode, data] = get_sync_json(target_url);
     const auto [is_latest, id_list] = is_latest_id_in_incoming(get_latest_id_from_key(key), data);
-    auto ret_arr = QJsonArray(data->object().value("list").toArray());
+    auto ret_arr = QJsonArray((*data)["list"].toArray());
     if(!is_latest) {
         for(auto loop = sync_loop(log, key, page + 1, id_list); auto el: *loop) {
             ret_arr.append(QJsonObject(el.toObject()));
-            if(el.toObject().value("id").toString().compare(get_latest_id_from_key(key)) == 0) break;
+            if(el.toObject()["id"].toString().compare(get_latest_id_from_key(key)) == 0) break;
         }
         return std::move(std::make_unique<QJsonArray>(ret_arr));
     }
@@ -257,7 +258,8 @@ void DataCommand::process_initial_data(WishLog& log, QNetworkReply* reply, const
         std::filesystem::path(
             QStandardPaths::standardLocations(QStandardPaths::GenericDataLocation)[0]
                 .toStdString()
-            ).append(APPNAME_BASE)
+            )
+            .append(APPNAME_BASE)
             .append(get_local_storage_folder(log.game()))
             .append(doc["data"]["list"][0]["uid"].toString().toStdString()),
         "*.cache",
