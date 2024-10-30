@@ -16,18 +16,18 @@
 
 const QString HistoryCommand::CommandSpecifier = "history";
 
-int HistoryCommand::cmd_main(int argc, char **argv) {
-    qwishes_history = std::make_shared<QApplication>(argc, argv);
+void HistoryCommand::command_create_application(int& argc, char **argv) {
+    qwishes_history = std::make_shared<QCoreApplication>(argc, argv);
     QApplication::setApplicationName(APPNAME_GEN(.history));
     QApplication::setApplicationVersion(APP_VERSION);
-
+}
+void HistoryCommand::command_setup_parser() {
     parser = std::make_shared<QCommandLineParser>();
     parser->addHelpOption();
     parser->addVersionOption();
 
     parser->addPositionalArgument( "command", L18N_M("Command to run. MUST be history.") );
 
-    std::shared_ptr<QCommandLineOption> game_path, file_path, reverse_order, open_url, max_return_num;
     parser->addOption(
         *(game_path = std::make_shared<QCommandLineOption>(
             QStringList() << "g" << "game_path",
@@ -61,9 +61,10 @@ int HistoryCommand::cmd_main(int argc, char **argv) {
             "max_return_num", "1"
         ))
     );
+}
 
+void HistoryCommand::command_process_parser() {
     parser->process(*qwishes_history);
-
     if( parser->positionalArguments().empty() ||
         parser->positionalArguments()[0].compare(CommandSpecifier, Qt::CaseInsensitive) != 0
     ) {
@@ -77,7 +78,9 @@ int HistoryCommand::cmd_main(int argc, char **argv) {
 
     // Obsessed with oneliners, shut up.
     this->command_max_return_num = (parser->isSet(*max_return_num)?parser->value(*max_return_num).toInt():1);
+}
 
+int HistoryCommand::command_run() {
     //std::cout << "ayyyyyyyyyyy :: " << this->command_game_path.toStdString() << std::endl;
     std::shared_ptr<std::list<std::shared_ptr<QFile>>> caches;
     if(!this->command_file_path.isEmpty() && QFileInfo::exists(command_file_path)) {

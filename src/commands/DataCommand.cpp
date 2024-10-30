@@ -23,18 +23,27 @@
 
 const QString DataCommand::CommandSpecifier = "data";
 
-int DataCommand::cmd_main(int argc, char **argv) {
-    qwishes_data = std::make_shared<QApplication>(argc, argv);
+
+void DataCommand::command_create_application(int& argc, char **argv) {
+    qwishes_data = std::make_shared<QCoreApplication>(argc, argv);
     QApplication::setApplicationName(APPNAME_GEN(.data));
     QApplication::setApplicationVersion(APP_VERSION);
+}
 
+void DataCommand::command_setup_parser() {
     parser = std::make_shared<QCommandLineParser>();
     parser->addHelpOption();
     parser->addVersionOption();
 
     parser->addPositionalArgument( "command", L18N_M("Command to run. MUST be data.") );
 
-    std::shared_ptr<QCommandLineOption> game_path, file_path, known_url, all_targets;
+    parser->addOption(
+        *(verbose = std::make_shared<QCommandLineOption>(
+            QStringList() << "verbose",
+            L18N("Be verbose about operations."),
+            "verbose", nullptr
+        ))
+    );
     parser->addOption(
         *(game_path = std::make_shared<QCommandLineOption>(
             QStringList() << "g" << "game-path",
@@ -63,16 +72,22 @@ int DataCommand::cmd_main(int argc, char **argv) {
             "all_Targets", nullptr
         ))
     );
+}
+
+void DataCommand::command_process_parser() {
     parser->process(*qwishes_data);
 
     this->command_game_path   =   parser->value(*game_path);
     this->command_file_path   =   parser->value(*file_path);
     this->command_known_url   =   parser->value(*known_url);
     this->command_all_targets =   parser->isSet(*all_targets);   // if set, always true
+    this->command_verbose     =   parser->isSet(*all_targets);   // if set, always true
 
     if(command_known_url.isEmpty() && command_game_path.isEmpty() && command_file_path.isEmpty())
         warnHelp(2, "No game path nor known URL was provided.\nOne of the two must be provided.");
+}
 
+int DataCommand::command_run() {
     //std::shared_ptr<std::list<std::shared_ptr<QFile>>> caches;
     if(!this->command_file_path.isEmpty() && QFileInfo::exists(command_file_path)) {
         caches = std::make_shared<std::list<std::shared_ptr<QFile>>>();
@@ -98,7 +113,9 @@ void DataCommand::started() {
 }
 
 void DataCommand::run_data_sync(WishLog& log) {
-    auto ret = mHttpClient->get_sync(log.getQuickInitUrl().toString());
+    if(command_verbose)
+        Log::get_logger()->warning(log.getQuickInitUrl().toString(QUrl::EncodeSpaces));
+    auto ret = mHttpClient->get_sync(log.getQuickInitUrl().toDisplayString());
     start_sync_process(log, ret);
 }
 
@@ -109,9 +126,9 @@ void DataCommand::early_exit(const QString& message, int exit_code) {
 
 void DataCommand::check_initial_doc(QJsonDocument& doc)
 {
-    if( doc["data"].isUndefined() )                   early_exit("data absent", 10);
-    if( doc["data"]["list"].isUndefined() )           early_exit("datalist absent", 11);
-    if( doc["data"]["list"][0].isUndefined() )        early_exit("datalist element absent", 12);
+    if( doc["data"].isUndefined() )                       early_exit("data absent", 10);
+    if( doc["data"]["list"].isUndefined() )             early_exit("datalist absent", 11);
+    if( doc["data"]["list"][0].isUndefined() )          early_exit("datalist element absent", 12);
     if( doc["data"]["list"][0]["uid"].isUndefined() ) early_exit("data element unexpected", 13);
 }
 
@@ -130,7 +147,7 @@ void DataCommand::start_sync_process(WishLog& log, QByteArray result) {
 
         // we know the last one has matched. This is the cleanest data unification we can possibly have.
         if(loaded_data[key].array().first().toObject().value("id").toString()
-           == sync_result->last().toObject().value("id").toString()
+            == sync_result->last().toObject().value("id").toString()
         ) sync_result->removeLast();
 
         // Only do the switcheroo if there's anything to add.
@@ -176,11 +193,11 @@ DataCommand::get_sync_json(const QString& target_url) {
         if( !( ret["retcode"].isUndefined() || ret["data"].isUndefined() ) ) {
             return {
                 ret["retcode"].toInt(-1),
-                std::make_shared<QJsonDocument>(ret.object().value("data").toObject())
+                std::make_shared<QJsonDocument>(ret["data"].toObject())
             };
         }
     }
-    return {-1, nullptr};
+    return { -1, nullptr };
 }
 
 std::tuple<bool, std::shared_ptr<QJsonValue>>
@@ -197,15 +214,14 @@ DataCommand::is_latest_id_in_incoming(const QString& latest, std::shared_ptr<QJs
 }
 
 QString DataCommand::get_latest_id_from_key(const QString& key) {
-    return (loaded_data[key].array().first().toObject().value("id").toString());
+    //    if( doc["data"]["list"][0]["uid"].isUndefined() ) early_exit("data element unexpected", 13);
+    return loaded_data[key][0]["id"].toString();
 }
 
 // todo: add delays because too many requests. DoS detect.
 std::unique_ptr<QJsonArray>
 DataCommand::run_sync_loop(WishLog& log, const QString& key, int page, std::shared_ptr<QJsonValue> id_val) {
-    if(page > 1) {
-        sleep(2); // anti-ddos
-    }
+    if(page > 1) sleep(2); // anti-ddos
 
     QString target_url = log.regenerate_data_url(
         key.toInt(),
@@ -240,8 +256,8 @@ void DataCommand::process_initial_data(WishLog& log, QNetworkReply* reply, const
     // Generate data using first page UID.
     data_dir = QDir(
         std::filesystem::path(
-                QStandardPaths::standardLocations(QStandardPaths::GenericDataLocation)[0]
-                    .toStdString()
+            QStandardPaths::standardLocations(QStandardPaths::GenericDataLocation)[0]
+                .toStdString()
             ).append(APPNAME_BASE)
             .append(get_local_storage_folder(log.game()))
             .append(doc["data"]["list"][0]["uid"].toString().toStdString()),

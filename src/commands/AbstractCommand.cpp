@@ -26,6 +26,13 @@ std::shared_ptr<std::list<std::shared_ptr<QFile>>> AbstractCommand::getGameWishe
     return nullptr;
 }
 
+int AbstractCommand::cmd_main(int argc, char **argv) {
+    this->command_create_application(argc, argv);
+    this->command_setup_parser();
+    this->command_process_parser();
+    return this->command_run();
+}
+
 void AbstractCommand::printSingleFilePath(const QString &filename) {
     std::cout
         << termcolor::bold << termcolor::cyan  << "[#] "        << termcolor::reset

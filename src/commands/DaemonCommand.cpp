@@ -5,6 +5,16 @@
 #include <commands/DaemonCommand.h>
 const QString DaemonCommand::CommandSpecifier = "daemon";
 
-int DaemonCommand::cmd_main(int, char **) {
+
+void DaemonCommand::command_create_application(int& argc, char **argv) {
+    abort();
+}
+void DaemonCommand::command_setup_parser() {
+    abort();
+}
+void DaemonCommand::command_process_parser() {
+    abort();
+}
+int DaemonCommand::command_run() {
     abort();
 }

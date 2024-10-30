@@ -49,6 +49,7 @@ private:
     QUrl log_data_url;
     int  log_data_page          = -1;
     int  log_data_page_size     = 10;
+    QString default_gacha_type  = ""; // This is unique? to HSR
     QString  real_gacha_type    = ""; // TODO: This is unique to ZZZ
     QString  base_gacha_type    = ""; // TODO: This is unique to ZZZ
     QString  end_id             = ""; // will be used

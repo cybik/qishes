@@ -21,18 +21,21 @@ class DataCommand : public QObject, public AbstractCommand {
 public:
     static const QString CommandSpecifier;
     DataCommand() = default;
-    int cmd_main(int, char **) override;
 
 public slots:
     void started();
 
 protected:
+    void command_create_application(int& argc, char **argv) override;
+    void command_setup_parser() override;
+    void command_process_parser() override;
+    int  command_run() override;
 private:
     std::string get_local_storage_folder(WishLog::WishLogGame game);
     void early_exit(const QString& message, int exit_code);
     QString command_known_url;
     bool command_all_targets;
-
+    bool command_verbose;
 
     void run_data_sync(WishLog& log);
     void start_sync_process(WishLog& log, QByteArray result);
@@ -58,5 +61,6 @@ private:
     void write_back(const QString& key);
 
     QString get_latest_id_from_key(const QString& key);
+    std::shared_ptr<QCommandLineOption> game_path, file_path, known_url, all_targets, verbose;
 
 };

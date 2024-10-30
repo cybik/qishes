@@ -14,10 +14,13 @@ class LauncherCommand : public AbstractCommand {
 public:
     static const QString CommandSpecifier;
     LauncherCommand() = default;
-    int cmd_main(int, char **) override;
 
 protected:
     void mbox();
+    void command_create_application(int& argc, char **argv) override;
+    void command_setup_parser() override;
+    void command_process_parser() override;
+    int  command_run() override;
 private:
     std::shared_ptr<QApplication> this_app;
     std::shared_ptr<QMenu> generate_menu();

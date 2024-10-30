@@ -10,9 +10,12 @@ class DaemonCommand : public AbstractCommand {
 public:
     static const QString CommandSpecifier;
     DaemonCommand() = default;
-    int cmd_main(int, char **) override;
 
 protected:
+    void command_create_application(int& argc, char **argv) override;
+    void command_setup_parser() override;
+    void command_process_parser() override;
+    int  command_run() override;
 private:
 
 };

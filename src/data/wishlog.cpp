@@ -160,9 +160,20 @@ QUrl WishLog::regenerate_data_url(
             break;
         }
         case(WishLog::HSR): {
-            data_url.setHost("api-os-takumi.mihoyo.com");
+            //data_url.setHost("api-os-takumi.mihoyo.com");
+            data_url.setHost("public-operation-hkrpg-sg.hoyoverse.com");
             data_url.setPath("/common/gacha_record/api/getGachaLog");
             /* TODO: fill in missing query bits */
+            // TODO: missing gacha_type matching upstream default_gacha_type
+            log_data_page = 1;
+            // identify missing;
+            bool    missing_gacha_type      = true;
+            for(const auto& item: reprocess_query.queryItems()) {
+                if(item.first == "default_gacha_type")      default_gacha_type    = item.second;
+                if(item.first == "gacha_type")              missing_gacha_type    = false;
+            }
+            if(missing_gacha_type) reprocess_query.addQueryItem("gacha_type", default_gacha_type);
+
             break;
         }
         case(WishLog::ZZZ): {

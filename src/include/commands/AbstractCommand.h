@@ -11,14 +11,21 @@
 #include <QFileSystemModel>
 #include <QCommandLineParser>
 #include <data/wishlog.h>
+#include <QApplication>
 
 #include <discord.h>
 
 class AbstractCommand {
 
 public:
-    virtual int cmd_main(int, char **) = 0;
+    int cmd_main(int, char **);
 protected:
+
+    virtual void command_create_application(int& argc, char **argv) = 0;
+    virtual void command_setup_parser() = 0;
+    virtual void command_process_parser() = 0;
+    virtual int  command_run() = 0;
+
     QString command_game_path;
     QString command_file_path;
 

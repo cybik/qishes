@@ -118,6 +118,12 @@ set(
 # For AutoMOC
 set(
     SOURCES_H
+        "${PROJECT_SOURCE_DIR}/include/common.h"
+
+        "${PROJECT_SOURCE_DIR}/include/data/wishlog.h"
+
+        "${PROJECT_SOURCE_DIR}/include/util/log.h"
+
         "${PROJECT_SOURCE_DIR}/include/commands/DataCommand.h"
         "${PROJECT_SOURCE_DIR}/include/commands/AbstractCommand.h"
         "${PROJECT_SOURCE_DIR}/include/commands/HistoryCommand.h"

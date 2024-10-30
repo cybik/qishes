@@ -74,6 +74,29 @@ void LauncherCommand::mbox() {
 }
 
 
+void LauncherCommand::command_create_application(int& argc, char **argv) {
+    this_app = std::make_shared<QApplication>(argc, argv);
+    QApplication::setApplicationName(APPNAME_GEN(.launcher));
+    QApplication::setApplicationVersion(APP_VERSION);
+}
+
+void LauncherCommand::command_setup_parser() {
+
+}
+
+void LauncherCommand::command_process_parser() {
+
+}
+
+int LauncherCommand::command_run() {
+
+    generate_tray_icon()->show();
+
+    this_app->exec();
+    abort();
+    return 0;
+}
+
 std::shared_ptr<QAction> LauncherCommand::get_action_dialog_test() {
     action_dial = std::make_shared<QAction>();
 
@@ -113,17 +136,4 @@ std::shared_ptr<QSystemTrayIcon> LauncherCommand::generate_tray_icon() {
     );
 
     return tray;
-}
-
-int LauncherCommand::cmd_main(int argc, char **argv) {
-    this_app = std::make_shared<QApplication>(argc, argv);
-    QApplication::setApplicationName(APPNAME_GEN(.launcher));
-    QApplication::setApplicationVersion(APP_VERSION);
-
-    generate_tray_icon()->show();
-
-    this_app->exec();
-
-    abort();
-    return 0;
 }
