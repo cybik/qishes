@@ -17,7 +17,7 @@
 const QString HistoryCommand::CommandSpecifier = "history";
 
 void HistoryCommand::command_create_application(int& argc, char **argv) {
-    qwishes_history = std::make_shared<QCoreApplication>(argc, argv);
+    qwishes_history = std::make_shared<QApplication>(argc, argv);
     QApplication::setApplicationName(APPNAME_GEN(.history));
     QApplication::setApplicationVersion(APP_VERSION);
 }

@@ -22,7 +22,7 @@ private:
     bool command_reverse_order;
     bool command_open_url;
     int command_max_return_num;
-    std::shared_ptr<QCoreApplication> qwishes_history;
+    std::shared_ptr<QCoreApplication> qwishes_history = nullptr;
 
     // arguments
     std::shared_ptr<QCommandLineOption> game_path, file_path, reverse_order, open_url, max_return_num;

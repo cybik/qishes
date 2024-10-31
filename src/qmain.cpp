@@ -33,6 +33,8 @@ std::function<int(int, char**)> process_command_func(QString command) {
 void enforce_qsg() {
     // Set QSG_RENDER_LOOP to basic only if it doesn't exist.
     setenv("QSG_RENDER_LOOP", "basic", 0);
+    // Re-setup
+    QApplication::setAttribute(Qt::AA_ShareOpenGLContexts, true);
 }
 
 int main(int argc, char *argv[]) {
@@ -40,8 +42,7 @@ int main(int argc, char *argv[]) {
     enforce_qsg();
     // for now, blast
     Log::get_logger()->log_level(Log::LogLevel::Debug);
-
-    QCoreApplication qwishes(argc, argv);
+    std::shared_ptr<QCoreApplication> qwishes = std::make_shared<QCoreApplication>(argc, argv);
     QCoreApplication::setApplicationName(APPNAME_GEN());
     QCoreApplication::setApplicationVersion(APP_VERSION);
     QCoreApplication::setOrganizationDomain("cybik.moe");
@@ -57,11 +58,13 @@ int main(int argc, char *argv[]) {
 
     parser.setOptionsAfterPositionalArgumentsMode(QCommandLineParser::ParseAsPositionalArguments);
 
-    parser.process(qwishes);
+    parser.process(*qwishes);
 
     if(parser.positionalArguments().empty()) {
         parser.showHelp(0);
     }
+    qwishes->exit(0);
+    qwishes.reset();
 
     int ret = -1;
     auto retf = process_command_func(parser.positionalArguments().at(0));

@@ -13,6 +13,12 @@
 
 #include <QWindow>
 
+#include <QGuiApplication>
+#include <QScreen>
+
+#include <QWebEngineView>
+#include <QWebEngineProfile>
+#include <QWebEnginePage>
 
 const QString LauncherCommand::CommandSpecifier = "launcher";
 
@@ -64,17 +70,24 @@ std::shared_ptr<QAction> LauncherCommand::get_action_rpc_ping() {
 }
 
 void LauncherCommand::mbox() {
-
-    qmw = std::make_shared<QMainWindow>(nullptr, Qt::Window);
+    qmw = std::make_shared<QMainWindow>();
     qmw->setFixedSize(800, 600);
     qmw->setWindowTitle("Test Dialog");
     qmw->setWindowState(Qt::WindowActive);
+    qmw->setMinimumSize(800, 600);
     qmw->setBaseSize(800, 600);
+    qmw->move(
+        QGuiApplication::primaryScreen()->geometry().center() - qmw->rect().center()
+    );
+    qmw->setVisible(true);
     qmw->show();
+    qmw->raise();
+    qmw->activateWindow();
 }
 
 
 void LauncherCommand::command_create_application(int& argc, char **argv) {
+    QApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
     this_app = std::make_shared<QApplication>(argc, argv);
     QApplication::setApplicationName(APPNAME_GEN(.launcher));
     QApplication::setApplicationVersion(APP_VERSION);
@@ -92,9 +105,7 @@ int LauncherCommand::command_run() {
 
     generate_tray_icon()->show();
 
-    this_app->exec();
-    abort();
-    return 0;
+    return this_app->exec();
 }
 
 std::shared_ptr<QAction> LauncherCommand::get_action_dialog_test() {

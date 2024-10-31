@@ -47,7 +47,7 @@ private:
     QDir data_dir;
 
     std::map<QString, QJsonDocument> loaded_data;
-    std::shared_ptr<QCoreApplication> qwishes_data;
+    std::shared_ptr<QCoreApplication> qwishes_data = nullptr;
     std::shared_ptr<QNetworkAccessManager> qwishes_qnam;
     std::map<QString, std::shared_ptr<QNetworkAccessManager>> qwishes_network_requests;
     std::shared_ptr<std::list<std::shared_ptr<QFile>>> caches;

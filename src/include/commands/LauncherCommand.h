@@ -22,7 +22,7 @@ protected:
     void command_process_parser() override;
     int  command_run() override;
 private:
-    std::shared_ptr<QApplication> this_app;
+    std::shared_ptr<QApplication> this_app = nullptr;
     std::shared_ptr<QMenu> generate_menu();
     std::shared_ptr<QSystemTrayIcon> generate_tray_icon();
 
