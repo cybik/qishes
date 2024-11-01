@@ -38,6 +38,7 @@ public:
     QUrl regenerate_data_url(int target_gacha_type = -1, int target_gacha_page = 1, const QString& target_end_id = "");
     QUrl regenerate_preview_url();
     static bool is_accepted_url(const QString& url);
+    QString get_identified_game_name();
 protected:
     WishLogGame guess_game(const QString& url);
 private:

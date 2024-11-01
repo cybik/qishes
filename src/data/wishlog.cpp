@@ -30,11 +30,14 @@ void WishLog::decode() {
     switch(log_game) {
         case(WishLog::Genshin): {
             for(const auto& item: que.queryItems()) {
-                if(item.first == "init_type")      base_gacha_type              = item.second;
+                if(item.first == "init_type")               base_gacha_type              = item.second;
             }
             break;
         }
-        case(WishLog::HSR): {
+    case(WishLog::HSR): {
+            for(const auto& item: que.queryItems()) {
+                if(item.first == "default_gacha_type")      base_gacha_type              = item.second;
+            }
             break;
         }
         case(WishLog::ZZZ): {
@@ -66,6 +69,15 @@ WishLog::WishLogGame WishLog::guess_game(const QString& url) {
     // TODO: support WuWa?
     // TODO: support other games??
     return WishLog::Unsupported;
+}
+
+QString WishLog::get_identified_game_name() {
+    switch(this->game()) {
+    case WishLog::Genshin: return "Genshin Impact";
+    case WishLog::HSR:     return "Honkai: Star Rail";
+    case WishLog::ZZZ:     return "Zenless Zone Zero";
+    default: abort();
+    }
 }
 
 bool WishLog::is_accepted_url(const QString& url) {
@@ -163,16 +175,50 @@ QUrl WishLog::regenerate_data_url(
             //data_url.setHost("api-os-takumi.mihoyo.com");
             data_url.setHost("public-operation-hkrpg-sg.hoyoverse.com");
             data_url.setPath("/common/gacha_record/api/getGachaLog");
+            bool    missing_page            = true,
+                    missing_size            = true,
+                    missing_end_id          = true,
+                    reset_init_type         = false
+            ;
             /* TODO: fill in missing query bits */
             // TODO: missing gacha_type matching upstream default_gacha_type
-            log_data_page = 1;
+            log_data_page = target_gacha_page;
             // identify missing;
             bool    missing_gacha_type      = true;
             for(const auto& item: reprocess_query.queryItems()) {
-                if(item.first == "default_gacha_type")      default_gacha_type    = item.second;
-                if(item.first == "gacha_type")              missing_gacha_type    = false;
+                if(item.first == "default_gacha_type")      default_gacha_type      = item.second;
+                if(item.first == "gacha_type")              missing_gacha_type      = false;
+                if(item.first == "page")                    missing_page            = false;
+                if(item.first == "size")                    missing_size            = false;
+                if(item.first == "end_id")                  missing_end_id          = false;
+
+                if(item.first == "default_gacha_type") {
+                    base_gacha_type = (target_gacha_type!=-1?QString::number(target_gacha_type):item.second);
+                    if(target_gacha_type != -1 && item.second.toInt() != target_gacha_type) {
+                        reset_init_type = true;
+                    }
+                }
             }
+
             if(missing_gacha_type) reprocess_query.addQueryItem("gacha_type", default_gacha_type);
+            if(missing_page)  reprocess_query.addQueryItem("page", QString::number(log_data_page));
+            if(missing_size)  reprocess_query.addQueryItem("size", QString::number(log_data_page_size));
+
+            // Regenerating a "fresh" url
+            if(reset_init_type) {
+                reprocess_query.removeQueryItem("gacha_type");
+                reprocess_query.addQueryItem("gacha_type", QString::number(target_gacha_type));
+                reprocess_query.removeQueryItem("default_gacha_type");
+                reprocess_query.addQueryItem("default_gacha_type", QString::number(target_gacha_type));
+            }
+
+            // specify end_id override. or reset
+            if(target_end_id != end_id) {
+                if(!missing_end_id) reprocess_query.removeQueryItem("end_id");
+                end_id = target_end_id;
+                missing_end_id = true;
+            }
+            if(missing_end_id) reprocess_query.addQueryItem("end_id", end_id);
 
             break;
         }

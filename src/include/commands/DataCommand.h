@@ -63,4 +63,7 @@ private:
     QString get_latest_id_from_key(const QString& key);
     std::shared_ptr<QCommandLineOption> game_path, file_path, known_url, all_targets, verbose;
 
+    std::list<QString> get_pull_id_list(WishLog::WishLogGame game);
+
+    bool write_condition_for_cache(const QString& key, const QString& incoming_id);
 };

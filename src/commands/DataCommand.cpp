@@ -37,8 +37,7 @@ void DataCommand::command_setup_parser() {
     parser->addOption(
         *(verbose = std::make_shared<QCommandLineOption>(
             QStringList() << "verbose",
-            L18N("Be verbose about operations."),
-            "verbose", nullptr
+            L18N("Be verbose about operations.")
         ))
     );
     parser->addOption(
@@ -65,8 +64,7 @@ void DataCommand::command_setup_parser() {
     parser->addOption(
         *(all_targets = std::make_shared<QCommandLineOption>(
             QStringList() << "a" << "all-targets",
-            L18N("Get all Gacha targets."),
-            "all_Targets", nullptr
+            L18N("Get all Gacha targets.")
         ))
     );
 }
@@ -114,6 +112,7 @@ void DataCommand::run_data_sync(WishLog& log) {
     if(command_verbose)
         Log::get_logger()->warning(log.getQuickInitUrl().toString(QUrl::EncodeSpaces));
     auto ret = mHttpClient->get_sync(log.getQuickInitUrl().toDisplayString());
+    Log::get_logger()->info("Game identified as " + log.get_identified_game_name());
     start_sync_process(log, ret);
 }
 
@@ -138,8 +137,13 @@ void DataCommand::start_sync_process(WishLog& log, QByteArray result) {
     jms::Spinner lSpinner("Processing initial data", jms::dots);
     lSpinner.start();
     process_initial_data(log, nullptr, result);
-    lSpinner.finish(jms::FinishedState::SUCCESS, "Initial data done!");
-    for(const auto& [key, value]: loaded_data) {
+    lSpinner.finish(jms::FinishedState::SUCCESS, "Initial data loaded!");
+    //for(const auto& [key, value]: loaded_data) {
+    for(const auto& key: get_pull_id_list(log.game())) {
+        if(!loaded_data.contains(key)) {
+            // New cache
+            loaded_data.emplace(key, QJsonDocument(QJsonArray()));
+        }
         lSpinner.setText("Processing data for " + key.toStdString());
         lSpinner.start();
         sleep(1);
@@ -147,9 +151,12 @@ void DataCommand::start_sync_process(WishLog& log, QByteArray result) {
         auto sync_result = sync_loop(log, key);
         auto initial_count = loaded_data[key].array().count();
 
-        // we know the last one has matched. This is the cleanest data unification we can possibly have.
-        if(loaded_data[key].array().first().toObject()["id"].toString()
-            == sync_result->last().toObject()["id"].toString()
+        // In the specific case where we know the last one has matched.
+        // This is the cleanest data unification we can possibly have.
+        if( !sync_result->isEmpty() && (
+                loaded_data[key].array().first().toObject()["id"].toString()
+                    == sync_result->last().toObject()["id"].toString()
+            )
         ) sync_result->removeLast();
 
         // Only do the switcheroo if there's anything to add.
@@ -219,6 +226,10 @@ QString DataCommand::get_latest_id_from_key(const QString& key) {
     return loaded_data[key][0]["id"].toString();
 }
 
+bool DataCommand::write_condition_for_cache(const QString& key, const QString& incoming_id) {
+    return ((loaded_data[key].array().count() == 0)? true : (incoming_id != get_latest_id_from_key(key)));
+}
+
 // todo: add delays because too many requests. DoS detect.
 std::unique_ptr<QJsonArray>
 DataCommand::sync_loop(WishLog& log, const QString& key, int page, std::shared_ptr<QJsonValue> id_val) {
@@ -229,10 +240,12 @@ DataCommand::sync_loop(WishLog& log, const QString& key, int page, std::shared_p
         page,
         (id_val == nullptr ? "" : id_val->toObject()["id"].toString())
     ).toString();
+    if(this->command_verbose) Log::get_logger()->info("Target URL to consult: " + target_url);
     const auto [retcode, data] = get_sync_json(target_url);
     const auto [is_latest, id_list] = is_latest_id_in_incoming(get_latest_id_from_key(key), data);
     auto ret_arr = QJsonArray((*data)["list"].toArray());
-    if(!is_latest) {
+    bool is_empty = (page <= 1 && (*data)["list"].toArray().count() == 0);
+    if(!is_empty && !is_latest) {
         for(auto loop = sync_loop(log, key, page + 1, id_list); auto el: *loop) {
             ret_arr.append(QJsonObject(el.toObject()));
             if(el.toObject()["id"].toString().compare(get_latest_id_from_key(key)) == 0) break;
@@ -244,7 +257,9 @@ DataCommand::sync_loop(WishLog& log, const QString& key, int page, std::shared_p
     //  we *end* with the expected end_id.
     // TODO: this assume regular syncs and a matching end_id. THIS DOES NOT SUPPORT "INITIAL DATA"
     //  OR TOO-LONG-DIDN'T-SYNC-MY-SHIT.
-    while(ret_arr.last().toObject().value("id") != get_latest_id_from_key(key)) ret_arr.removeLast();
+    if(!is_empty)
+        while(write_condition_for_cache(key, ret_arr.last().toObject().value("id").toString()))
+            ret_arr.removeLast();
 
     return std::move(std::make_unique<QJsonArray>(ret_arr));
 }
@@ -284,4 +299,14 @@ std::string DataCommand::get_local_storage_folder(WishLog::WishLogGame game) {
         case WishLog::ZZZ:     return "nap";
         default: abort();
     }
+}
+
+std::list<QString> DataCommand::get_pull_id_list(WishLog::WishLogGame game) {
+    switch(game) {
+    case WishLog::Genshin: return {"200", "301", "302", "500" };
+    case WishLog::HSR:     return {"1", "2", "11", "12" };
+    //case WishLog::ZZZ:     return {"nap"};
+    default: abort();
+    }
+
 }
