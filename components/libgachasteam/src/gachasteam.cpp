@@ -6,18 +6,29 @@
 
 #include <vlvproton.h>
 
+#include <cstring>
+
 std::shared_ptr<gachasteam> gachasteam::mInstance = nullptr;
 
+bool gachasteam::is_steam_deck() {
+    return check_env_var_against_value("SteamDeck", "1");
+}
+
+bool gachasteam::is_steam_env() {
+    return check_env_var_against_value("SteamEnv", "1");
+}
+
+bool gachasteam::launched_from_steam_client() {
+    return check_env_var_against_value("SteamClientLaunch", "1");
+}
+
 bool gachasteam::running_under_steam() {
-    const char* steam_envs[2] = {
-        std::getenv("SteamDeck"),
-        std::getenv("SteamEnv"),
-        //std::getenv("SteamAppId"),
-        //std::getenv("SteamClientLaunch"),
-        //std::getenv("STEAM_COMPAT_DATA_PATH"),
-        //std::getenv("STEAM_COMPAT_TOOL_PATHS"),
-    };
-    return (steam_envs[0] || steam_envs[1]);
+    return (is_steam_deck() || is_steam_env() || launched_from_steam_client());
+}
+
+bool gachasteam::check_env_var_against_value(const char* env_var, const char* expected_value) {
+    const char* env_var_value = std::getenv(env_var);
+    return ( env_var_value && strcmp(env_var_value, expected_value) == 0 );
 }
 
 std::shared_ptr<gachasteam> gachasteam::get_gachasteam_instance() {
