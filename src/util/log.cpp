@@ -1,12 +1,12 @@
 /******************************************************************
-**
-** log.cpp
-**
-** \brief A brief summary of what this class intends to accomplish.
-**
-** Created by cybik on 24-07-13. for qgachawishes.
-**
-*******************************************************************/
+ *
+ * log.cpp
+ *
+ * \brief A brief summary of what this class intends to accomplish.
+ *
+ * Created by cybik on 24-07-13. for qgachawishes.
+ *
+ ******************************************************************/
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "readability-convert-member-functions-to-static"
 

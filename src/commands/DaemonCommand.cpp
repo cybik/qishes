@@ -1,12 +1,12 @@
 /******************************************************************
-**
-** DaemonCommand.cpp
-**
-** \brief A brief summary of what this class intends to accomplish.
-**
-** Created by cybik on 24-07-10 for qgachawishes.
-**
-*******************************************************************/
+ *
+ * DaemonCommand.cpp
+ *
+ * \brief A brief summary of what this class intends to accomplish.
+ *
+ * Created by cybik on 24-07-10 for qgachawishes.
+ *
+ ******************************************************************/
 
 #include <commands/DaemonCommand.h>
 const QString DaemonCommand::CommandSpecifier = "daemon";

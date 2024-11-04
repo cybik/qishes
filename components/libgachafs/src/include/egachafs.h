@@ -1,12 +1,12 @@
 /******************************************************************
-**
-** egachafs.h
-**
-** \brief A brief summary of what this class intends to accomplish.
-**
-** Created by cybik on 24-08-25 for libgachafs, part of qgachawishes
-**
-*******************************************************************/
+ *
+ * egachafs.h
+ *
+ * \brief A brief summary of what this class intends to accomplish.
+ *
+ * Created by cybik on 24-08-25 for libgachafs, part of qgachawishes
+ *
+ ******************************************************************/
 
 #pragma once
 
