@@ -80,10 +80,17 @@ void DataCommand::command_process_parser() {
 
     if(command_known_url.isEmpty() && command_game_path.isEmpty() && command_file_path.isEmpty())
         warnHelp(2, "No game path nor known URL was provided.\nOne of the two must be provided.");
+
+    if( this->command_verbose ) Log::get_logger()->log_level(Log::Info);
+}
+
+std::shared_ptr<HttpClient> DataCommand::get_http_client() {
+    if(!mHttpClient)
+        mHttpClient = std::make_shared<HttpClient>();
+    return mHttpClient;
 }
 
 int DataCommand::command_run() {
-    //std::shared_ptr<std::list<std::shared_ptr<QFile>>> caches;
     if(!this->command_file_path.isEmpty() && QFileInfo::exists(command_file_path)) {
         caches = std::make_shared<std::list<std::shared_ptr<QFile>>>();
         (*caches).emplace_front(std::make_shared<QFile>(QFileInfo(command_file_path).absoluteFilePath()));
@@ -96,8 +103,6 @@ int DataCommand::command_run() {
     if(caches->empty()) warnHelp(3, "No URL was found in the detected cache.");
     printSingleFilePath((*caches).begin()->get()->fileName());
 
-    mHttpClient = std::make_shared<HttpClient>();
-
     started();
     return 0;
 }
@@ -109,9 +114,8 @@ void DataCommand::started() {
 }
 
 void DataCommand::run_data_sync(WishLog& log) {
-    if(command_verbose)
-        Log::get_logger()->warning(log.getQuickInitUrl().toString(QUrl::EncodeSpaces));
-    auto ret = mHttpClient->get_sync(log.getQuickInitUrl().toDisplayString());
+    Log::get_logger()->debug(log.getQuickInitUrl().toString(QUrl::EncodeSpaces));
+    auto ret = get_http_client()->get_sync(log.getQuickInitUrl().toDisplayString());
     Log::get_logger()->info("Game identified as " + log.get_identified_game_name());
     start_sync_process(log, ret);
 }
@@ -121,16 +125,16 @@ void DataCommand::early_exit(const QString& message, int exit_code) {
     qwishes_data->exit(exit_code);
 }
 
+void DataCommand::exit_check(bool condition, const QString& message, int exit_code) {
+    if( condition ) early_exit(message, exit_code);
+}
+
 void DataCommand::check_initial_doc(QJsonDocument& doc)
 {
-    if( doc["data"].isUndefined() )
-        early_exit("data absent", 10);
-    if( doc["data"]["list"].isUndefined() )
-        early_exit("datalist absent", 11);
-    if( doc["data"]["list"][0].isUndefined() )
-        early_exit("datalist element absent", 12);
-    if( doc["data"]["list"][0]["uid"].isUndefined() )
-        early_exit("data element unexpected", 13);
+    exit_check(doc["data"].isUndefined(), "data absent", 10);
+    exit_check(doc["data"]["list"].isUndefined(), "datalist absent", 11);
+    exit_check(doc["data"]["list"][0].isUndefined(), "datalist element absent", 12);
+    exit_check(doc["data"]["list"][0]["uid"].isUndefined(), "data unexpected", 13);
 }
 
 void DataCommand::start_sync_process(WishLog& log, QByteArray result) {
@@ -138,7 +142,6 @@ void DataCommand::start_sync_process(WishLog& log, QByteArray result) {
     lSpinner.start();
     process_initial_data(log, nullptr, result);
     lSpinner.finish(jms::FinishedState::SUCCESS, "Initial data loaded!");
-    //for(const auto& [key, value]: loaded_data) {
     for(const auto& key: get_pull_id_list(log.game())) {
         if(!loaded_data.contains(key)) {
             // New cache
@@ -153,7 +156,8 @@ void DataCommand::start_sync_process(WishLog& log, QByteArray result) {
 
         // In the specific case where we know the last one has matched.
         // This is the cleanest data unification we can possibly have.
-        if( !sync_result->isEmpty() && (
+        if( !sync_result->isEmpty()
+            && (
                 loaded_data[key].array().first().toObject()["id"].toString()
                     == sync_result->last().toObject()["id"].toString()
             )
@@ -180,24 +184,25 @@ void DataCommand::start_sync_process(WishLog& log, QByteArray result) {
 void DataCommand::write_back(const QString& key) {
     if(data_dir.exists(QString(key).append(".cache"))) {
         // mv
-        QFile(data_dir.filePath(QString(key).append(".cache")))
-            .rename(
-                data_dir.filePath(
-                    QString(key)
-                        .append(".cache.")
-                        .append(QString::number( QDateTime::currentSecsSinceEpoch() ))
-                )
-            );
+        QFile(
+            data_dir.filePath(QString(key).append(".cache"))
+        ).rename(
+            data_dir.filePath(
+                QString(key)
+                    .append(".cache.")
+                    .append(QString::number( QDateTime::currentSecsSinceEpoch() ))
+            )
+        );
     }
     QFile write_back(data_dir.filePath(QString(key).append(".cache")));
     write_back.open(QIODevice::ReadWrite);
     write_back.write(loaded_data[key].toJson());
+    write_back.close(); // clean up after ourselves. Good habits and all.
 }
 
 std::tuple<int, std::shared_ptr<QJsonDocument>>
 DataCommand::get_sync_json(const QString& target_url) {
-    //auto incoming = mHttpClient->get_sync(target_url);
-    if(QJsonDocument ret = QJsonDocument::fromJson(mHttpClient->get_sync(target_url));
+    if(QJsonDocument ret = QJsonDocument::fromJson(get_http_client()->get_sync(target_url));
         !ret.isEmpty() && ( !( ret["retcode"].isUndefined() || ret["data"].isUndefined() ) )
     ) {
         return {
@@ -222,7 +227,6 @@ DataCommand::is_latest_id_in_incoming(const QString& latest, std::shared_ptr<QJs
 }
 
 QString DataCommand::get_latest_id_from_key(const QString& key) {
-    // if( doc["data"]["list"][0]["uid"].isUndefined() ) early_exit("data element unexpected", 13);
     return loaded_data[key][0]["id"].toString();
 }
 
@@ -242,7 +246,8 @@ DataCommand::sync_loop(WishLog& log, const QString& key, int page, std::shared_p
     ).toString();
     if(this->command_verbose) Log::get_logger()->info("Target URL to consult: " + target_url);
     const auto [retcode, data] = get_sync_json(target_url);
-    const auto [is_latest, id_list] = is_latest_id_in_incoming(get_latest_id_from_key(key), data);
+    const auto [is_latest, id_list]
+        = is_latest_id_in_incoming(get_latest_id_from_key(key), data);
     auto ret_arr = QJsonArray((*data)["list"].toArray());
     bool is_empty = (page <= 1 && (*data)["list"].toArray().count() == 0);
     if(!is_empty && !is_latest) {
@@ -289,6 +294,7 @@ void DataCommand::process_initial_data(WishLog& log, QNetworkReply* reply, const
         QFile loaded(file.absoluteFilePath());
         loaded.open(QIODevice::ReadOnly);
         loaded_data.emplace(file.baseName(),QJsonDocument::fromJson(loaded.readAll()));
+        loaded.close();
     }
 }
 

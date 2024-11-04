@@ -1,11 +1,12 @@
-//
-// Created by cybik on 24-07-13.
-//
-
+/******************************************************************
+ * log.h
+ *
+ * Created by cybik on 24-07-13. for qgachawishes.
+ *
+ ******************************************************************/
 #pragma once
 
 #include <memory>
-
 #include <QString>
 
 class Log {

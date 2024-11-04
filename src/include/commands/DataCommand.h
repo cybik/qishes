@@ -32,10 +32,11 @@ protected:
     int  command_run() override;
 private:
     std::string get_local_storage_folder(WishLog::WishLogGame game);
-    void early_exit(const QString& message, int exit_code);
-    QString command_known_url;
-    bool command_all_targets;
-    bool command_verbose;
+    void        early_exit(const QString& message, int exit_code);
+    void        exit_check(bool condition, const QString& message, int exit_code);
+    QString     command_known_url;
+    bool        command_all_targets;
+    bool        command_verbose;
 
     void run_data_sync(WishLog& log);
     void start_sync_process(WishLog& log, QByteArray result);
@@ -52,7 +53,7 @@ private:
     std::map<QString, std::shared_ptr<QNetworkAccessManager>> qwishes_network_requests;
     std::shared_ptr<std::list<std::shared_ptr<QFile>>> caches;
 
-    std::shared_ptr<HttpClient> mHttpClient;
+    std::shared_ptr<HttpClient> mHttpClient = nullptr;
     std::tuple<int, std::shared_ptr<QJsonDocument>>
     get_sync_json(const QString& target_url);
     std::tuple<bool, std::shared_ptr<QJsonValue>>
@@ -66,4 +67,6 @@ private:
     std::list<QString> get_pull_id_list(WishLog::WishLogGame game);
 
     bool write_condition_for_cache(const QString& key, const QString& incoming_id);
+
+    std::shared_ptr<HttpClient> get_http_client();
 };

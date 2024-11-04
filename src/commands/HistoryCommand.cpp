@@ -21,6 +21,7 @@ void HistoryCommand::command_create_application(int& argc, char **argv) {
     QApplication::setApplicationName(APPNAME_GEN(.history));
     QApplication::setApplicationVersion(APP_VERSION);
 }
+
 void HistoryCommand::command_setup_parser() {
     parser->addPositionalArgument(
         "command",
@@ -80,7 +81,6 @@ void HistoryCommand::command_process_parser() {
 }
 
 int HistoryCommand::command_run() {
-    //std::cout << "ayyyyyyyyyyy :: " << this->command_game_path.toStdString() << std::endl;
     std::shared_ptr<std::list<std::shared_ptr<QFile>>> caches;
     if(!this->command_file_path.isEmpty() && QFileInfo::exists(command_file_path)) {
         caches = std::make_shared<std::list<std::shared_ptr<QFile>>>();

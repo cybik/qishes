@@ -4,7 +4,6 @@
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "performance-unnecessary-value-param"
 
-#include <QDesktopServices>
 #include <QRegularExpression>
 #include <iostream>
 #include <commands/AbstractCommand.h>
@@ -40,10 +39,10 @@ int AbstractCommand::cmd_main(int argc, char **argv) {
 
 void AbstractCommand::printSingleFilePath(const QString &filename) {
     std::cout
-        << termcolor::bold << termcolor::cyan  << "[#] "        << termcolor::reset
-        << termcolor::bold << termcolor::green << "Data file"   << termcolor::reset
+        << termcolor::bold      << termcolor::cyan          << "[#] "       << termcolor::reset
+        << termcolor::bold      << termcolor::green         << "Data file"  << termcolor::reset
         << ": "
-        << termcolor::yellow << filename.toStdString() << termcolor::reset
+        << termcolor::yellow    << filename.toStdString()                   << termcolor::reset
         << std::endl;
 }
 
@@ -62,7 +61,7 @@ std::shared_ptr<QStringList> AbstractCommand::runUrlCleanup(const std::shared_pt
     std::shared_ptr<QStringList> retList; // don't initialize unless necessary
     for(const auto& single_string: (*ptr)) {
         for(const auto& split_string_1: single_string.split("1/0/")) { /** cut on 1/0/ **/
-            for(const auto& split_string_2: split_string_1.split('\0', Qt::SkipEmptyParts)) {
+            for(const auto& split_string_2: split_string_1.split(QChar('\0'), Qt::SkipEmptyParts)) {
                 if(split_string_2.startsWith("http")) {
                     if(!retList) retList = std::make_shared<QStringList>();
                     // always split after a cache entry, defined by nullchars
@@ -92,6 +91,5 @@ void AbstractCommand::warnHelp(int exit_code, const QString& message)
     Log::get_logger()->critical(message);
     if(parser) parser->showHelp(exit_code);
 }
-
 
 #pragma clang diagnostic pop
