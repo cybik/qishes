@@ -1,6 +1,12 @@
-//
-// Created by cybik on 24-06-27.
-//
+/******************************************************************
+**
+** AbstractCommand.cpp
+**
+** \brief A brief summary of what this class intends to accomplish.
+**
+** Created by cybik on 24-06-27 for qgachawishes.
+**
+*******************************************************************/
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "performance-unnecessary-value-param"
 

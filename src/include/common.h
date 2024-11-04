@@ -1,5 +1,5 @@
 //
-// Created by cybik on 24-06-27.
+// Created by cybik on 24-06-27
 //
 
 #pragma once

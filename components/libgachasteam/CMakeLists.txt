@@ -14,12 +14,14 @@ set(PROJECT_SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/src")
 set(
     SOURCES_CPP
         "${PROJECT_SOURCE_DIR}/gachasteam.cpp"
+        "${PROJECT_SOURCE_DIR}/steam_environment.cpp"
 )
 
 # For AutoMOC
 set(
     SOURCES_H
         "${PROJECT_SOURCE_DIR}/include/gachasteam.h"
+        "${PROJECT_SOURCE_DIR}/include/steam_environment.h"
 )
 
 add_library(

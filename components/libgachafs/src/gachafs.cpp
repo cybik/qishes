@@ -1,7 +1,12 @@
-//
-// Created by cybik on 24-06-29.
-//
-
+/******************************************************************
+**
+** gachafs.cpp
+**
+** \brief A brief summary of what this class intends to accomplish.
+**
+** Created by cybik on 24-06-29 for libgachafs, part of qgachawishes
+**
+*******************************************************************/
 #include "gachafs.h"
 #include <QDir>
 #include <QFileInfo>

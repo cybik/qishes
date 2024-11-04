@@ -1,7 +1,12 @@
-//
-// Created by cybik on 24-06-29.
-//
-
+/******************************************************************
+**
+** gachasteam.h
+**
+** \brief A brief summary of what this class intends to accomplish.
+**
+** Created by cybik on 24-06-29 for qgachawishes.
+**
+*******************************************************************/
 #pragma once
 #include <memory>
 

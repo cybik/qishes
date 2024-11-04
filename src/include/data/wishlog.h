@@ -1,6 +1,12 @@
-//
-// Created by cybik on 24-07-03.
-//
+/******************************************************************
+**
+** wishlog.h
+**
+** \brief A brief summary of what this class intends to accomplish.
+**
+** Created by cybik on 24-07-03 for qgachawishes.
+**
+*******************************************************************/
 
 #pragma once
 

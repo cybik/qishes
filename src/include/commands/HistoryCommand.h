@@ -1,7 +1,12 @@
-//
-// Created by cybik on 24-06-27.
-//
-
+/******************************************************************
+**
+** HistoryCommand.h
+**
+** \brief A brief summary of what this class intends to accomplish.
+**
+** Created by cybik on 24-06-27 for qgachawishes.
+**
+*******************************************************************/
 #pragma once
 
 #include "AbstractCommand.h"

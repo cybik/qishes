@@ -1,6 +1,12 @@
-//
-// Created by cybik on 24-07-10.
-//
+/******************************************************************
+**
+** DataCommand.cpp
+**
+** \brief A brief summary of what this class intends to accomplish.
+**
+** Created by cybik on 24-07-10 for qgachawishes.
+**
+*******************************************************************/
 
 #include <commands/DataCommand.h>
 #include <QApplication>
