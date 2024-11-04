@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.21)
 
-project(gachasteam)
+project(vlvproton)
 
 include_directories(
     BEFORE
@@ -12,24 +12,24 @@ set(PROJECT_SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/src")
 
 set(
     SOURCES_CPP
-        "${PROJECT_SOURCE_DIR}/gachasteam.cpp"
+        "${PROJECT_SOURCE_DIR}/vlvproton.cpp"
 )
 
 # For AutoMOC
 set(
     SOURCES_H
-        "${PROJECT_SOURCE_DIR}/include/gachasteam.h"
+        "${PROJECT_SOURCE_DIR}/include/vlvproton.h"
 )
 
 add_library(
-    gachasteam
+    vlvproton
     SHARED
         ${SOURCES_CPP}
         ${SOURCES_H}
 )
 
 target_include_directories(
-    gachasteam
+    vlvproton
     PUBLIC
         "${PROJECT_SOURCE_DIR}/include"
 )

@@ -1,44 +1,25 @@
 cmake_minimum_required(VERSION 3.21)
 
-set(MY_PROJECT_NAME "gachafs")
+set(MY_PROJECT_NAME "gachasteam")
 project(${MY_PROJECT_NAME})
-
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
-
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
-set(CMAKE_AUTOUIC ON)
-
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include_directories(
     BEFORE
         "${CMAKE_CURRENT_LIST_DIR}/src/include"
-        "${CMAKE_CURRENT_LIST_DIR}/../../3rdParty/termcolor/include"
 )
 set(CMAKE_BUILD_TYPE Release)
 
-find_package(
-    Qt6
-    REQUIRED
-    COMPONENTS
-        Gui
-        Xml
-)
-
-
 set(PROJECT_SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/src")
+
 set(
     SOURCES_CPP
-        "${PROJECT_SOURCE_DIR}/gachafs.cpp"
+        "${PROJECT_SOURCE_DIR}/gachasteam.cpp"
 )
 
 # For AutoMOC
 set(
     SOURCES_H
-        "${PROJECT_SOURCE_DIR}/include/gachafs.h"
-        "${PROJECT_SOURCE_DIR}/include/egachafs.h"
+        "${PROJECT_SOURCE_DIR}/include/gachasteam.h"
 )
 
 add_library(
@@ -50,9 +31,12 @@ add_library(
 
 target_link_libraries(
     ${MY_PROJECT_NAME}
-        Qt6::Gui
-        Qt6::Xml
-        Qt6::Core
+    PUBLIC
+        vlvproton
+)
+add_dependencies(
+    ${MY_PROJECT_NAME}
+        vlvproton
 )
 
 target_include_directories(

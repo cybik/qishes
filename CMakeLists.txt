@@ -157,6 +157,7 @@ target_link_libraries(
         yaml-cpp
         gachafs
         gachasteam
+        vlvproton
         httpclient
         discord-game-sdk-interface
         #Ribbon
@@ -180,7 +181,7 @@ add_custom_command(
         mkdir -p "${OUTDIR_FINAL_ASSEMBLAGE_BASE}/lib/${CMAKE_LIBRARY_ARCHITECTURE}/"
 )
 
-foreach(PROJECT_TO_INSTALL IN ITEMS gachafs gachasteam discord-game-sdk-interface qadwaitadecorations)
+foreach(PROJECT_TO_INSTALL IN ITEMS gachafs gachasteam vlvproton discord-game-sdk-interface qadwaitadecorations)
     add_custom_command(
         TARGET ${PROJECT_NAME}
         POST_BUILD

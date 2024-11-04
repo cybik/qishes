@@ -16,6 +16,8 @@
 #include <gachafs.h>
 #include <gachasteam.h>
 
+#include <cstdlib>
+
 #define DEFINE_COMMAND(COMMNAME) \
     if(command.compare(COMMNAME::CommandSpecifier, Qt::CaseInsensitive) == 0) \
         return [](int argc, char** argv) { \
@@ -37,7 +39,17 @@ void enforce_qsg() {
     QApplication::setAttribute(Qt::AA_ShareOpenGLContexts, true);
 }
 
+int detect_and_divert(int argc, char *argv[]) {
+    if(gachasteam::get_gachasteam_instance()->running_under_steam()) return 0;
+    return -1; // Base case: not being launched under Steam.
+}
+
 int main(int argc, char *argv[]) {
+    if(int d_a_d = detect_and_divert(argc, argv); d_a_d >= 0) {
+        Log::get_logger()->critical("detect online");
+        abort();
+        return d_a_d;
+    }
     // QT6 Linux workaround - somehow QSG Render Loop must be set for CLI apps that don't do windowing bollocks
     enforce_qsg();
     // for now, blast
