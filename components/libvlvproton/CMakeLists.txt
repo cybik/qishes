@@ -6,7 +6,6 @@ include_directories(
     BEFORE
         "${CMAKE_CURRENT_LIST_DIR}/src/include"
 )
-set(CMAKE_BUILD_TYPE Release)
 
 set(PROJECT_SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/src")
 

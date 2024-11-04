@@ -40,7 +40,8 @@ void enforce_qsg() {
 }
 
 int detect_and_divert(int argc, char *argv[]) {
-    if(gachasteam::get_gachasteam_instance()->running_under_steam()) return 0;
+    if(gachasteam::get_gachasteam_instance()->running_under_steam())
+        return 0;
     return -1; // Base case: not being launched under Steam.
 }
 

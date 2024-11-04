@@ -17,7 +17,6 @@ include_directories(
         "${CMAKE_CURRENT_LIST_DIR}/src/include"
         "${CMAKE_CURRENT_LIST_DIR}/../../3rdParty/termcolor/include"
 )
-set(CMAKE_BUILD_TYPE Release)
 
 find_package(
     Qt6

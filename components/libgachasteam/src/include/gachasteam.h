@@ -22,6 +22,4 @@ private:
     gachasteam() = default;
 
     static std::shared_ptr<gachasteam> mInstance;
-
-    bool check_env_var_against_value(const char* env_var, const char* expected_value);
 };

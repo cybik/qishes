@@ -13,6 +13,7 @@
 std::shared_ptr<vlvproton> vlvproton::mInstance = nullptr;
 
 std::shared_ptr<vlvproton> vlvproton::getInstance() {
-
+    if (!mInstance) mInstance = std::shared_ptr<vlvproton>(new vlvproton());
+    return mInstance;
 }
 

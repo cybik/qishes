@@ -18,5 +18,6 @@ public:
     static std::shared_ptr<vlvproton> getInstance();
 protected:
 private:
+    vlvproton() = default;
     static std::shared_ptr<vlvproton> mInstance;
 };
