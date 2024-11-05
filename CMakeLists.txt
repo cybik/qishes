@@ -33,16 +33,13 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include("${CMAKE_SOURCE_DIR}/cmake/RpathDefinitions.cmake")
 
-#add_subdirectory("${PROJECT_3RDPARTY_DIR}/xdg")
 add_subdirectory("${PROJECT_3RDPARTY_DIR}/yaml-cpp")
 add_subdirectory("${PROJECT_3RDPARTY_DIR}/termcolor")
 add_subdirectory("${PROJECT_3RDPARTY_DIR}/discord-game-sdk")
 add_subdirectory("${PROJECT_3RDPARTY_DIR}/qthttpclient")
-#add_subdirectory("${PROJECT_3RDPARTY_DIR}/spinnerspp")
+add_subdirectory("${PROJECT_3RDPARTY_DIR}/QAdwaitaDeco") # todo: needed or not?
 
 add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/components")
-
-add_subdirectory("${PROJECT_3RDPARTY_DIR}/QAdwaitaDeco")
 
 find_package(
     Qt6
