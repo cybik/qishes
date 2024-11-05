@@ -60,10 +60,8 @@ include_directories(
 
 include_directories(
     AFTER
-        #"${PROJECT_3RDPARTY_DIR}/xdg/include"
         "${PROJECT_3RDPARTY_DIR}/yaml-cpp/include"
         "${PROJECT_3RDPARTY_DIR}/termcolor/include"
-        #"${PROJECT_3RDPARTY_DIR}/spinnerspp/include"
         "${PROJECT_3RDPARTY_DIR}/spinnersplusplus"
         "${PROJECT_3RDPARTY_DIR}/discord-game-sdk/include"
 )
@@ -128,6 +126,9 @@ target_link_libraries(
         Qt6::Widgets
         Qt6::WebEngineCore
         Qt6::WebEngineWidgets
+        #QEasyDownloader
+        #QArchive
+        #qadwaitadecorations
         # Not Qt
         yaml-cpp
         gachafs
@@ -135,13 +136,6 @@ target_link_libraries(
         vlvproton
         httpclient
         discord-game-sdk-interface
-        #Ribbon
-        #XdgUtils::BaseDir
-        #QEasyDownloader
-        #QArchive
-        #qadwaitadecorations
-
-        #"${PROJECT_SOURCE_DIR}/3rdParty/libsass/lib/libsass.a"
 )
 
 add_dependencies(

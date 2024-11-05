@@ -56,8 +56,8 @@ macro(ProcessLibraryForPackaging targetproj targetlib)
         COMMAND
             echo "- Subproject Lib :: Processing $<TARGET_FILE:${targetlib}>" &&
             bash -c '[[ $<TARGET_FILE:${targetlib}> == *.a ]]'
-            && echo "Static lib, skipping"
-            || cp -Lf $<TARGET_FILE:${targetlib}> ${OUTDIR_FINAL_ASSEMBLAGE}
+                && echo "Static lib, skipping"
+                || cp -Lf $<TARGET_FILE:${targetlib}> ${OUTDIR_FINAL_ASSEMBLAGE}
     )
 endmacro()
 
@@ -69,7 +69,7 @@ macro (RestoreSONames targetproj)
         POST_BUILD
         COMMAND
             echo "- Restoring SOnames and autocreating symlinks where needed"
-            && bash ${CMAKE_CURRENT_SOURCE_DIR}/tools/restore_soname.sh ${OUTDIR_FINAL_ASSEMBLAGE}
+                && bash ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/tools/restore_soname.sh ${OUTDIR_FINAL_ASSEMBLAGE}
     )
 endmacro()
 
