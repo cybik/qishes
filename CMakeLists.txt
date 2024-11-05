@@ -31,7 +31,7 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(PROJECT_3RDPARTY_DIR "${CMAKE_CURRENT_LIST_DIR}/3rdParty")
+include("${CMAKE_SOURCE_DIR}/cmake/RpathDefinitions.cmake")
 
 #add_subdirectory("${PROJECT_3RDPARTY_DIR}/xdg")
 add_subdirectory("${PROJECT_3RDPARTY_DIR}/yaml-cpp")
@@ -71,29 +71,7 @@ include_directories(
         "${PROJECT_3RDPARTY_DIR}/discord-game-sdk/include"
 )
 
-# Bringing in past experience / knowledge
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
-set(OUTDIR_FINAL_ASSEMBLAGE_BASE "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
-set(OUTDIR_FINAL_ASSEMBLAGE "${OUTDIR_FINAL_ASSEMBLAGE_BASE}/lib/${CMAKE_LIBRARY_ARCHITECTURE}/")
-
-# hi https://dev.my-gate.net/2021/08/04/understanding-rpath-with-cmake/
-# use, i.e. don't skip the full RPATH for the build tree
-set(CMAKE_SKIP_BUILD_RPATH FALSE)
-
-# when building, don't use the install RPATH already
-# (but later on when installing)
-set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-set(CMAKE_INSTALL_RPATH "${OUTDIR_FINAL_ASSEMBLAGE_BASE}/lib")
-
-# add the automatically determined parts of the RPATH
-# which point to directories outside the build tree to the install RPATH
-set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
-
-# Fun options
-#set(CMAKE_SKIP_BUILD_RPATH FALSE)
-#set(CMAKE_BUILD_WITH_INSTALL_RPATH ON)
-#set(CMAKE_INSTALL_RPATH_USE_LINK_PATH ON)
-#set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+PreconfigureApplicationRpath()
 
 if(ASAN)
     add_compile_options(-fsanitize=address)
@@ -181,48 +159,17 @@ add_custom_command(
         mkdir -p "${OUTDIR_FINAL_ASSEMBLAGE_BASE}/lib/${CMAKE_LIBRARY_ARCHITECTURE}/"
 )
 
-foreach(PROJECT_TO_INSTALL IN ITEMS gachafs gachasteam vlvproton discord-game-sdk-interface qadwaitadecorations)
-    add_custom_command(
-        TARGET ${PROJECT_NAME}
-        POST_BUILD
-        COMMAND
-            echo "- Subproject Lib :: Processing $<TARGET_FILE:${PROJECT_TO_INSTALL}>" &&
-            bash -c '[[ $<TARGET_FILE:${PROJECT_TO_INSTALL}> == *.a ]]'
-                && echo "Static lib, skipping"
-                || cp -Lf $<TARGET_FILE:${PROJECT_TO_INSTALL}> ${OUTDIR_FINAL_ASSEMBLAGE}
-    )
-endforeach()
-
-# Discord SDK library
-set(DISCORD_FORCED_LIB_FILE "${PROJECT_3RDPARTY_DIR}/discord-game-sdk/lib/linux/x86_64/libdiscord_game_sdk.so")
-target_link_libraries(
-    ${MY_PROJECT_NAME}
-    PRIVATE
-        "${DISCORD_FORCED_LIB_FILE}"
+list(
+    APPEND
+    APP_DEPENDENCIES
+        "gachafs"
+        "gachasteam"
+        "vlvproton"
+        "discord-game-sdk-interface"
+        "qadwaitadecorations"
 )
 
-foreach(PROJECT_TO_INSTALL IN ITEMS ${DISCORD_FORCED_LIB_FILE})
-    add_custom_command(
-        TARGET
-            ${MY_PROJECT_NAME}
-        POST_BUILD
-        COMMAND
-            echo "- Forced Lib :: Processing ${PROJECT_TO_INSTALL}" &&
-            bash -c '[[ ${PROJECT_TO_INSTALL} == *.a ]]'
-                && echo "Static lib, skipping"
-                || cp -Lf ${PROJECT_TO_INSTALL} ${OUTDIR_FINAL_ASSEMBLAGE}
-    )
-endforeach()
-
-# From past life still
-add_custom_command(
-    TARGET
-        ${MY_PROJECT_NAME}
-    POST_BUILD
-    COMMAND
-        echo "- Restoring SOnames and autocreating symlinks where needed"
-            && bash ${CMAKE_CURRENT_SOURCE_DIR}/tools/restore_soname.sh ${OUTDIR_FINAL_ASSEMBLAGE}
-)
+AutoconfigureApplicationRpath("${MY_PROJECT_NAME}" "${APP_DEPENDENCIES}")
 
 install(
     TARGETS
