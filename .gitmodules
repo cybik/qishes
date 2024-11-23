@@ -16,3 +16,6 @@
 [submodule "3rdParty/spinnersplusplus"]
 	path = 3rdParty/spinnersplusplus
 	url = https://github.com/jmslocum/spinners-plus-plus.git
+[submodule "3rdParty/libsass"]
+	path = 3rdParty/libsass
+	url = https://github.com/sass/libsass.git

@@ -16,6 +16,8 @@
 #include <QMainWindow>
 #include <QDockWidget>
 
+#include <ui/Landing.h>
+
 class LauncherCommand : public AbstractCommand {
 public:
     static const QString CommandSpecifier;
@@ -23,6 +25,7 @@ public:
 
 protected:
     void mbox();
+    void launcher();
     void command_create_application(int& argc, char **argv) override;
     void command_setup_parser() override;
     void command_process_parser() override;
@@ -35,6 +38,7 @@ private:
     std::shared_ptr<QAction> get_action_exit();
     std::shared_ptr<QAction> get_action_rpc_ping();
     std::shared_ptr<QAction> get_action_dialog_test();
+    std::shared_ptr<QAction> get_action_launcher_test();
     std::shared_ptr<QAction> get_action_rpc_init();
 
     std::shared_ptr<QMenu> tray_menu;
@@ -42,12 +46,15 @@ private:
     std::shared_ptr<QAction> action_init;
     std::shared_ptr<QAction> action_ping;
     std::shared_ptr<QAction> action_dial;
+    std::shared_ptr<QAction> action_launch;
     std::shared_ptr<QSystemTrayIcon> tray;
     std::shared_ptr<discord::Activity> disco;
     std::shared_ptr<QMainWindow> qmw;
     std::shared_ptr<QDockWidget> qdw;
 
     //std::shared_ptr<QAction> action_launcher;
+    static std::shared_ptr<SettingsData> data;
+
 };
 
 

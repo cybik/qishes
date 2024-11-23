@@ -19,6 +19,9 @@ project(
         CXX
 )
 set(USE_QT6 ON)
+
+option(ASAN "Check memory" OFF)
+
 find_package(Qt6 REQUIRED COMPONENTS Core)
 qt_standard_project_setup()
 
@@ -31,9 +34,12 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+set(QT_VER "Qt6")
+
 include("${CMAKE_SOURCE_DIR}/cmake/RpathDefinitions.cmake")
 
 add_subdirectory("${PROJECT_3RDPARTY_DIR}/yaml-cpp")
+#add_subdirectory("${PROJECT_3RDPARTY_DIR}/libsass")
 add_subdirectory("${PROJECT_3RDPARTY_DIR}/termcolor")
 add_subdirectory("${PROJECT_3RDPARTY_DIR}/discord-game-sdk")
 add_subdirectory("${PROJECT_3RDPARTY_DIR}/qthttpclient")
@@ -42,7 +48,7 @@ add_subdirectory("${PROJECT_3RDPARTY_DIR}/QAdwaitaDeco") # todo: needed or not?
 add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/components")
 
 find_package(
-    Qt6
+    ${QT_VER}
     REQUIRED
     COMPONENTS
         Gui
@@ -56,6 +62,7 @@ set(PROJECT_SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/src")
 include_directories(
     BEFORE
         "${PROJECT_SOURCE_DIR}/include"
+        "${PROJECT_SOURCE_DIR}/3rdParty/libsass/include"
 )
 
 include_directories(
@@ -120,12 +127,12 @@ target_link_libraries(
     ${MY_PROJECT_NAME}
     PUBLIC
         # Qt
-        Qt6::Gui
-        Qt6::Xml
-        Qt6::Core
-        Qt6::Widgets
-        Qt6::WebEngineCore
-        Qt6::WebEngineWidgets
+        ${QT_VER}::Gui
+        ${QT_VER}::Xml
+        ${QT_VER}::Core
+        ${QT_VER}::Widgets
+        ${QT_VER}::WebEngineCore
+        ${QT_VER}::WebEngineWidgets
         #QEasyDownloader
         #QArchive
         #qadwaitadecorations
@@ -135,7 +142,11 @@ target_link_libraries(
         gachasteam
         vlvproton
         httpclient
+        qisheslauncher
         discord-game-sdk-interface
+
+        # todo: fix this bloody thing tbh
+        "${PROJECT_3RDPARTY_DIR}/libsass/lib/libsass.a"
 )
 
 add_dependencies(
@@ -155,6 +166,7 @@ list(
     APP_DEPENDENCIES
         "gachafs"
         "gachasteam"
+        "qisheslauncher"
         "vlvproton"
         "discord-game-sdk-interface"
         "qadwaitadecorations"

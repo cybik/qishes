@@ -28,6 +28,8 @@
 
 const QString LauncherCommand::CommandSpecifier = "launcher";
 
+std::shared_ptr<SettingsData> LauncherCommand::data = nullptr;
+
 std::shared_ptr<QAction> LauncherCommand::get_action_exit() {
     action_exit = std::make_shared<QAction>();
 
@@ -91,6 +93,15 @@ void LauncherCommand::mbox() {
     qmw->activateWindow();
 }
 
+void LauncherCommand::launcher() {
+    data = SettingsData::getSettingsData();
+    std::unique_ptr<QAGL::Landing> landing = std::make_unique<QAGL::Landing>(
+        *this_app, std::move(data), QAGL::QAGL_App_Style::Normal
+    );
+    QPixmap pix;
+    pix.loadFromData(QByteArray::fromBase64(qiqi_smol.toLocal8Bit(), QByteArray::Base64Encoding));
+    landing->show(*this_app);
+}
 
 void LauncherCommand::command_create_application(int& argc, char **argv) {
     QApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
@@ -127,6 +138,19 @@ std::shared_ptr<QAction> LauncherCommand::get_action_dialog_test() {
 
     return action_dial;
 }
+std::shared_ptr<QAction> LauncherCommand::get_action_launcher_test() {
+    action_launch = std::make_shared<QAction>();
+
+    action_launch->setText("Test Launch");
+    QObject::connect(
+        action_launch.get(), &QAction::triggered, // Signal
+        [&](bool) {
+            launcher();
+        }
+    );
+
+    return action_launch;
+}
 
 std::shared_ptr<QMenu> LauncherCommand::generate_menu() {
     tray_menu = std::make_shared<QMenu>();
@@ -134,6 +158,7 @@ std::shared_ptr<QMenu> LauncherCommand::generate_menu() {
     tray_menu->addAction(get_action_rpc_init().get());
     tray_menu->addAction(get_action_rpc_ping().get());
     tray_menu->addAction(get_action_dialog_test().get());
+    tray_menu->addAction(get_action_launcher_test().get());
     tray_menu->addAction(get_action_exit().get());
     //tray_menu->triggered(get_action_exit().get());
 
