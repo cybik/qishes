@@ -18,6 +18,36 @@
 #include <data/SettingsData.h>
 
 namespace QAGL {
+
+    class LandingWebEnginePage : public QWebEnginePage
+    {
+Q_OBJECT
+    public:
+        explicit LandingWebEnginePage(QObject* parent = nullptr) : QWebEnginePage(parent) { }
+        //LandingWebEnginePage *setSettingsLambda(std::function<void()>);
+        void setParentWindow(std::shared_ptr<QMainWindow> ptr);
+        //LandingWebEnginePage *setParentWindow(std::shared_ptr<QMainWindow> ptr);
+        bool acceptNavigationRequest(const QUrl &, NavigationType, bool) override;
+
+        QWebEnginePage *createWindow(WebWindowType type) override;
+    private:
+        //std::shared_ptr<QSettings> fakesettings;
+        std::shared_ptr<QMainWindow> _parent;
+        std::function<void()> _parentSettings;
+    };
+
+    typedef enum {
+        h4ke,
+        nap,
+        hkrpg,
+        bh3 // MULTIPLE BACKGROUNDS, DEBUG LOL
+    } QAGL_Game;
+
+    typedef enum {
+        global, // cn defines this as overseas
+        cn
+    } QAGL_Region;
+
     typedef enum {
         Normal,
         Unique_Window
@@ -26,8 +56,10 @@ namespace QAGL {
 Q_OBJECT
     public:
         explicit Landing(const QApplication &app,
-                         std::shared_ptr<SettingsData> settings,
-                         QAGL_App_Style style = QAGL_App_Style::Normal
+            std::shared_ptr<SettingsData> settings,
+            QAGL_App_Style style = QAGL_App_Style::Normal,
+            QAGL_Game game = QAGL_Game::h4ke,
+            QAGL_Region region = QAGL_Region::global
         );
         void show(const QApplication &app);
 
@@ -51,6 +83,7 @@ Q_OBJECT
         std::shared_ptr<QMainWindow> launcher_Window;
         QStackedWidget* launcher_WidgetStack;
         std::shared_ptr<QWebEngineView> launcher_WebEngine;
+        std::shared_ptr<QAGL::LandingWebEnginePage> launcher_WebPage;
 
         // Webkit/Chromium Developer Console
         std::shared_ptr<QMainWindow> devTools_Window;
@@ -75,22 +108,9 @@ Q_OBJECT
         void background_set();
 
         QAGL_App_Style _style = QAGL_App_Style::Normal;
-    };
-
-    class LandingWebEnginePage : public QWebEnginePage
-    {
-Q_OBJECT
-    public:
-        explicit LandingWebEnginePage(QObject* parent = 0) : QWebEnginePage(parent) { }
-        LandingWebEnginePage *setSettingsLambda(std::function<void()>);
-        LandingWebEnginePage *setParentWindow(std::shared_ptr<QMainWindow> ptr);
-        bool acceptNavigationRequest(const QUrl &, NavigationType, bool) override;
-
-        QWebEnginePage *createWindow(WebWindowType type) override;
-    private:
-        std::shared_ptr<QSettings> fakesettings;
-        std::shared_ptr<QMainWindow> _parent;
-        std::function<void()> _parentSettings;
+        QAGL_Game _game = QAGL_Game::h4ke;
+        QAGL_Region _region = QAGL_Region::global;
+        QString bg_gamebiz();
     };
 }
 

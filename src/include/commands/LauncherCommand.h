@@ -54,7 +54,7 @@ private:
 
     //std::shared_ptr<QAction> action_launcher;
     static std::shared_ptr<SettingsData> data;
-
+    static std::unique_ptr<QAGL::Landing> landing;
 };
 
 

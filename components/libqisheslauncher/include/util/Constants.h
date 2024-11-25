@@ -27,11 +27,16 @@ namespace QAGL {
         {
             /* anime */                 const std::string first = atob("Z2Vuc2hpbg==");
             /* animecompany */          const std::string company = atob("bWlob3lv");
+            /* animecompany */          const std::string company_os = atob("aG95b3ZlcnNl");
         }
-    }
 
+    }
+// https://hyp-api.mihoyo.com/hyp/hyp-connect/api/getAllGameBasicInfo?launcher_id=jGHBHlcOq1
     namespace uri {
         const std::string api = "https://sdk-os-static."+ placeholders::lowercase::company +".com/hk4e_global/mdk/launcher/api";
+        const std::string api_os = "https://sdk-os-static."+ placeholders::lowercase::company_os +".com/hk4e_global/mdk/launcher/api";
+        const std::string api_hyp = "https://sg-hyp-api."+ placeholders::lowercase::company_os +".com/hyp/hyp-connect/api/getAllGameBasicInfo";
+        const std::string api_hyp_cn = "https://hyp-api."+ placeholders::lowercase::company +".com/hyp/hyp-connect/api/getAllGameBasicInfo";
         namespace patch {
             const std::string origin = "https://notabug.org/Krock/dawn";
             const std::string additional= "https://dev.kaifa.ch/Maroxy/dawn";
@@ -45,8 +50,10 @@ namespace QAGL {
         };
         const std::string winetricks = "https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks";
     }
-    const std::string versionUri = (uri::api+"/resource?key=gcStgarh&launcher_id=10&language=");
-    const std::string backgroundUri = (uri::api+"/content?filter_adv=true&launcher_id=10&key=gcStgarh&language=");
+    const std::string versionUri = (uri::api_os+"/resource?key=gcStgarh&launcher_id=10&language=");
+    const std::string backgroundUri = (uri::api_os+"/content?filter_adv=true&launcher_id=10&key=gcStgarh&language=");
+    const std::string backgroundUri_hyp = (uri::api_hyp+"?launcher_id=VYTpXlbWo8&language=");
+    const std::string backgroundUri_hyp_cn = (uri::api_hyp+"?launcher_id=jGHBHlcOq1");
 }
 
 #endif //QAGL_CONSTANTS_H

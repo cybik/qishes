@@ -29,6 +29,7 @@
 const QString LauncherCommand::CommandSpecifier = "launcher";
 
 std::shared_ptr<SettingsData> LauncherCommand::data = nullptr;
+std::unique_ptr<QAGL::Landing> LauncherCommand::landing = nullptr;
 
 std::shared_ptr<QAction> LauncherCommand::get_action_exit() {
     action_exit = std::make_shared<QAction>();
@@ -94,10 +95,16 @@ void LauncherCommand::mbox() {
 }
 
 void LauncherCommand::launcher() {
-    data = SettingsData::getSettingsData();
-    std::unique_ptr<QAGL::Landing> landing = std::make_unique<QAGL::Landing>(
-        *this_app, std::move(data), QAGL::QAGL_App_Style::Normal
-    );
+    if (!data) data = SettingsData::getSettingsData(); // todo: refresh
+    if (!landing) {
+        landing = std::make_unique<QAGL::Landing>(
+            *this_app,
+            std::move(data),
+            QAGL::QAGL_App_Style::Normal
+            //QAGL::QAGL_Game::h4ke, // Genshin
+            //QAGL::QAGL_Region::global // Global
+        );
+    }
     QPixmap pix;
     pix.loadFromData(QByteArray::fromBase64(qiqi_smol.toLocal8Bit(), QByteArray::Base64Encoding));
     landing->show(*this_app);

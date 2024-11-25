@@ -38,22 +38,65 @@ namespace QAGL {
         devTools_Window->show();
     }
 
+    QString Landing::bg_gamebiz() {
+        QString bg_endswith = (
+            _region == QAGL_Region::cn
+            ? "cn"
+            : "global"
+        );
+        switch (_game) {
+        case h4ke: return ("hk4e_" + bg_endswith);
+        case nap: return ("nap_" + bg_endswith);
+        case bh3: return ("bh3_" + bg_endswith);
+        case hkrpg: return ("hkrpg_" + bg_endswith);
+        }
+    }
+
     void Landing::background_set() {
+        QString back = "";
+        // TODO: game selection. Initial: support for hk4e only
+        if (!background->isNull()
+            && (*background)["data"].isObject()
+            && (*background)["data"]["game_info_list"].isArray()
+        ) {
+            for (auto elem: (*background)["data"]["game_info_list"].toArray()) {
+                if (!elem.isUndefined()
+                    && elem.toObject()["game"].isObject()
+                    && elem.toObject()["backgrounds"].isArray()
+                ) {
+                    if (elem.toObject()["game"].toObject()["biz"].isString()) {
+                        if (elem.toObject()["game"].toObject()["biz"].toString().compare(bg_gamebiz()) == 0) {
+                            back =
+                                elem.toObject()["backgrounds"]
+                                    .toArray().at(0).toObject()["background"]
+                                    .toObject()["url"].toString();
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        /*
         QString back = background->object().find("data").value().toObject()
                 .find("adv").value().toObject()
-                .find("background").value().toString();
-        launcher_WebEngine->page()->runJavaScript(
-            "document.body.background = ('"+back+"');",
-            [this](const QVariant& var) {
-                networkRequest.reset();
-                launcher_Window->show();
-            }
-        );
+                .find("background").value().toString();*/
+        if (!back.isEmpty()) {
+            launcher_WebEngine->page()->runJavaScript(
+                "document.body.background = ('"+back+"');",
+                [this](const QVariant& var) {
+                    networkRequest.reset();
+                    launcher_Window->show();
+                }
+            );
+        } else {
+            launcher_Window->show();
+        }
     }
 
     // Final method after getting background URL, load up
     void Landing::background_req(QNetworkReply *reply) {
         background = std::make_shared<QJsonDocument>(QJsonDocument::fromJson(reply->readAll()));
+        //std::cout << reply->url().toString().toStdString() << std::endl;
         background_set();
     }
 
@@ -66,7 +109,8 @@ namespace QAGL {
                     this, SLOT(background_req(QNetworkReply*))
                 );
             }
-            networkRequest = std::make_shared<QNetworkRequest>(QUrl((backgroundUri + "en-us").c_str()));
+            //networkRequest = std::make_shared<QNetworkRequest>(QUrl((backgroundUri + "en-us").c_str()));
+            networkRequest = std::make_shared<QNetworkRequest>(QUrl((backgroundUri_hyp + "en-us").c_str()));
             networkLink->get(*networkRequest);
             return;
         }
@@ -101,12 +145,12 @@ namespace QAGL {
                             auto in_data = std::make_shared<QJsonDocument>(
                                 QJsonDocument::fromJson(reply->readAll())
                             );
-                            std::cout << in_data->toJson().toStdString() << std::endl;
+                            //std::cout << in_data->toJson().toStdString() << std::endl;
                         }
                     );
                 }
                 networkRequest_data = std::make_shared<QNetworkRequest>(QUrl((versionUri + "en-us").c_str()));
-                std::cout << (versionUri + "en-us") << std::endl;
+                //std::cout << (versionUri + "en-us") << std::endl;
                 networkLink_data->get(*networkRequest_data);
             }
             return;
@@ -152,7 +196,12 @@ namespace QAGL {
         }
     }
 
-    Landing::Landing(const QApplication &app, std::shared_ptr<SettingsData> settings, QAGL::QAGL_App_Style style) {
+    Landing::Landing(
+        const QApplication &app, std::shared_ptr<SettingsData> settings, QAGL::QAGL_App_Style style,
+        QAGL::QAGL_Game game, QAGL::QAGL_Region region
+    ) {
+        _game = game;
+        _region = region;
         _configData = settings;
 
         launcher_Window = std::make_shared<QMainWindow>();
@@ -173,13 +222,9 @@ namespace QAGL {
         launcher_WebEngine = std::make_shared<QWebEngineView>();
         launcher_WebEngine->setContextMenuPolicy(Qt::NoContextMenu);
         launcher_WebEngine->setAcceptDrops(false);
-        launcher_WebEngine->setPage(
-            (new LandingWebEnginePage())
-                ->setSettingsLambda([this]() {
-                    //this->load_settings();
-                })
-                ->setParentWindow(launcher_Window)
-        );
+        launcher_WebPage = std::make_shared<QAGL::LandingWebEnginePage>();
+        launcher_WebPage->setParentWindow(launcher_Window);
+        launcher_WebEngine->setPage(launcher_WebPage.get());
         inject_stylesheet();
         inject_settings();
         QObject::connect(
@@ -227,12 +272,14 @@ namespace QAGL {
     */
 
     QString Landing::generate_url() {
-        return QString("https://")
+        auto ret = QString("https://")
                 .append(placeholders::lowercase::first.c_str()).append(".")
-                .append(placeholders::lowercase::company.c_str())
+                .append(placeholders::lowercase::company_os.c_str())
                 .append(".com/launcher/10/en-us?api_url=https%3A%2F%2Fapi-os-takumi.")
                 .append(placeholders::lowercase::company.c_str())
                 .append(".com%2Fhk4e_global&key=gcStgarh&prev=false");
+        //std::cout << ret.toStdString() << std::endl;
+        return ret;
     }
 
     void Landing::show(const QApplication &app) {
@@ -262,13 +309,15 @@ namespace QAGL {
         return true;
     }
 
+    /*
     LandingWebEnginePage* LandingWebEnginePage::setSettingsLambda(std::function<void()> lambda) {
         _parentSettings = std::move(lambda);
         return this;
     }
+    */
 
-    LandingWebEnginePage* LandingWebEnginePage::setParentWindow(std::shared_ptr<QMainWindow> ptr) {
+    void LandingWebEnginePage::setParentWindow(std::shared_ptr<QMainWindow> ptr) {
         _parent = ptr;
-        return this;
+        //return this;
     }
 }
