@@ -17,7 +17,7 @@
 class Discord {
 public:
     static std::shared_ptr<Discord> get_instance();
-    void                            report_presence_message(QString msg);
+    std::shared_ptr<Discord> report_presence_message(QString msg);
     void quit();
 
 private:

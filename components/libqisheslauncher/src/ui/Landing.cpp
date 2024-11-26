@@ -203,8 +203,8 @@ namespace QAGL {
     }
 
     Landing::Landing(
-        const QApplication &app, std::shared_ptr<SettingsData> settings, QAGL::QAGL_App_Style style,
-        QAGL::QAGL_Game game, QAGL::QAGL_Region region
+        const QApplication &app, std::shared_ptr<SettingsData> settings,
+        QAGL::QAGL_App_Style style, QAGL::QAGL_Game game, QAGL::QAGL_Region region
     ) {
         _game = game;
         _region = region;

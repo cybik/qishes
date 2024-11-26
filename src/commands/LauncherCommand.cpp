@@ -51,8 +51,6 @@ void LauncherCommand::launcher() {
             //QAGL::QAGL_Region::global // Global
         );
     }
-    QPixmap pix;
-    pix.loadFromData(QByteArray::fromBase64(qiqi_smol.toLocal8Bit(), QByteArray::Base64Encoding));
     dis->report_presence_message("qishes on main");
     landing->show(*this_app);
 }
@@ -81,8 +79,7 @@ void LauncherCommand::command_process_parser() {
 }
 
 int LauncherCommand::command_run() {
-    dis = Discord::get_instance();
-    dis->report_presence_message("qishes loading");
+    dis = Discord::get_instance()->report_presence_message("qishes loading");
 
     generate_tray_icon()->show();
 
@@ -95,9 +92,7 @@ std::shared_ptr<QAction> LauncherCommand::get_action_launcher_test() {
     action_launch->setText("Test Launch");
     QObject::connect(
         action_launch.get(), &QAction::triggered, // Signal
-        [&](bool) {
-            launcher();
-        }
+        [&](bool) { launcher(); }
     );
 
     return action_launch;
@@ -113,10 +108,8 @@ std::shared_ptr<QSystemTrayIcon> LauncherCommand::generate_tray_icon() {
     tray = std::make_shared<QSystemTrayIcon>();
     tray->setContextMenu(generate_menu().get());
     QObject::connect(
-            tray.get(), &QSystemTrayIcon::activated,
-            [&](QSystemTrayIcon::ActivationReason) {
-                tray->contextMenu()->show();
-            }
+        tray.get(), &QSystemTrayIcon::activated,
+        [&](QSystemTrayIcon::ActivationReason) { tray->contextMenu()->show(); }
     );
 
     return tray;

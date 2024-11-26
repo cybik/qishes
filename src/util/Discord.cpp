@@ -23,12 +23,13 @@ std::shared_ptr<Discord> Discord::get_instance() {
     return _instance;
 }
 
-void Discord::report_presence_message(QString msg) {
+std::shared_ptr<Discord> Discord::report_presence_message(QString msg) {
     DiscordRichPresence* drp = new DiscordRichPresence();
     drp->details = msg.toStdString().c_str();
     drp->startTimestamp = start.time_since_epoch().count();
 
     Discord_UpdatePresence(drp);
+    return _instance;
 }
 
 void Discord::quit() {

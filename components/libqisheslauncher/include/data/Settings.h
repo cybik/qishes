@@ -6,12 +6,7 @@
 #define QAGL_SETTINGS_H
 
 #include <string>
-#include <list>
 #include <yaml-cpp/yaml.h>
-
-#include <tuple>
-
-//#include <ui/settings/util/SettingsControls.h>
 
 class SettingsParsing {
 public:
@@ -115,7 +110,7 @@ public:
 
 class Settings : protected SettingsParsing {
 public:
-    Settings() = default; // TODO: config being initiated.
+    Settings() = default; // TODO: config being initialized.
     Settings(const YAML::Node& file);
     void parse(const YAML::Node& file) override;
     std::unique_ptr<YAML::Node> generate() override;

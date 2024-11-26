@@ -10,11 +10,7 @@
 
 #pragma once
 
-#include <QMenu>
 #include "AbstractCommand.h"
-#include <QSystemTrayIcon>
-#include <QMainWindow>
-#include <QDockWidget>
 
 #include <ui/Landing.h>
 #include <util/Discord.h>
@@ -27,7 +23,6 @@ public:
     LauncherCommand() = default;
 
 protected:
-    void mbox();
     void launcher();
     void command_create_application(int& argc, char **argv) override;
     void command_setup_parser() override;
@@ -43,13 +38,8 @@ private:
 
     std::shared_ptr<QMenu> tray_menu;
     std::shared_ptr<QAction> action_exit;
-    std::shared_ptr<QAction> action_init;
-    std::shared_ptr<QAction> action_ping;
-    std::shared_ptr<QAction> action_dial;
     std::shared_ptr<QAction> action_launch;
     std::shared_ptr<QSystemTrayIcon> tray;
-    std::shared_ptr<QMainWindow> qmw;
-    std::shared_ptr<QDockWidget> qdw;
 
     std::shared_ptr<Discord> dis;
     //std::shared_ptr<QAction> action_launcher;

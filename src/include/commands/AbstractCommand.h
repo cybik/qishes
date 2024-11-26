@@ -10,7 +10,6 @@
 #pragma once
 
 #include <QString>
-#include <QFile>
 
 #include <common.h>
 #include <QFileSystemModel>
