@@ -19,3 +19,6 @@
 [submodule "3rdParty/libsass"]
 	path = 3rdParty/libsass
 	url = https://github.com/sass/libsass.git
+[submodule "3rdParty/discord-rpc-classic"]
+	path = 3rdParty/discord-rpc-classic
+	url = https://github.com/discord/discord-rpc.git

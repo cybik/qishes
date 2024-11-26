@@ -9,6 +9,8 @@
 #include <cstdint>
 #endif
 
+#include <tuple>
+
 namespace discord {
 
 enum class Result {

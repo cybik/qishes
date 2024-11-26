@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 #include "types.h"
 
 namespace discord {
@@ -9,9 +11,15 @@ public:
     ~UserManager() = default;
 
     Result GetCurrentUser(User* currentUser);
+    std::tuple<Result, std::shared_ptr<User>> GetCurrentUser();
+
     void GetUser(UserId userId, std::function<void(Result, User const&)> callback);
+
     Result GetCurrentUserPremiumType(PremiumType* premiumType);
+    std::tuple<Result, std::shared_ptr<PremiumType>> GetCurrentUserPremiumType();
+
     Result CurrentUserHasFlag(UserFlag flag, bool* hasFlag);
+    std::tuple<Result, bool> CurrentUserHasFlag(UserFlag flag);
 
     Event<> OnCurrentUserUpdate;
 

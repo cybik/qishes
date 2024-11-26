@@ -41,7 +41,8 @@ include("${CMAKE_SOURCE_DIR}/cmake/RpathDefinitions.cmake")
 add_subdirectory("${PROJECT_3RDPARTY_DIR}/yaml-cpp")
 #add_subdirectory("${PROJECT_3RDPARTY_DIR}/libsass")
 add_subdirectory("${PROJECT_3RDPARTY_DIR}/termcolor")
-add_subdirectory("${PROJECT_3RDPARTY_DIR}/discord-game-sdk")
+#add_subdirectory("${PROJECT_3RDPARTY_DIR}/discord-game-sdk")
+#add_subdirectory("${PROJECT_3RDPARTY_DIR}/discord-rpc-classic")
 add_subdirectory("${PROJECT_3RDPARTY_DIR}/qthttpclient")
 add_subdirectory("${PROJECT_3RDPARTY_DIR}/QAdwaitaDeco") # todo: needed or not?
 
@@ -70,7 +71,9 @@ include_directories(
         "${PROJECT_3RDPARTY_DIR}/yaml-cpp/include"
         "${PROJECT_3RDPARTY_DIR}/termcolor/include"
         "${PROJECT_3RDPARTY_DIR}/spinnersplusplus"
-        "${PROJECT_3RDPARTY_DIR}/discord-game-sdk/include"
+        #"${PROJECT_3RDPARTY_DIR}/discord-rpc-classic/include"
+        "${PROJECT_3RDPARTY_DIR}/discord-rpc-classic-bin/include"
+        #"${PROJECT_3RDPARTY_DIR}/discord-game-sdk/include"
 )
 
 PreconfigureApplicationRpath()
@@ -87,6 +90,7 @@ set(
         "${PROJECT_SOURCE_DIR}/data/wishlog.cpp"
 
         "${PROJECT_SOURCE_DIR}/util/log.cpp"
+        "${PROJECT_SOURCE_DIR}/util/Discord.cpp"
 
         "${PROJECT_SOURCE_DIR}/commands/DataCommand.cpp"
         "${PROJECT_SOURCE_DIR}/commands/DaemonCommand.cpp"
@@ -103,6 +107,7 @@ set(
         "${PROJECT_SOURCE_DIR}/include/data/wishlog.h"
 
         "${PROJECT_SOURCE_DIR}/include/util/log.h"
+        "${PROJECT_SOURCE_DIR}/include/util/Discord.h"
 
         "${PROJECT_SOURCE_DIR}/include/commands/DataCommand.h"
         "${PROJECT_SOURCE_DIR}/include/commands/AbstractCommand.h"
@@ -143,10 +148,12 @@ target_link_libraries(
         vlvproton
         httpclient
         qisheslauncher
-        discord-game-sdk-interface
+        #discord-rpc
+        #discord-game-sdk-interface
 
         # todo: fix this bloody thing tbh
         "${PROJECT_3RDPARTY_DIR}/libsass/lib/libsass.a"
+        "${PROJECT_3RDPARTY_DIR}/discord-rpc-classic-bin/lib/libdiscord-rpc.so"
 )
 
 add_dependencies(
@@ -168,7 +175,8 @@ list(
         "gachasteam"
         "qisheslauncher"
         "vlvproton"
-        "discord-game-sdk-interface"
+        #"discord-rpc"
+        #"discord-game-sdk-interface"
         "qadwaitadecorations"
 )
 

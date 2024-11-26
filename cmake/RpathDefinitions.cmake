@@ -87,7 +87,8 @@ function(AutoconfigureApplicationRpath targetproj dependencies)
     endforeach()
 
     # Discord SDK library
-    set(DISCORD_FORCED_LIB_FILE "${PROJECT_3RDPARTY_DIR}/discord-game-sdk/lib/linux/x86_64/libdiscord_game_sdk.so")
+    set(DISCORD_FORCED_LIB_FILE "${PROJECT_3RDPARTY_DIR}/discord-rpc-classic-bin/lib/libdiscord-rpc.so")
+    #set(DISCORD_FORCED_LIB_FILE "${PROJECT_3RDPARTY_DIR}/discord-game-sdk/lib/linux/x86_64/libdiscord_game_sdk.so")
     target_link_libraries(
         ${targetproj}
         PRIVATE

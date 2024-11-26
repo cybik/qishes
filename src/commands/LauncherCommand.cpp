@@ -26,6 +26,8 @@
 #include <QWebEngineProfile>
 #include <QWebEnginePage>
 
+#include <chrono>
+
 const QString LauncherCommand::CommandSpecifier = "launcher";
 
 std::shared_ptr<SettingsData> LauncherCommand::data = nullptr;
@@ -38,8 +40,8 @@ std::shared_ptr<QAction> LauncherCommand::get_action_exit() {
     QObject::connect(
             action_exit.get(), &QAction::triggered, // Signal
             [&](bool) {
-                std::cout << "mikkiku" << std::endl;
-                abort();
+                std::cout << "mikkikue" << std::endl;
+                QApplication::quit();
             }
     );
 
@@ -48,14 +50,11 @@ std::shared_ptr<QAction> LauncherCommand::get_action_exit() {
 std::shared_ptr<QAction> LauncherCommand::get_action_rpc_init() {
     action_init = std::make_shared<QAction>();
 
-    action_init->setText("Test init");
+    action_init->setText("Test rpc init");
     QObject::connect(
         action_init.get(), &QAction::triggered, // Signal
         [&](bool) {
-            std::cout << "mikkiku" << std::endl;
-
-            disco = std::make_shared<discord::Activity>();
-            disco->SetApplicationId(478233407323897871);
+            std::shared_ptr<Discord> dis = Discord::get_instance();
         }
     );
 
@@ -65,14 +64,10 @@ std::shared_ptr<QAction> LauncherCommand::get_action_rpc_init() {
 std::shared_ptr<QAction> LauncherCommand::get_action_rpc_ping() {
     action_ping = std::make_shared<QAction>();
 
-    action_ping->setText("Test rpc");
+    action_ping->setText("Test rpc ping");
     QObject::connect(
         action_ping.get(), &QAction::triggered, // Signal
-        [&](bool) {
-            disco->SetState("Bumming Around");
-            disco->SetType(discord::ActivityType::Playing);
-            disco->SetName("Derping Around");
-        }
+        [&](bool) { }
     );
 
     return action_ping;
@@ -107,6 +102,7 @@ void LauncherCommand::launcher() {
     }
     QPixmap pix;
     pix.loadFromData(QByteArray::fromBase64(qiqi_smol.toLocal8Bit(), QByteArray::Base64Encoding));
+    dis->report_presence_message("qishes on main");
     landing->show(*this_app);
 }
 
@@ -115,6 +111,15 @@ void LauncherCommand::command_create_application(int& argc, char **argv) {
     this_app = std::make_shared<QApplication>(argc, argv);
     QApplication::setApplicationName(APPNAME_GEN(.launcher));
     QApplication::setApplicationVersion(APP_VERSION);
+
+    QApplication::connect(
+        this_app.get(), &QApplication::aboutToQuit,
+        [&]() {
+            dis->quit();
+            dis.reset();
+            landing.reset();
+        }
+    );
 }
 
 void LauncherCommand::command_setup_parser() {
@@ -126,6 +131,8 @@ void LauncherCommand::command_process_parser() {
 }
 
 int LauncherCommand::command_run() {
+    dis = Discord::get_instance();
+    dis->report_presence_message("qishes loading");
 
     generate_tray_icon()->show();
 
@@ -162,9 +169,9 @@ std::shared_ptr<QAction> LauncherCommand::get_action_launcher_test() {
 std::shared_ptr<QMenu> LauncherCommand::generate_menu() {
     tray_menu = std::make_shared<QMenu>();
 
-    tray_menu->addAction(get_action_rpc_init().get());
-    tray_menu->addAction(get_action_rpc_ping().get());
-    tray_menu->addAction(get_action_dialog_test().get());
+    //tray_menu->addAction(get_action_rpc_init().get());
+    //tray_menu->addAction(get_action_rpc_ping().get());
+    //tray_menu->addAction(get_action_dialog_test().get());
     tray_menu->addAction(get_action_launcher_test().get());
     tray_menu->addAction(get_action_exit().get());
     //tray_menu->triggered(get_action_exit().get());
@@ -180,7 +187,7 @@ std::shared_ptr<QSystemTrayIcon> LauncherCommand::generate_tray_icon() {
             tray.get(), &QSystemTrayIcon::activated,
             [=](QSystemTrayIcon::ActivationReason trigger_event) {
                 std::cout << "mikkikuu" << std::endl;
-                abort();
+                tray->contextMenu()->show();
             }
     );
 

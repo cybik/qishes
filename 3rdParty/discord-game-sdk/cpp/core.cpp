@@ -9,13 +9,37 @@
 
 namespace discord {
 
+std::tuple<Result, std::shared_ptr<Core>> Core::Create(ClientId clientId, std::uint64_t flags) {
+    std::shared_ptr<Core> instance = std::shared_ptr<Core>(new Core());
+    DiscordCreateParams params{};
+    DiscordCreateParamsSetDefault(&params);
+    params.client_id = clientId;
+    params.flags = flags;
+    params.events = nullptr;
+    params.event_data = instance.get();
+    params.user_events = &UserManager::events_;
+    params.activity_events = &ActivityManager::events_;
+    params.relationship_events = &RelationshipManager::events_;
+    params.lobby_events = &LobbyManager::events_;
+    params.network_events = &NetworkManager::events_;
+    params.overlay_events = &OverlayManager::events_;
+    params.store_events = &StoreManager::events_;
+    params.voice_events = &VoiceManager::events_;
+    params.achievement_events = &AchievementManager::events_;
+    auto result = DiscordCreate(DISCORD_VERSION, &params, &(instance->internal_));
+    if (result != DiscordResult_Ok || !instance->internal_) {
+        instance.reset();
+    }
+    return std::make_tuple(Result(result), instance);
+}
+
 Result Core::Create(ClientId clientId, std::uint64_t flags, Core** instance)
 {
     if (!instance) {
         return Result::InternalError;
     }
 
-    (*instance) = new Core();
+    (*instance) = new Core(); // todo: shared pointer / unique pointer
     DiscordCreateParams params{};
     DiscordCreateParamsSetDefault(&params);
     params.client_id = clientId;

@@ -14,11 +14,15 @@
 #include "voice_manager.h"
 #include "achievement_manager.h"
 
+#include <memory>
+#include <tuple>
+
 namespace discord {
 
 class Core final {
 public:
     static Result Create(ClientId clientId, std::uint64_t flags, Core** instance);
+    static std::tuple<Result, std::shared_ptr<Core>> Create(ClientId clientId, std::uint64_t flags);
 
     ~Core();
 

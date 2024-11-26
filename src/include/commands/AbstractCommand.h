@@ -18,8 +18,6 @@
 #include <data/wishlog.h>
 #include <QApplication>
 
-#include <discord.h>
-
 class AbstractCommand {
 
 public:

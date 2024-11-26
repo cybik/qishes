@@ -40,6 +40,14 @@ Result UserManager::GetCurrentUser(User* currentUser)
     return static_cast<Result>(result);
 }
 
+std::tuple<Result, std::shared_ptr<User>> UserManager::GetCurrentUser() {
+    std::shared_ptr<User> currentUser = std::make_shared<User>();
+    auto result =
+      internal_->get_current_user(internal_, reinterpret_cast<DiscordUser*>(currentUser.get()));
+    return std::make_tuple(Result(result), currentUser);
+}
+
+
 void UserManager::GetUser(UserId userId, std::function<void(Result, User const&)> callback)
 {
     static auto wrapper = [](void* callbackData, EDiscordResult result, DiscordUser* user) -> void {

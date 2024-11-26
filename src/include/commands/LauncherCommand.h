@@ -17,6 +17,9 @@
 #include <QDockWidget>
 
 #include <ui/Landing.h>
+#include <util/Discord.h>
+
+//#include <discord.h>
 
 class LauncherCommand : public AbstractCommand {
 public:
@@ -48,10 +51,10 @@ private:
     std::shared_ptr<QAction> action_dial;
     std::shared_ptr<QAction> action_launch;
     std::shared_ptr<QSystemTrayIcon> tray;
-    std::shared_ptr<discord::Activity> disco;
     std::shared_ptr<QMainWindow> qmw;
     std::shared_ptr<QDockWidget> qdw;
 
+    std::shared_ptr<Discord> dis;
     //std::shared_ptr<QAction> action_launcher;
     static std::shared_ptr<SettingsData> data;
     static std::unique_ptr<QAGL::Landing> landing;
