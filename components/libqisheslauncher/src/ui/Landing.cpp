@@ -85,14 +85,20 @@ namespace QAGL {
                 "document.body.background = ('"+back+"');",
                 [this](const QVariant& var) {
                     networkRequest.reset();
-                    launcher_Window->show();
+                    everythingHasLoaded();
                 }
             );
         } else {
-            launcher_Window->show();
+            everythingHasLoaded();
         }
     }
 
+    void Landing::everythingHasLoaded() {
+        if (launcher_loaded == false) {
+            launcher_loaded = true;
+        }
+        launcher_Window->show();
+    }
     // Final method after getting background URL, load up
     void Landing::background_req(QNetworkReply *reply) {
         background = std::make_shared<QJsonDocument>(QJsonDocument::fromJson(reply->readAll()));
@@ -283,7 +289,10 @@ namespace QAGL {
     }
 
     void Landing::show(const QApplication &app) {
-        launcher_WebEngine->load(QUrl(generate_url()));
+        if (launcher_loaded)
+            everythingHasLoaded();
+        else
+            launcher_WebEngine->load(QUrl(generate_url()));
     }
 
     QWebEnginePage * LandingWebEnginePage::createWindow(WebWindowType type) {

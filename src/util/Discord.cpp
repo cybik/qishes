@@ -35,7 +35,6 @@ void Discord::quit() {
     Discord_Shutdown();
 }
 
-
 Discord::Discord() {
     Discord_Initialize(
         "478233407323897871",

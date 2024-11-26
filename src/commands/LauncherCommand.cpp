@@ -12,19 +12,11 @@
 
 #include <QApplication>
 
-
 #include <QObject>
 
 #include <iostream>
 
-#include <QWindow>
-
-#include <QGuiApplication>
-#include <QScreen>
-
 #include <QWebEngineView>
-#include <QWebEngineProfile>
-#include <QWebEnginePage>
 
 #include <chrono>
 
@@ -46,47 +38,6 @@ std::shared_ptr<QAction> LauncherCommand::get_action_exit() {
     );
 
     return action_exit;
-}
-std::shared_ptr<QAction> LauncherCommand::get_action_rpc_init() {
-    action_init = std::make_shared<QAction>();
-
-    action_init->setText("Test rpc init");
-    QObject::connect(
-        action_init.get(), &QAction::triggered, // Signal
-        [&](bool) {
-            std::shared_ptr<Discord> dis = Discord::get_instance();
-        }
-    );
-
-    return action_init;
-}
-
-std::shared_ptr<QAction> LauncherCommand::get_action_rpc_ping() {
-    action_ping = std::make_shared<QAction>();
-
-    action_ping->setText("Test rpc ping");
-    QObject::connect(
-        action_ping.get(), &QAction::triggered, // Signal
-        [&](bool) { }
-    );
-
-    return action_ping;
-}
-
-void LauncherCommand::mbox() {
-    qmw = std::make_shared<QMainWindow>();
-    qmw->setFixedSize(800, 600);
-    qmw->setWindowTitle("Test Dialog");
-    qmw->setWindowState(Qt::WindowActive);
-    qmw->setMinimumSize(800, 600);
-    qmw->setBaseSize(800, 600);
-    qmw->move(
-        QGuiApplication::primaryScreen()->geometry().center() - qmw->rect().center()
-    );
-    qmw->setVisible(true);
-    qmw->show();
-    qmw->raise();
-    qmw->activateWindow();
 }
 
 void LauncherCommand::launcher() {
@@ -115,7 +66,6 @@ void LauncherCommand::command_create_application(int& argc, char **argv) {
     QApplication::connect(
         this_app.get(), &QApplication::aboutToQuit,
         [&]() {
-            dis->quit();
             dis.reset();
             landing.reset();
         }
@@ -139,19 +89,6 @@ int LauncherCommand::command_run() {
     return this_app->exec();
 }
 
-std::shared_ptr<QAction> LauncherCommand::get_action_dialog_test() {
-    action_dial = std::make_shared<QAction>();
-
-    action_dial->setText("Test Dialog");
-    QObject::connect(
-        action_dial.get(), &QAction::triggered, // Signal
-        [&](bool) {
-            mbox();
-        }
-    );
-
-    return action_dial;
-}
 std::shared_ptr<QAction> LauncherCommand::get_action_launcher_test() {
     action_launch = std::make_shared<QAction>();
 
@@ -168,25 +105,16 @@ std::shared_ptr<QAction> LauncherCommand::get_action_launcher_test() {
 
 std::shared_ptr<QMenu> LauncherCommand::generate_menu() {
     tray_menu = std::make_shared<QMenu>();
-
-    //tray_menu->addAction(get_action_rpc_init().get());
-    //tray_menu->addAction(get_action_rpc_ping().get());
-    //tray_menu->addAction(get_action_dialog_test().get());
-    tray_menu->addAction(get_action_launcher_test().get());
-    tray_menu->addAction(get_action_exit().get());
-    //tray_menu->triggered(get_action_exit().get());
-
+    tray_menu->addActions( { get_action_launcher_test().get(), get_action_exit().get() } );
     return tray_menu;
 }
 
 std::shared_ptr<QSystemTrayIcon> LauncherCommand::generate_tray_icon() {
     tray = std::make_shared<QSystemTrayIcon>();
-    std::cout << "Tray available? " << (tray->isSystemTrayAvailable()?"Yes":"No") << std::endl;
     tray->setContextMenu(generate_menu().get());
     QObject::connect(
             tray.get(), &QSystemTrayIcon::activated,
-            [=](QSystemTrayIcon::ActivationReason trigger_event) {
-                std::cout << "mikkikuu" << std::endl;
+            [&](QSystemTrayIcon::ActivationReason) {
                 tray->contextMenu()->show();
             }
     );

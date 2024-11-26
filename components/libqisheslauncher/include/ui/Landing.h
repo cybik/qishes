@@ -72,6 +72,7 @@ Q_OBJECT
     protected:
     private:
         Landing() = default;
+        void everythingHasLoaded();
         void inject_stylesheet();
         void inject_settings();
         void runBackground();
@@ -100,6 +101,8 @@ Q_OBJECT
         std::shared_ptr<QJsonDocument> background;
 
         std::shared_ptr<SettingsData> _configData;
+
+        std::atomic_bool launcher_loaded = false;
 
         //std::shared_ptr<SettingsWindow> createSettings();
 

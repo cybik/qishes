@@ -39,10 +39,7 @@ private:
     std::shared_ptr<QSystemTrayIcon> generate_tray_icon();
 
     std::shared_ptr<QAction> get_action_exit();
-    std::shared_ptr<QAction> get_action_rpc_ping();
-    std::shared_ptr<QAction> get_action_dialog_test();
     std::shared_ptr<QAction> get_action_launcher_test();
-    std::shared_ptr<QAction> get_action_rpc_init();
 
     std::shared_ptr<QMenu> tray_menu;
     std::shared_ptr<QAction> action_exit;
