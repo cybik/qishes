@@ -66,24 +66,18 @@ namespace QAGL {
                 ) {
                     if (elem.toObject()["game"].toObject()["biz"].isString()) {
                         if (elem.toObject()["game"].toObject()["biz"].toString().compare(bg_gamebiz()) == 0) {
-                            back =
-                                elem.toObject()["backgrounds"]
-                                    .toArray().at(0).toObject()["background"]
-                                    .toObject()["url"].toString();
+                            back = elem.toObject()["backgrounds"]
+                                    .toArray().at(0).toObject()["background"].toObject()["url"].toString();
                             break;
                         }
                     }
                 }
             }
         }
-        /*
-        QString back = background->object().find("data").value().toObject()
-                .find("adv").value().toObject()
-                .find("background").value().toString();*/
         if (!back.isEmpty()) {
             launcher_WebEngine->page()->runJavaScript(
                 "document.body.background = ('"+back+"');",
-                [this](const QVariant& var) {
+                [this](const QVariant&) {
                     networkRequest.reset();
                     everythingHasLoaded();
                 }
@@ -94,33 +88,36 @@ namespace QAGL {
     }
 
     void Landing::everythingHasLoaded() {
-        if (launcher_loaded == false) {
+        if (!launcher_loaded)
             launcher_loaded = true;
-        }
         launcher_Window->show();
     }
+
     // Final method after getting background URL, load up
     void Landing::background_req(QNetworkReply *reply) {
         background = std::make_shared<QJsonDocument>(QJsonDocument::fromJson(reply->readAll()));
-        //std::cout << reply->url().toString().toStdString() << std::endl;
         background_set();
+    }
+
+    QUrl Landing::getLocaleBackgroundUri() const {
+        // if behind the Chinese mainland firewall, return mihoyo-based url
+        //  QUrl((backgroundUri_hyp + "en-us").c_str())
+        return QUrl((backgroundUri_hyp + "en-us").c_str());
     }
 
     void Landing::runBackground() {
         if(!background) {
-            if(networkLink == nullptr) {
-                networkLink = std::make_shared<QNetworkAccessManager>();
+            if(!networkLink) {
                 QObject::connect(
-                    networkLink.get(), SIGNAL(finished(QNetworkReply *)),
-                    this, SLOT(background_req(QNetworkReply*))
+                    (networkLink = std::make_shared<QNetworkAccessManager>()).get(),
+                    &QNetworkAccessManager::finished,
+                    [&](QNetworkReply *reply) { background_req(reply); }
                 );
             }
-            //networkRequest = std::make_shared<QNetworkRequest>(QUrl((backgroundUri + "en-us").c_str()));
-            networkRequest = std::make_shared<QNetworkRequest>(QUrl((backgroundUri_hyp + "en-us").c_str()));
-            networkLink->get(*networkRequest);
-            return;
+            networkLink->get(*(networkRequest = std::make_shared<QNetworkRequest>(getLocaleBackgroundUri())));
+        } else {
+            background_set();
         }
-        background_set();
     }
 
     void Landing::loaded(bool is) {
@@ -142,59 +139,58 @@ namespace QAGL {
                 }
             );
 
-            {
-                if (networkLink_data == nullptr) {
-                    networkLink_data = std::make_shared<QNetworkAccessManager>();
-                    QObject::connect(
-                        networkLink_data.get(), &QNetworkAccessManager::finished,
-                        [](QNetworkReply *reply) {
-                            auto in_data = std::make_shared<QJsonDocument>(
-                                QJsonDocument::fromJson(reply->readAll())
-                            );
-                            //std::cout << in_data->toJson().toStdString() << std::endl;
-                        }
-                    );
-                }
-                networkRequest_data = std::make_shared<QNetworkRequest>(QUrl((versionUri + "en-us").c_str()));
-                //std::cout << (versionUri + "en-us") << std::endl;
-                networkLink_data->get(*networkRequest_data);
+            if (networkLink_data == nullptr) {
+                networkLink_data = std::make_shared<QNetworkAccessManager>();
+                QObject::connect(
+                    networkLink_data.get(), &QNetworkAccessManager::finished,
+                    [](QNetworkReply *reply) {
+                        auto in_data = std::make_shared<QJsonDocument>(
+                            QJsonDocument::fromJson(reply->readAll())
+                        );
+                    }
+                );
             }
-            return;
+            networkRequest_data = std::make_shared<QNetworkRequest>(QUrl((versionUri + "en-us").c_str()));
+            networkLink_data->get(*networkRequest_data);
         }
     }
 
     void Landing::inject_stylesheet() {
-        if(launcher_WebEngine->page()->scripts().isEmpty() ||
-           launcher_WebEngine->page()->scripts().find("cpp-sends-their-regards").empty()
-        ) {
+        if( launcher_WebEngine->page()->scripts().find("cpp-sends-their-regards").empty() ) {
             QWebEngineScript script;
-            QString s = QString::fromLatin1(QAGL_INJECT_STYLESHEET)
-                            .arg("cpp-sends-their-regards")
-                            .arg(SASSProcess(idx_sass.toStdString()).c_str());
-            launcher_WebEngine->page()->runJavaScript(s, QWebEngineScript::ApplicationWorld);
+            script.setSourceCode(
+                QString::fromLatin1(QAGL_INJECT_STYLESHEET)
+                    .arg("cpp-sends-their-regards")
+                    .arg(SASSProcess(idx_sass.toStdString()).c_str())
+            );
 
             script.setName("cpp-sends-their-regards");
-            script.setSourceCode(s);
             script.setInjectionPoint(QWebEngineScript::DocumentReady);
             script.setRunsOnSubFrames(true);
             script.setWorldId(QWebEngineScript::ApplicationWorld);
+
+            // run it first
+            launcher_WebEngine->page()->runJavaScript(script.sourceCode(), QWebEngineScript::ApplicationWorld);
+
+            // inject it as well
             launcher_WebEngine->page()->scripts().insert(script);
         }
     }
 
     void Landing::inject_settings() {
-        if(launcher_WebEngine->page()->scripts().isEmpty() ||
-           launcher_WebEngine->page()->scripts().find("setts").empty()
+        if(launcher_WebEngine->page()->scripts().isEmpty()
+            || launcher_WebEngine->page()->scripts().find("setts").empty()
         ) {
             QWebEngineScript script;
-            QString s = QString::fromLatin1(QAGL_INJECT_SETTINGS)
+            script.setSourceCode(
+                QString::fromLatin1(QAGL_INJECT_SETTINGS)
                             .arg(gear_idle.c_str())
                             .arg(gear_hover.c_str())
-                            .arg(YAAGL_SETTINGS);
-            launcher_WebEngine->page()->runJavaScript(s, QWebEngineScript::ApplicationWorld);
+                            .arg(YAAGL_SETTINGS));
+            launcher_WebEngine->page()->runJavaScript(script.sourceCode(), QWebEngineScript::ApplicationWorld);
 
             script.setName("setts");
-            script.setSourceCode(s);
+            script.setSourceCode(script.sourceCode());
             script.setInjectionPoint(QWebEngineScript::DocumentReady);
             script.setRunsOnSubFrames(true);
             script.setWorldId(QWebEngineScript::ApplicationWorld);
@@ -205,10 +201,7 @@ namespace QAGL {
     Landing::Landing(
         const QApplication &app, std::shared_ptr<SettingsData> settings,
         QAGL::QAGL_App_Style style, QAGL::QAGL_Game game, QAGL::QAGL_Region region
-    ) {
-        _game = game;
-        _region = region;
-        _configData = settings;
+    ) : _configData(settings), _style(style), _game(game), _region(region) {
 
         launcher_Window = std::make_shared<QMainWindow>();
 
@@ -219,10 +212,7 @@ namespace QAGL {
 
         // Menu
         devTools_Combo = std::make_shared<QShortcut>(QKeySequence(Qt::Key_F12), launcher_Window.get());
-        QObject::connect(
-            devTools_Combo.get(), SIGNAL(activated()),
-            this, SLOT(show_dev())
-        );
+        QObject::connect( devTools_Combo.get(), &QShortcut::activated,[&]() { show_dev(); } );
 
         // Web core
         launcher_WebEngine = std::make_shared<QWebEngineView>();
@@ -241,7 +231,6 @@ namespace QAGL {
         // Add the web core to the window
         launcher_WidgetStack = new QStackedWidget(nullptr);
         launcher_WidgetStack->addWidget(launcher_WebEngine.get());
-        _style = style;
         if(style == QAGL_App_Style::Unique_Window) {
             /*
             launcher_WidgetStack->addWidget(createSettings()->getWidget()); // first
@@ -277,15 +266,14 @@ namespace QAGL {
     }
     */
 
-    QString Landing::generate_url() {
-        auto ret = QString("https://")
-                .append(placeholders::lowercase::first.c_str()).append(".")
-                .append(placeholders::lowercase::company_os.c_str())
-                .append(".com/launcher/10/en-us?api_url=https%3A%2F%2Fapi-os-takumi.")
-                .append(placeholders::lowercase::company.c_str())
-                .append(".com%2Fhk4e_global&key=gcStgarh&prev=false");
-        //std::cout << ret.toStdString() << std::endl;
-        return ret;
+    QString Landing::generate_url() const {
+        return QString("https://")
+            .append(placeholders::lowercase::first)
+            .append(".")
+            .append(placeholders::lowercase::company_os)
+            .append(".com/launcher/10/en-us?api_url=https%3A%2F%2Fapi-os-takumi.")
+            .append(placeholders::lowercase::company)
+            .append(".com%2Fhk4e_global&key=gcStgarh&prev=false");
     }
 
     void Landing::show(const QApplication &app) {
@@ -302,16 +290,18 @@ namespace QAGL {
     bool LandingWebEnginePage::acceptNavigationRequest(const QUrl& url, NavigationType _type, bool _ignore) {
         switch (_type) {
             case(QWebEnginePage::NavigationTypeLinkClicked): {
-                QDesktopServices::openUrl(url);
+                if (url.toString().contains(YAAGL_SETTINGS)) {
+                    qDebug() << "WIP: Settings";
+                    if (_parentSettings) _parentSettings();
+                } else {
+                    QDesktopServices::openUrl(url);
+                }
                 return false;
             }
             case (QWebEnginePage::NavigationTypeRedirect): {
                 if (url.toString().contains(YAAGL_SETTINGS)) {
-                    qDebug() << "WIP: Settings";
-                    _parentSettings();
                     return false;
                 }
-                break;
             }
             default: { break; }
         }
@@ -327,6 +317,5 @@ namespace QAGL {
 
     void LandingWebEnginePage::setParentWindow(std::shared_ptr<QMainWindow> ptr) {
         _parent = ptr;
-        //return this;
     }
 }

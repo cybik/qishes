@@ -64,18 +64,24 @@ Q_OBJECT
         void show(const QApplication &app);
 
     public slots:
-        void background_req(QNetworkReply *);
-        void show_dev();
+        void        background_req(QNetworkReply *);
+        QUrl        getLocaleBackgroundUri() const;
+        void        show_dev();
         //void exit_settings();
-        void loaded(bool);
+        void        loaded(bool);
 
     protected:
     private:
         Landing() = default;
-        void everythingHasLoaded();
-        void inject_stylesheet();
-        void inject_settings();
-        void runBackground();
+        void        everythingHasLoaded();
+        void        inject_stylesheet();
+        void        inject_settings();
+        void        runBackground();
+
+        // Utilities
+        QString     generate_url() const;
+        void        background_set();
+        QString     bg_gamebiz();
 
         //void load_settings();
         //std::shared_ptr<SettingsWindow> settings;
@@ -84,7 +90,7 @@ Q_OBJECT
         std::shared_ptr<QMainWindow> launcher_Window;
         QStackedWidget* launcher_WidgetStack;
         std::shared_ptr<QWebEngineView> launcher_WebEngine;
-        std::shared_ptr<QAGL::LandingWebEnginePage> launcher_WebPage;
+        std::shared_ptr<LandingWebEnginePage> launcher_WebPage;
 
         // Webkit/Chromium Developer Console
         std::shared_ptr<QMainWindow> devTools_Window;
@@ -106,14 +112,9 @@ Q_OBJECT
 
         //std::shared_ptr<SettingsWindow> createSettings();
 
-        // Utilities
-        static QString generate_url();
-        void background_set();
-
         QAGL_App_Style _style = QAGL_App_Style::Normal;
         QAGL_Game _game = QAGL_Game::h4ke;
         QAGL_Region _region = QAGL_Region::global;
-        QString bg_gamebiz();
     };
 }
 

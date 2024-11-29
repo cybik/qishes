@@ -37,10 +37,6 @@ namespace QAGL {
         const std::string api_os = "https://sdk-os-static."+ placeholders::lowercase::company_os +".com/hk4e_global/mdk/launcher/api";
         const std::string api_hyp = "https://sg-hyp-api."+ placeholders::lowercase::company_os +".com/hyp/hyp-connect/api/getAllGameBasicInfo";
         const std::string api_hyp_cn = "https://hyp-api."+ placeholders::lowercase::company +".com/hyp/hyp-connect/api/getAllGameBasicInfo";
-        namespace patch {
-            const std::string origin = "https://notabug.org/Krock/dawn";
-            const std::string additional= "https://dev.kaifa.ch/Maroxy/dawn";
-        }
         const std::string launcher_upstream = "https://gitlab.com/KRypt0n_/an-anime-game-launcher";
         const std::string launcher_qagl = "https://gitlab.com/cybik/qt-anime-game-launcher";
         const std::string discord_upstream_qagl = "https://discord.gg/ck37X6UWBp";
