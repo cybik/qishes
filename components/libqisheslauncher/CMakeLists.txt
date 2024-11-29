@@ -158,6 +158,8 @@ target_link_libraries(
         ${QT_VER}::WebEngineCore
         ${QT_VER}::WebEngineWidgets
         # Should be at the root of this whole thing.
+        vlvproton
+        steamintegration
         yaml-cpp
 )
 

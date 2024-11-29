@@ -9,12 +9,15 @@
 #pragma once
 #include <memory>
 
+#include <filesystem>
+
 class SteamEnvironment {
 public:
     static std::shared_ptr<SteamEnvironment>    get_steam_environment_instance();
     bool                                        is_steam_deck();
     bool                                        is_steam_env();
     bool                                        launched_from_steam_client();
+    std::filesystem::path                       getSteamBaseFolder();
 protected:
 private:
     SteamEnvironment() = default;

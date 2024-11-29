@@ -25,6 +25,11 @@ void examine(const QJsonObject& object) {
 }
 #endif
 
+#include <vlvproton.h>
+#include <steam_proton.h>
+
+#include "steam_integration.h"
+
 namespace QAGL {
     void Landing::show_dev() {
         if(!devTools_Window) {
@@ -292,7 +297,24 @@ namespace QAGL {
             case(QWebEnginePage::NavigationTypeLinkClicked): {
                 if (url.toString().contains(YAAGL_SETTINGS)) {
                     qDebug() << "WIP: Settings";
-                    if (_parentSettings) _parentSettings();
+                    //if (_parentSettings) _parentSettings();
+                    auto genshin = QFileDialog::getOpenFileName(
+                        nullptr,
+                        "Get me the genshin",
+                        QString(std::getenv("STEAM_COMPAT_DATA_PATH")), "*.exe"
+                    );
+                    QStringList list;
+                    for (auto str: vlvproton::getInstance()->get_available_protons()) list << str.c_str();
+                    auto proton = QInputDialog::getItem(
+                        nullptr,
+                        "Choose wisely",
+                        "Proton",
+                        list
+                    );
+                    steam_integration::get_steam_integration_instance()->proton()->select(proton.toStdString());
+                    steam_integration::get_steam_integration_instance()->proton()->try_run(
+                        genshin.toStdString()
+                    );
                 } else {
                     QDesktopServices::openUrl(url);
                 }

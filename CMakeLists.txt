@@ -144,7 +144,7 @@ target_link_libraries(
         # Not Qt
         yaml-cpp
         gachafs
-        gachasteam
+        steamintegration
         vlvproton
         httpclient
         qisheslauncher
@@ -172,7 +172,7 @@ list(
     APPEND
     APP_DEPENDENCIES
         "gachafs"
-        "gachasteam"
+        "steamintegration"
         "qisheslauncher"
         "vlvproton"
         #"discord-rpc"

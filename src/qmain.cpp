@@ -14,7 +14,7 @@
 #include <common.h>
 
 #include <gachafs.h>
-#include <gachasteam.h>
+#include <steam_integration.h>
 
 #include <cstdlib>
 
@@ -40,17 +40,16 @@ void enforce_qsg() {
 }
 
 int detect_and_divert(int argc, char *argv[]) {
-    if(gachasteam::get_gachasteam_instance()->running_under_steam())
+    if(steam_integration::get_steam_integration_instance()->running_under_steam())
         return 0;
     return -1; // Base case: not being launched under Steam.
 }
 
 int main(int argc, char *argv[]) {
     if(int d_a_d = detect_and_divert(argc, argv); d_a_d >= 0) {
-        Log::get_logger()->critical("detect online");
-        abort();
-        return d_a_d;
+        Log::get_logger()->critical("running under steam, neato");
     }
+
     // QT6 Linux workaround - somehow QSG Render Loop must be set for CLI apps that don't do windowing bollocks
     enforce_qsg();
     // for now, blast
