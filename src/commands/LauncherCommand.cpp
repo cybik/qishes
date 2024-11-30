@@ -73,6 +73,9 @@ void LauncherCommand::command_create_application(int& argc, char **argv) {
     QApplication::setApplicationName(APPNAME_GEN(.launcher));
     QApplication::setApplicationVersion(APP_VERSION);
 
+    (icon = std::make_shared<QPixmap>())
+        ->loadFromData(QByteArray::fromBase64(qiqi_smol.toLocal8Bit(), QByteArray::Base64Encoding));
+
     QApplication::connect(
         this_app.get(), &QApplication::aboutToQuit,
         [&]() {
@@ -119,6 +122,7 @@ std::shared_ptr<QMenu> LauncherCommand::generate_menu() {
 std::shared_ptr<QSystemTrayIcon> LauncherCommand::generate_tray_icon() {
     tray = std::make_shared<QSystemTrayIcon>();
     tray->setContextMenu(generate_menu().get());
+    tray->setIcon(*icon);
     QObject::connect(
         tray.get(), &QSystemTrayIcon::activated,
         [&](QSystemTrayIcon::ActivationReason) { tray->contextMenu()->show(); }

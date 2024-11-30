@@ -42,6 +42,7 @@ private:
     std::shared_ptr<QSystemTrayIcon> tray;
 
     std::shared_ptr<Discord> dis;
+    std::shared_ptr<QPixmap> icon;
     //std::shared_ptr<QAction> action_launcher;
     static std::shared_ptr<SettingsData> data;
     static std::unique_ptr<QAGL::Landing> landing;
