@@ -38,7 +38,6 @@ std::shared_ptr<proton> vlvproton::get_selected_proton() {
     return mProtons.at(mSelectedProton);
 }
 
-
 void vlvproton::select(std::string key) {
     mSelectedProton = key;
 }
@@ -56,19 +55,18 @@ vlvproton::vlvproton(std::filesystem::path base_dir) {
         std::cout
             << termcolor::bright_magenta
                 << "Proton identified: " << proton_key
-                << termcolor::reset
-                << " at " << termcolor::bright_blue << proton_value->dir()
+            << termcolor::reset
+                << " at "
+            << termcolor::bright_blue
+                << proton_value->dir()
+            << termcolor::reset
         << std::endl;
     }
 }
 
 void vlvproton::identify(std::filesystem::directory_iterator path) {
-    for (const auto& dir : std::filesystem::directory_iterator(path)) {
-        if (dir.is_directory()
-            && !is_symlink(dir)  // skip symlinks
-            && is_regular_file(dir.path() / "proton") // is a Proton runtime
-        ) {
+    // skip symlinks and determine if proton runtime is present
+    for (const auto& dir : std::filesystem::directory_iterator(path))
+        if (dir.is_directory() && !is_symlink(dir) && is_regular_file(dir.path() / "proton") )
             mProtons.emplace(dir.path().filename(), std::make_shared<proton>(dir));
-        }
-    }
 }

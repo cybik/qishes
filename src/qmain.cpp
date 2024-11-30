@@ -18,6 +18,8 @@
 
 #include <cstdlib>
 
+#include <unistd.h>
+
 #define DEFINE_COMMAND(COMMNAME) \
     if(command.compare(COMMNAME::CommandSpecifier, Qt::CaseInsensitive) == 0) \
         return [](int argc, char** argv) { \
@@ -40,8 +42,9 @@ void enforce_qsg() {
 }
 
 int detect_and_divert(int argc, char *argv[]) {
-    if(steam_integration::get_steam_integration_instance()->running_under_steam())
+    if(steam_integration::get_steam_integration_instance()->running_under_steam()) {
         return 0;
+    }
     return -1; // Base case: not being launched under Steam.
 }
 
@@ -54,6 +57,7 @@ int main(int argc, char *argv[]) {
     enforce_qsg();
     // for now, blast
     Log::get_logger()->log_level(Log::LogLevel::Debug);
+
     std::shared_ptr<QCoreApplication> qwishes = std::make_shared<QCoreApplication>(argc, argv);
     QCoreApplication::setApplicationName(APPNAME_GEN());
     QCoreApplication::setApplicationVersion(APP_VERSION);

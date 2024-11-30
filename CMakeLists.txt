@@ -44,6 +44,7 @@ add_subdirectory("${PROJECT_3RDPARTY_DIR}/termcolor")
 #add_subdirectory("${PROJECT_3RDPARTY_DIR}/discord-game-sdk")
 #add_subdirectory("${PROJECT_3RDPARTY_DIR}/discord-rpc-classic")
 add_subdirectory("${PROJECT_3RDPARTY_DIR}/qthttpclient")
+#add_subdirectory("${PROJECT_3RDPARTY_DIR}/qlementine")
 add_subdirectory("${PROJECT_3RDPARTY_DIR}/QAdwaitaDeco") # todo: needed or not?
 
 add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/components")
@@ -138,6 +139,7 @@ target_link_libraries(
         ${QT_VER}::Widgets
         ${QT_VER}::WebEngineCore
         ${QT_VER}::WebEngineWidgets
+        #qlementine
         #QEasyDownloader
         #QArchive
         #qadwaitadecorations

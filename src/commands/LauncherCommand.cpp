@@ -56,8 +56,20 @@ void LauncherCommand::launcher() {
 }
 
 void LauncherCommand::command_create_application(int& argc, char **argv) {
+    // Quirk: Early detection of Bootstrap steam environment
+    if (auto clientlaunch = std::getenv("SteamClientLaunch") ;
+        std::getenv("SteamUser") &&
+            (! clientlaunch || clientlaunch != "1")
+    ) {
+        exit(0);
+    }
+
     QApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
     this_app = std::make_shared<QApplication>(argc, argv);
+    _Argc = argc;
+    for (int i = 0; i < argc; i++) {
+        _Argv.append(argv[i]);
+    }
     QApplication::setApplicationName(APPNAME_GEN(.launcher));
     QApplication::setApplicationVersion(APP_VERSION);
 
