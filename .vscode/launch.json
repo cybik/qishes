@@ -1,12 +1,37 @@
 {
   "configurations": [
     {
+      "name": "Baseline",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/qgachawishes",
+      "args": [ ],
+      "stopAtEntry": false,
+      "cwd": "${fileDirname}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+          {
+              "description": "Activer l'impression en mode Pretty pour gdb",
+              "text": "-enable-pretty-printing",
+              "ignoreFailures": true
+          },
+          {
+              "description": "Définir la version désassemblage sur Intel",
+              "text": "-gdb-set disassembly-flavor intel",
+              "ignoreFailures": true
+          }
+      ]
+    },
+    {
       "name": "History (no dir)",
       "type": "cppdbg",
       "request": "launch",
       "program": "${workspaceFolder}/build/qgachawishes",
       "args": [
-        "history"
+        "history",
+        "-g", "${HOME}/.steam/root/steamapps/compatdata/3585780814/pfx/drive_c/HoyoPlay/Games/Genshin"
       ],
       "stopAtEntry": false,
       "cwd": "${fileDirname}",
@@ -32,7 +57,8 @@
       "request": "launch",
       "program": "${workspaceFolder}/build/qgachawishes",
       "args": [
-        "history"
+        "data",
+        "-g", "${HOME}/.steam/root/steamapps/compatdata/3585780814/pfx/drive_c/HoyoPlay/Games/Genshin"
       ],
       "stopAtEntry": false,
       "cwd": "${fileDirname}",
