@@ -19,6 +19,7 @@
 #include <QWebEngineView>
 
 #include <chrono>
+#include "steam_integration.h"
 
 const QString LauncherCommand::CommandSpecifier = "launcher";
 
@@ -40,18 +41,67 @@ std::shared_ptr<QAction> LauncherCommand::get_action_exit() {
     return action_exit;
 }
 
+void LauncherCommand::setupRibbonWindow() {
+    // Cool thing?
+    given->setRibbonTheme(SARibbonTheme::RibbonThemeDark);
+    given->ribbonBar()->setRibbonStyle(SARibbonBar::RibbonStyleCompactTwoRow);
+    given->ribbonBar()->setMinimumMode(true);
+    given->ribbonBar()->setTabOnTitle(true);
+    given->ribbonBar()->applicationButton()->setText("moo");
+    given->ribbonBar()->applicationButton()->setToolTip("moo");
+
+    given->windowButtonBar()->setupMaximizeButton(false);
+    given->windowButtonBar()->connect(
+    given->windowButtonBar()
+            ->addAction("Proton", QIcon(), Qt::ToolButtonTextOnly),
+        &QAction::triggered,
+        [&](bool) {
+            QStringList list;
+            for (auto str: vlvproton::getInstance()->get_available_protons()) list << str.c_str();
+            auto proton = QInputDialog::getItem(
+                nullptr,
+                "Choose wisely",
+                "Proton",
+                list
+            );
+            steam_integration::get_steam_integration_instance()->proton()->select(proton.toStdString());
+        }
+        );
+    given->windowButtonBar()->connect(
+    given->windowButtonBar()
+            ->addAction("Executable", QIcon(), Qt::ToolButtonTextOnly),
+        &QAction::triggered,
+        [&](bool) {
+            target_exec = QFileDialog::getOpenFileName(
+                nullptr,
+                "Get me the genshin",
+                QString(std::getenv("STEAM_COMPAT_DATA_PATH")), "*.exe"
+            );
+        }
+    );
+    //given->windowButtonBar()->setWindowTitle("test");
+}
+
 void LauncherCommand::launcher() {
     if (!data) data = SettingsData::getSettingsData(); // todo: refresh
     if (!landing) {
+        given = std::make_shared<SARibbonMainWindow>();
+
         landing = std::make_unique<QAGL::Landing>(
             *this_app,
             std::move(data),
-            QAGL::QAGL_App_Style::Normal
-            //QAGL::QAGL_Game::h4ke, // Genshin
-            //QAGL::QAGL_Region::global // Global
+            QAGL::QAGL_App_Style::Normal,
+            QAGL::QAGL_Game::h4ke, // Genshin
+            QAGL::QAGL_Region::global, // Global
+            given
         );
+
+        setupRibbonWindow();
+        landing->hint_titlebar_height(given->ribbonBar()->titleBarHeight());
+
     }
     dis->report_presence_message("qishes on main");
+
     landing->show(*this_app);
 }
 
@@ -59,12 +109,13 @@ void LauncherCommand::command_create_application(int& argc, char **argv) {
     // Quirk: Early detection of Bootstrap steam environment
     if (auto clientlaunch = std::getenv("SteamClientLaunch") ;
         std::getenv("SteamUser") &&
-            (! clientlaunch || clientlaunch != "1")
+            (! clientlaunch || strcmp(clientlaunch, "1") == 0)
     ) {
         exit(0);
     }
 
     QApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
+    QApplication::setAttribute(Qt::AA_DontCreateNativeWidgetSiblings); // QWindowKit
     this_app = std::make_shared<QApplication>(argc, argv);
     _Argc = argc;
     for (int i = 0; i < argc; i++) {

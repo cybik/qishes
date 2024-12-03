@@ -1,5 +1,6 @@
 
 set(PROJECT_3RDPARTY_DIR "${CMAKE_SOURCE_DIR}/3rdParty")
+set(PROJECT_BIN_3RDPARTY_DIR "${CMAKE_CURRENT_BINARY_DIR}/3rdParty")
 
 macro(PreconfigureApplicationRpath)
     # Bringing in past experience / knowledge
@@ -49,6 +50,17 @@ macro(PreconfigureLibraryRpath)
 endmacro()
 
 macro(ProcessLibraryForPackaging targetproj targetlib)
+    add_custom_command(
+        TARGET
+            ${targetproj}
+        POST_BUILD
+        COMMAND
+            echo "- Subproject Lib :: Fixing RPath for $<TARGET_FILE:${targetlib}> manually" &&
+            export ORIGIN="$$ORIGIN" &&
+            bash -c '[[ $<TARGET_FILE:${targetlib}> == *.a ]]'
+                && echo "Static lib, skipping"
+                || patchelf --set-rpath "\\$$ORIGIN" "$<TARGET_FILE:${targetlib}>"
+    )
     add_custom_command(
         TARGET
             ${targetproj}
@@ -134,3 +146,4 @@ function(AutoconfigureLibraryRpath targetproj dependencies)
     RestoreSONames("${targetproj}")
 
 endfunction()
+

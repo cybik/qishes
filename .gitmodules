@@ -22,3 +22,9 @@
 [submodule "3rdParty/discord-rpc-classic"]
 	path = 3rdParty/discord-rpc-classic
 	url = https://github.com/discord/discord-rpc.git
+[submodule "3rdParty/qwindowkit"]
+	path = 3rdParty/qwindowkit
+	url = https://github.com/stdware/qwindowkit.git
+[submodule "3rdParty/saribbon"]
+	path = 3rdParty/saribbon
+	url = git@github.com:cybik/SARibbon.git

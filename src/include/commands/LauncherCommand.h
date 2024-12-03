@@ -15,7 +15,11 @@
 #include <ui/Landing.h>
 #include <util/Discord.h>
 
+#include <core/qwkglobal.h>
+#include <widgets/widgetwindowagent.h>
+
 //#include <discord.h>
+#include <SARibbon.h>
 
 class LauncherCommand : public AbstractCommand {
 public:
@@ -34,6 +38,7 @@ private:
     std::shared_ptr<QSystemTrayIcon> generate_tray_icon();
 
     std::shared_ptr<QAction> get_action_exit();
+    void                     setupRibbonWindow();
     std::shared_ptr<QAction> get_action_launcher_test();
 
     std::shared_ptr<QMenu> tray_menu;
@@ -48,6 +53,11 @@ private:
     static std::unique_ptr<QAGL::Landing> landing;
     int _Argc;
     QList<QString> _Argv;
+
+    // title shit
+    std::shared_ptr<SARibbonMainWindow> given;
+    std::shared_ptr<SARibbonApplicationButton> given_appbutton;
+    QString target_exec;
 };
 
 

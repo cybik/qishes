@@ -125,6 +125,10 @@ namespace QAGL {
         }
     }
 
+    std::shared_ptr<QMainWindow> Landing::getWindow() {
+        return launcher_Window;
+    }
+
     void Landing::loaded(bool is) {
         if(is) {
             launcher_WebEngine->page()->runJavaScript(
@@ -134,7 +138,7 @@ namespace QAGL {
                     launcher_WebEngine->page()->runJavaScript(
                         "document.getElementsByClassName('home')[0].clientHeight;",
                         [this](const QVariant& var) {
-                            launcher_Window->setFixedHeight(var.toInt());
+                            launcher_Window->setFixedHeight(var.toInt() + titlebar_height);
                             launcher_Window->move(
                                 QGuiApplication::primaryScreen()->geometry().center() - launcher_Window->rect().center()
                             );
@@ -205,10 +209,11 @@ namespace QAGL {
 
     Landing::Landing(
         const QApplication &app, std::shared_ptr<SettingsData> settings,
-        QAGL::QAGL_App_Style style, QAGL::QAGL_Game game, QAGL::QAGL_Region region
+        QAGL::QAGL_App_Style style, QAGL::QAGL_Game game, QAGL::QAGL_Region region,
+        std::shared_ptr<QMainWindow> given_window
     ) : _configData(settings), _style(style), _game(game), _region(region) {
 
-        launcher_Window = std::make_shared<QMainWindow>();
+        launcher_Window = given_window ? given_window: std::make_shared<QMainWindow>();
 
         // defaults
         launcher_Window->setFixedSize(1280, 730);

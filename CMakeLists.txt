@@ -38,14 +38,13 @@ set(QT_VER "Qt6")
 
 include("${CMAKE_SOURCE_DIR}/cmake/RpathDefinitions.cmake")
 
-add_subdirectory("${PROJECT_3RDPARTY_DIR}/yaml-cpp")
-#add_subdirectory("${PROJECT_3RDPARTY_DIR}/libsass")
-add_subdirectory("${PROJECT_3RDPARTY_DIR}/termcolor")
-#add_subdirectory("${PROJECT_3RDPARTY_DIR}/discord-game-sdk")
-#add_subdirectory("${PROJECT_3RDPARTY_DIR}/discord-rpc-classic")
-add_subdirectory("${PROJECT_3RDPARTY_DIR}/qthttpclient")
-#add_subdirectory("${PROJECT_3RDPARTY_DIR}/qlementine")
-add_subdirectory("${PROJECT_3RDPARTY_DIR}/QAdwaitaDeco") # todo: needed or not?
+set(SARIBBON_BUILD_EXAMPLES OFF CACHE BOOL "Exported" FORCE)
+set(SARIBBON_USE_FRAMELESS_LIB ON CACHE BOOL "Exported" FORCE)
+#set(QWINDOWKIT_INSTALL OFF CACHE BOOL "Exported" FORCE)
+#set(QWindowKit_DIR "${PROJECT_3RDPARTY_DIR}/qwindowkit/src" CACHE STRING "Exported" FORCE)
+#set(QWindowKit_DIR "${PROJECT_BIN_3RDPARTY_DIR}/qwindowkit/src" CACHE STRING "Exported" FORCE)
+
+add_subdirectory("${PROJECT_3RDPARTY_DIR}")
 
 add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/components")
 
@@ -74,6 +73,8 @@ include_directories(
         "${PROJECT_3RDPARTY_DIR}/spinnersplusplus"
         #"${PROJECT_3RDPARTY_DIR}/discord-rpc-classic/include"
         "${PROJECT_3RDPARTY_DIR}/discord-rpc-classic-bin/include"
+        "${PROJECT_3RDPARTY_DIR}/qwindowkit/src"
+        "${PROJECT_3RDPARTY_DIR}/saribbon/src"
         #"${PROJECT_3RDPARTY_DIR}/discord-game-sdk/include"
 )
 
@@ -152,6 +153,10 @@ target_link_libraries(
         qisheslauncher
         #discord-rpc
         #discord-game-sdk-interface
+        QWKCore
+        QWKWidgets
+
+        SARibbonBar::SARibbonBar
 
         # todo: fix this bloody thing tbh
         "${PROJECT_3RDPARTY_DIR}/libsass/lib/libsass.a"
@@ -180,6 +185,9 @@ list(
         #"discord-rpc"
         #"discord-game-sdk-interface"
         "qadwaitadecorations"
+        "QWKCore"
+        "QWKWidgets"
+        "SARibbonBar::SARibbonBar"
 )
 
 AutoconfigureApplicationRpath("${MY_PROJECT_NAME}" "${APP_DEPENDENCIES}")

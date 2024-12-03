@@ -59,7 +59,8 @@ Q_OBJECT
             std::shared_ptr<SettingsData> settings,
             QAGL_App_Style style = QAGL_App_Style::Normal,
             QAGL_Game game = QAGL_Game::h4ke,
-            QAGL_Region region = QAGL_Region::global
+            QAGL_Region region = QAGL_Region::global,
+            std::shared_ptr<QMainWindow> given_window = nullptr
         );
         void show(const QApplication &app);
 
@@ -69,6 +70,8 @@ Q_OBJECT
         void        show_dev();
         //void exit_settings();
         void        loaded(bool);
+        std::shared_ptr<QMainWindow> getWindow();
+        void        hint_titlebar_height(int pHeight) { titlebar_height = pHeight; }
 
     protected:
     private:
@@ -115,6 +118,7 @@ Q_OBJECT
         QAGL_App_Style _style = QAGL_App_Style::Normal;
         QAGL_Game _game = QAGL_Game::h4ke;
         QAGL_Region _region = QAGL_Region::global;
+        int titlebar_height = 0;
     };
 }
 
