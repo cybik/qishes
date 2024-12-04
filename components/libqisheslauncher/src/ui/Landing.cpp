@@ -303,6 +303,7 @@ namespace QAGL {
                 if (url.toString().contains(YAAGL_SETTINGS)) {
                     qDebug() << "WIP: Settings";
                     //if (_parentSettings) _parentSettings();
+                    /*
                     auto genshin = QFileDialog::getOpenFileName(
                         nullptr,
                         "Get me the genshin",
@@ -320,6 +321,7 @@ namespace QAGL {
                     steam_integration::get_steam_integration_instance()->proton()->try_run(
                         genshin.toStdString()
                     );
+                    */
                 } else {
                     QDesktopServices::openUrl(url);
                 }

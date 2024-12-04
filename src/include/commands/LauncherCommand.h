@@ -40,6 +40,7 @@ private:
     std::shared_ptr<QAction> get_action_exit();
     void                     setupRibbonWindow();
     std::shared_ptr<QAction> get_action_launcher_test();
+    std::shared_ptr<SARibbonCategory> getLauncherCat();
 
     std::shared_ptr<QMenu> tray_menu;
     std::shared_ptr<QAction> action_exit;
@@ -51,12 +52,16 @@ private:
     //std::shared_ptr<QAction> action_launcher;
     static std::shared_ptr<SettingsData> data;
     static std::unique_ptr<QAGL::Landing> landing;
-    int _Argc;
-    QList<QString> _Argv;
 
     // title shit
     std::shared_ptr<SARibbonMainWindow> given;
-    std::shared_ptr<SARibbonApplicationButton> given_appbutton;
+
+    std::shared_ptr<SARibbonCategory> given_cat;
+    std::shared_ptr<SARibbonPannel> given_panel_game;
+    std::shared_ptr<QAction> given_action_game;
+    std::shared_ptr<SARibbonPannel> given_panel_proton;
+    std::shared_ptr<QAction> given_action_proton;
+
     QString target_exec;
 };
 

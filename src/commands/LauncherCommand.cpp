@@ -41,45 +41,66 @@ std::shared_ptr<QAction> LauncherCommand::get_action_exit() {
     return action_exit;
 }
 
+std::shared_ptr<SARibbonCategory> LauncherCommand::getLauncherCat() {
+    if (!given_panel_game) {
+        given_action_game = std::make_shared<QAction>();
+        given_action_game->setText("Select Launch Executable");
+        given->connect(
+            given_action_game.get(),
+            &QAction::triggered,
+            [&](bool) {
+                target_exec = QFileDialog::getOpenFileName(
+                    nullptr,
+                    "Get me the genshin",
+                    QString(std::getenv("STEAM_COMPAT_DATA_PATH")), "*.exe"
+                );
+            }
+        );
+        given_panel_game = std::make_shared<SARibbonPannel>();
+        given_panel_game->addLargeAction(given_action_game.get());
+    }
+    if (!given_panel_proton) {
+        given_action_proton = std::make_shared<QAction>();
+        given_action_proton->setText("Select Proton");
+        given->connect(
+            given_action_proton.get(),
+            &QAction::triggered,
+            [&](bool) {
+                QStringList list;
+                for (auto str: vlvproton::getInstance()->get_available_protons()) list << str.c_str();
+                auto proton = QInputDialog::getItem(
+                    nullptr,
+                    "Choose wisely",
+                    "Proton",
+                    list
+                );
+                steam_integration::get_steam_integration_instance()->proton()->select(proton.toStdString());
+            }
+        );
+        given_panel_proton = std::make_shared<SARibbonPannel>();
+        given_panel_proton->addLargeAction(given_action_proton.get());
+    }
+    if (!given_cat) {
+        given_cat = std::make_shared<SARibbonCategory>();
+        given_cat->setCategoryName("Game");
+        given_cat->setObjectName("gamedata");
+
+        given_cat->addPannel(given_panel_game.get());
+        given_cat->addPannel(given_panel_proton.get());
+    }
+    return given_cat;
+}
+
 void LauncherCommand::setupRibbonWindow() {
     // Cool thing?
     given->setRibbonTheme(SARibbonTheme::RibbonThemeDark);
-    given->ribbonBar()->setRibbonStyle(SARibbonBar::RibbonStyleCompactTwoRow);
+    given->ribbonBar()->setRibbonStyle(SARibbonBar::RibbonStyleCompactThreeRow);
     given->ribbonBar()->setMinimumMode(true);
     given->ribbonBar()->setTabOnTitle(true);
-    given->ribbonBar()->applicationButton()->setText("moo");
-    given->ribbonBar()->applicationButton()->setToolTip("moo");
+    given->ribbonBar()->setApplicationButton(nullptr);
+    given->ribbonBar()->addCategoryPage(getLauncherCat().get());
 
     given->windowButtonBar()->setupMaximizeButton(false);
-    given->windowButtonBar()->connect(
-    given->windowButtonBar()
-            ->addAction("Proton", QIcon(), Qt::ToolButtonTextOnly),
-        &QAction::triggered,
-        [&](bool) {
-            QStringList list;
-            for (auto str: vlvproton::getInstance()->get_available_protons()) list << str.c_str();
-            auto proton = QInputDialog::getItem(
-                nullptr,
-                "Choose wisely",
-                "Proton",
-                list
-            );
-            steam_integration::get_steam_integration_instance()->proton()->select(proton.toStdString());
-        }
-        );
-    given->windowButtonBar()->connect(
-    given->windowButtonBar()
-            ->addAction("Executable", QIcon(), Qt::ToolButtonTextOnly),
-        &QAction::triggered,
-        [&](bool) {
-            target_exec = QFileDialog::getOpenFileName(
-                nullptr,
-                "Get me the genshin",
-                QString(std::getenv("STEAM_COMPAT_DATA_PATH")), "*.exe"
-            );
-        }
-    );
-    //given->windowButtonBar()->setWindowTitle("test");
 }
 
 void LauncherCommand::launcher() {
@@ -117,10 +138,6 @@ void LauncherCommand::command_create_application(int& argc, char **argv) {
     QApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
     QApplication::setAttribute(Qt::AA_DontCreateNativeWidgetSiblings); // QWindowKit
     this_app = std::make_shared<QApplication>(argc, argv);
-    _Argc = argc;
-    for (int i = 0; i < argc; i++) {
-        _Argv.append(argv[i]);
-    }
     QApplication::setApplicationName(APPNAME_GEN(.launcher));
     QApplication::setApplicationVersion(APP_VERSION);
 
@@ -130,7 +147,23 @@ void LauncherCommand::command_create_application(int& argc, char **argv) {
     QApplication::connect(
         this_app.get(), &QApplication::aboutToQuit,
         [&]() {
+            // Discord yeet
             dis.reset();
+
+            // Panel yeet
+            given_cat->removePannel(given_panel_proton.get());
+            given_panel_proton->removeAction(given_action_proton.get());
+            given_panel_proton.reset();
+
+            // Panel yeet
+            given_cat->removePannel(given_panel_game.get());
+            given_panel_game->removeAction(given_action_game.get());
+            given_panel_game.reset();
+
+            // Ribbon reset
+            given_cat.reset();
+
+            // Landing window yeet
             landing.reset();
         }
     );
