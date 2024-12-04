@@ -48,7 +48,7 @@ void steam_proton::try_setup() {
     }
     if (!std::getenv("STEAM_COMPAT_DATA_PATH")) {
         // TODO: file explorer selector for now.
-        abort();
+        //abort();
     }
 }
 

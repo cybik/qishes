@@ -51,6 +51,7 @@ int detect_and_divert(int argc, char *argv[]) {
 int main(int argc, char *argv[]) {
     if(int d_a_d = detect_and_divert(argc, argv); d_a_d >= 0) {
         Log::get_logger()->critical("running under steam, neato");
+        setenv("QTWEBENGINE_DISABLE_SANDBOX", "1", 1);
     }
 
     // QT6 Linux workaround - somehow QSG Render Loop must be set for CLI apps that don't do windowing bollocks

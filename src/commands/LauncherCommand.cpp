@@ -77,16 +77,53 @@ std::shared_ptr<SARibbonCategory> LauncherCommand::getLauncherCat() {
                 steam_integration::get_steam_integration_instance()->proton()->select(proton.toStdString());
             }
         );
+    }
+    if (!given_panel_proton) {
+        given_action_proton = std::make_shared<QAction>();
+        given_action_proton->setText("Select Proton");
+        given->connect(
+            given_action_proton.get(),
+            &QAction::triggered,
+            [&](bool) {
+                QStringList list;
+                for (auto str: vlvproton::getInstance()->get_available_protons()) list << str.c_str();
+                auto proton = QInputDialog::getItem(
+                    nullptr,
+                    "Choose wisely",
+                    "Proton",
+                    list
+                );
+                steam_integration::get_steam_integration_instance()->proton()->select(proton.toStdString());
+            }
+        );
         given_panel_proton = std::make_shared<SARibbonPannel>();
         given_panel_proton->addLargeAction(given_action_proton.get());
+    }
+    if (!given_panel_run) {
+        given_action_run = std::make_shared<QAction>();
+        given_action_run->setText("Try to run");
+        given->connect(
+            given_action_run.get(),
+            &QAction::triggered,
+            [&](bool) {
+                if (!target_exec.isEmpty()) {
+                    steam_integration::get_steam_integration_instance()->proton()->try_run(
+                        target_exec.toStdString()
+                    );
+                }
+            }
+        );
+        given_panel_run = std::make_shared<SARibbonPannel>();
+        given_panel_run->addLargeAction(given_action_run.get());
     }
     if (!given_cat) {
         given_cat = std::make_shared<SARibbonCategory>();
         given_cat->setCategoryName("Game");
         given_cat->setObjectName("gamedata");
 
-        given_cat->addPannel(given_panel_game.get());
+        if (!exec_provided_by_environment) given_cat->addPannel(given_panel_game.get());
         given_cat->addPannel(given_panel_proton.get());
+        given_cat->addPannel(given_panel_run.get());
     }
     return given_cat;
 }
@@ -140,6 +177,20 @@ void LauncherCommand::command_create_application(int& argc, char **argv) {
     this_app = std::make_shared<QApplication>(argc, argv);
     QApplication::setApplicationName(APPNAME_GEN(.launcher));
     QApplication::setApplicationVersion(APP_VERSION);
+
+    // Get rid of the first two lol
+    for (auto str: this_app->arguments()) {
+        std::cout << "Arg per qt: " << str.toStdString() << std::endl;
+    }
+    if (this_app->arguments().size() > 2) {
+        // we can assume we have a 3rd argument. Use that as the execution target.
+        if (this_app->arguments().at(2).endsWith("exe") ) {
+            // all right we have an exe
+            std::cout << "exe detected lfg" << std::endl;
+            target_exec = this_app->arguments().at(2);
+            exec_provided_by_environment = true;
+        }
+    }
 
     (icon = std::make_shared<QPixmap>())
         ->loadFromData(QByteArray::fromBase64(qiqi_smol.toLocal8Bit(), QByteArray::Base64Encoding));

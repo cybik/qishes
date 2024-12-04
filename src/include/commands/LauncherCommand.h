@@ -57,12 +57,16 @@ private:
     std::shared_ptr<SARibbonMainWindow> given;
 
     std::shared_ptr<SARibbonCategory> given_cat;
+    std::shared_ptr<SARibbonPannel> given_panel_run;
+    std::shared_ptr<QAction> given_action_run;
     std::shared_ptr<SARibbonPannel> given_panel_game;
     std::shared_ptr<QAction> given_action_game;
     std::shared_ptr<SARibbonPannel> given_panel_proton;
     std::shared_ptr<QAction> given_action_proton;
 
+    //
     QString target_exec;
+    bool    exec_provided_by_environment = false;
 };
 
 
