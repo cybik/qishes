@@ -130,7 +130,7 @@ void LauncherCommand::command_create_application(int& argc, char **argv) {
     // Quirk: Early detection of Bootstrap steam environment
     if (auto clientlaunch = std::getenv("SteamClientLaunch") ;
         std::getenv("SteamUser") &&
-            (! clientlaunch || strcmp(clientlaunch, "1") == 0)
+            (! clientlaunch || strcmp(clientlaunch, "1") != 0)
     ) {
         exit(0);
     }
