@@ -65,7 +65,8 @@ private:
     std::unique_ptr<QAction> given_action_game;
 
     std::unique_ptr<SARibbonPannel> given_panel_proton;
-    std::unique_ptr<QAction> given_action_proton;
+    //std::unique_ptr<QAction> given_action_proton;
+    std::unique_ptr<SARibbonComboBox> given_proton_combo;
 
     void remove_panel_and_action(   std::shared_ptr<SARibbonCategory>,
                                     std::unique_ptr<SARibbonPannel>,

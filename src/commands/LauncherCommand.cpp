@@ -58,46 +58,19 @@ std::shared_ptr<SARibbonCategory> LauncherCommand::getLauncherCat() {
         );
         given_panel_game = std::make_unique<SARibbonPannel>();
         given_panel_game->addLargeAction(given_action_game.get());
+        given_panel_game->setPannelName("Game Runtime");
     }
     if (!given_panel_proton) {
-        given_action_proton = std::make_unique<QAction>();
-        given_action_proton->setText("Select Proton");
-        given->connect(
-            given_action_proton.get(),
-            &QAction::triggered,
-            [&](bool) {
-                QStringList list;
-                for (auto str: vlvproton::getInstance()->get_available_protons()) list << str.c_str();
-                auto proton = QInputDialog::getItem(
-                    nullptr,
-                    "Choose wisely",
-                    "Proton",
-                    list
-                );
-                steam_integration::get_steam_integration_instance()->proton()->select(proton.toStdString());
-            }
-        );
-    }
-    if (!given_panel_proton) {
-        given_action_proton = std::make_unique<QAction>();
-        given_action_proton->setText("Select Proton");
-        given->connect(
-            given_action_proton.get(),
-            &QAction::triggered,
-            [&](bool) {
-                QStringList list;
-                for (auto str: vlvproton::getInstance()->get_available_protons()) list << str.c_str();
-                auto proton = QInputDialog::getItem(
-                    nullptr,
-                    "Choose wisely",
-                    "Proton",
-                    list
-                );
-                steam_integration::get_steam_integration_instance()->proton()->select(proton.toStdString());
-            }
-        );
+        given_proton_combo = std::make_unique<SARibbonComboBox>();
+        given_proton_combo->setWindowTitle("ProtonSelect");
+        given_proton_combo->setObjectName("ProtonSelect");
+        for (auto str: vlvproton::getInstance()->get_available_protons()) {
+            given_proton_combo->addItem(QString(str.c_str()));
+        }
+        // TODO: set current selected to match config that's not implemented yet
         given_panel_proton = std::make_unique<SARibbonPannel>();
-        given_panel_proton->addLargeAction(given_action_proton.get());
+        given_panel_proton->addSmallWidget(given_proton_combo.get());
+        given_panel_proton->setPannelName("Proton Runtime");
     }
     if (!given_panel_run) {
         given_action_run = std::make_unique<QAction>();
@@ -106,6 +79,9 @@ std::shared_ptr<SARibbonCategory> LauncherCommand::getLauncherCat() {
             given_action_run.get(),
             &QAction::triggered,
             [&](bool) {
+                steam_integration::get_steam_integration_instance()->proton()->select(
+                    given_proton_combo->currentText().toStdString()
+                );
                 if (!target_exec.isEmpty()) {
                     steam_integration::get_steam_integration_instance()->proton()->try_run(
                         target_exec.toStdString()
@@ -115,6 +91,7 @@ std::shared_ptr<SARibbonCategory> LauncherCommand::getLauncherCat() {
         );
         given_panel_run = std::make_unique<SARibbonPannel>();
         given_panel_run->addLargeAction(given_action_run.get());
+        given_panel_run->setPannelName("Run game");
     }
     if (!given_cat) {
         given_cat = std::make_shared<SARibbonCategory>();
@@ -130,7 +107,7 @@ std::shared_ptr<SARibbonCategory> LauncherCommand::getLauncherCat() {
 
 void LauncherCommand::setupRibbonWindow() {
     // Cool thing?
-    given->setRibbonTheme(SARibbonTheme::RibbonThemeDark);
+    given->setRibbonTheme(SARibbonTheme::RibbonThemeDark2);
     given->ribbonBar()->setRibbonStyle(SARibbonBar::RibbonStyleCompactThreeRow);
     given->ribbonBar()->setMinimumMode(true);
     given->ribbonBar()->setTabOnTitle(true);
@@ -197,7 +174,8 @@ void LauncherCommand::command_create_application(int& argc, char **argv) {
             dis.reset();
 
             // Panel yeets
-            remove_panel_and_action(given_cat, std::move(given_panel_proton), std::move(given_action_proton));
+            if (given_proton_combo) given_proton_combo.reset();
+            remove_panel_and_action(given_cat, std::move(given_panel_proton), nullptr);
             remove_panel_and_action(given_cat, std::move(given_panel_game), std::move(given_action_game));
             remove_panel_and_action(given_cat, std::move(given_panel_run), std::move(given_action_run));
 
@@ -214,9 +192,9 @@ void LauncherCommand::remove_panel_and_action(  std::shared_ptr<SARibbonCategory
                                                 std::unique_ptr<SARibbonPannel> panel,
                                                 std::unique_ptr<QAction> action
 ) {
-    if (cat && action && panel) {
+    if (cat && panel) {
         cat->removePannel(panel.get());
-        panel->removeAction(action.get());
+        if (action) panel->removeAction(action.get());
         panel.reset();
     }
 }
