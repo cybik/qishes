@@ -63,6 +63,10 @@ private:
     std::shared_ptr<QAction> given_action_game;
     std::shared_ptr<SARibbonPannel> given_panel_proton;
     std::shared_ptr<QAction> given_action_proton;
+    void remove_panel_and_action(   std::shared_ptr<SARibbonCategory>,
+                                    std::shared_ptr<SARibbonPannel>,
+                                    std::shared_ptr<QAction>
+    );
 
     //
     QString target_exec;

@@ -138,6 +138,7 @@ namespace QAGL {
                     launcher_WebEngine->page()->runJavaScript(
                         "document.getElementsByClassName('home')[0].clientHeight;",
                         [this](const QVariant& var) {
+                            std::cout << QString::number(var.toInt()).toStdString() << std::endl;
                             launcher_Window->setFixedHeight(var.toInt() + titlebar_height);
                             launcher_Window->move(
                                 QGuiApplication::primaryScreen()->geometry().center() - launcher_Window->rect().center()
@@ -302,26 +303,6 @@ namespace QAGL {
             case(QWebEnginePage::NavigationTypeLinkClicked): {
                 if (url.toString().contains(YAAGL_SETTINGS)) {
                     qDebug() << "WIP: Settings";
-                    //if (_parentSettings) _parentSettings();
-                    /*
-                    auto genshin = QFileDialog::getOpenFileName(
-                        nullptr,
-                        "Get me the genshin",
-                        QString(std::getenv("STEAM_COMPAT_DATA_PATH")), "*.exe"
-                    );
-                    QStringList list;
-                    for (auto str: vlvproton::getInstance()->get_available_protons()) list << str.c_str();
-                    auto proton = QInputDialog::getItem(
-                        nullptr,
-                        "Choose wisely",
-                        "Proton",
-                        list
-                    );
-                    steam_integration::get_steam_integration_instance()->proton()->select(proton.toStdString());
-                    steam_integration::get_steam_integration_instance()->proton()->try_run(
-                        genshin.toStdString()
-                    );
-                    */
                 } else {
                     QDesktopServices::openUrl(url);
                 }

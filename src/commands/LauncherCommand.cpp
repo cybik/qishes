@@ -163,8 +163,19 @@ void LauncherCommand::launcher() {
     landing->show(*this_app);
 }
 
+void LauncherCommand::remove_panel_and_action(  std::shared_ptr<SARibbonCategory> cat,
+                                                std::shared_ptr<SARibbonPannel> panel,
+                                                std::shared_ptr<QAction> action
+) {
+    if (cat && action && panel) {
+        cat->removePannel(panel.get());
+        panel->removeAction(action.get());
+        panel.reset();
+    }
+}
+
 void LauncherCommand::command_create_application(int& argc, char **argv) {
-    // Quirk: Early detection of Bootstrap steam environment
+    // Quirk: Early detection of Steam Startup environment
     if (auto clientlaunch = std::getenv("SteamClientLaunch") ;
         std::getenv("SteamUser") &&
             (! clientlaunch || strcmp(clientlaunch, "1") != 0)
@@ -178,15 +189,10 @@ void LauncherCommand::command_create_application(int& argc, char **argv) {
     QApplication::setApplicationName(APPNAME_GEN(.launcher));
     QApplication::setApplicationVersion(APP_VERSION);
 
-    // Get rid of the first two lol
-    for (auto str: this_app->arguments()) {
-        std::cout << "Arg per qt: " << str.toStdString() << std::endl;
-    }
     if (this_app->arguments().size() > 2) {
         // we can assume we have a 3rd argument. Use that as the execution target.
         if (this_app->arguments().at(2).endsWith("exe") ) {
             // all right we have an exe
-            std::cout << "exe detected lfg" << std::endl;
             target_exec = this_app->arguments().at(2);
             exec_provided_by_environment = true;
         }
@@ -201,15 +207,10 @@ void LauncherCommand::command_create_application(int& argc, char **argv) {
             // Discord yeet
             dis.reset();
 
-            // Panel yeet
-            given_cat->removePannel(given_panel_proton.get());
-            given_panel_proton->removeAction(given_action_proton.get());
-            given_panel_proton.reset();
-
-            // Panel yeet
-            given_cat->removePannel(given_panel_game.get());
-            given_panel_game->removeAction(given_action_game.get());
-            given_panel_game.reset();
+            // Panel yeets
+            remove_panel_and_action(given_cat, given_panel_proton, given_action_proton);
+            remove_panel_and_action(given_cat, given_panel_game, given_action_game);
+            remove_panel_and_action(given_cat, given_panel_run, given_action_run);
 
             // Ribbon reset
             given_cat.reset();
@@ -230,6 +231,7 @@ void LauncherCommand::command_process_parser() {
 
 int LauncherCommand::command_run() {
     dis = Discord::get_instance()->report_presence_message("qishes loading");
+    vlvproton::getInstance()->identify_installs();
 
     generate_tray_icon()->show();
 
