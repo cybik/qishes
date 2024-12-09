@@ -43,7 +43,7 @@ std::shared_ptr<QAction> LauncherCommand::get_action_exit() {
 
 std::shared_ptr<SARibbonCategory> LauncherCommand::getLauncherCat() {
     if (!given_panel_game) {
-        given_action_game = std::make_shared<QAction>();
+        given_action_game = std::make_unique<QAction>();
         given_action_game->setText("Select Launch Executable");
         given->connect(
             given_action_game.get(),
@@ -56,11 +56,11 @@ std::shared_ptr<SARibbonCategory> LauncherCommand::getLauncherCat() {
                 );
             }
         );
-        given_panel_game = std::make_shared<SARibbonPannel>();
+        given_panel_game = std::make_unique<SARibbonPannel>();
         given_panel_game->addLargeAction(given_action_game.get());
     }
     if (!given_panel_proton) {
-        given_action_proton = std::make_shared<QAction>();
+        given_action_proton = std::make_unique<QAction>();
         given_action_proton->setText("Select Proton");
         given->connect(
             given_action_proton.get(),
@@ -79,7 +79,7 @@ std::shared_ptr<SARibbonCategory> LauncherCommand::getLauncherCat() {
         );
     }
     if (!given_panel_proton) {
-        given_action_proton = std::make_shared<QAction>();
+        given_action_proton = std::make_unique<QAction>();
         given_action_proton->setText("Select Proton");
         given->connect(
             given_action_proton.get(),
@@ -96,11 +96,11 @@ std::shared_ptr<SARibbonCategory> LauncherCommand::getLauncherCat() {
                 steam_integration::get_steam_integration_instance()->proton()->select(proton.toStdString());
             }
         );
-        given_panel_proton = std::make_shared<SARibbonPannel>();
+        given_panel_proton = std::make_unique<SARibbonPannel>();
         given_panel_proton->addLargeAction(given_action_proton.get());
     }
     if (!given_panel_run) {
-        given_action_run = std::make_shared<QAction>();
+        given_action_run = std::make_unique<QAction>();
         given_action_run->setText("Try to run");
         given->connect(
             given_action_run.get(),
@@ -113,7 +113,7 @@ std::shared_ptr<SARibbonCategory> LauncherCommand::getLauncherCat() {
                 }
             }
         );
-        given_panel_run = std::make_shared<SARibbonPannel>();
+        given_panel_run = std::make_unique<SARibbonPannel>();
         given_panel_run->addLargeAction(given_action_run.get());
     }
     if (!given_cat) {
@@ -163,17 +163,6 @@ void LauncherCommand::launcher() {
     landing->show(*this_app);
 }
 
-void LauncherCommand::remove_panel_and_action(  std::shared_ptr<SARibbonCategory> cat,
-                                                std::shared_ptr<SARibbonPannel> panel,
-                                                std::shared_ptr<QAction> action
-) {
-    if (cat && action && panel) {
-        cat->removePannel(panel.get());
-        panel->removeAction(action.get());
-        panel.reset();
-    }
-}
-
 void LauncherCommand::command_create_application(int& argc, char **argv) {
     // Quirk: Early detection of Steam Startup environment
     if (auto clientlaunch = std::getenv("SteamClientLaunch") ;
@@ -208,9 +197,9 @@ void LauncherCommand::command_create_application(int& argc, char **argv) {
             dis.reset();
 
             // Panel yeets
-            remove_panel_and_action(given_cat, given_panel_proton, given_action_proton);
-            remove_panel_and_action(given_cat, given_panel_game, given_action_game);
-            remove_panel_and_action(given_cat, given_panel_run, given_action_run);
+            remove_panel_and_action(given_cat, std::move(given_panel_proton), std::move(given_action_proton));
+            remove_panel_and_action(given_cat, std::move(given_panel_game), std::move(given_action_game));
+            remove_panel_and_action(given_cat, std::move(given_panel_run), std::move(given_action_run));
 
             // Ribbon reset
             given_cat.reset();
@@ -219,6 +208,17 @@ void LauncherCommand::command_create_application(int& argc, char **argv) {
             landing.reset();
         }
     );
+}
+
+void LauncherCommand::remove_panel_and_action(  std::shared_ptr<SARibbonCategory> cat,
+                                                std::unique_ptr<SARibbonPannel> panel,
+                                                std::unique_ptr<QAction> action
+) {
+    if (cat && action && panel) {
+        cat->removePannel(panel.get());
+        panel->removeAction(action.get());
+        panel.reset();
+    }
 }
 
 void LauncherCommand::command_setup_parser() {
