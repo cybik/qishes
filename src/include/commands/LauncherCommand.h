@@ -33,6 +33,8 @@ protected:
     void command_process_parser() override;
     int  command_run() override;
 private:
+    void run_the_magic();
+
     std::shared_ptr<QApplication> this_app = nullptr;
     std::shared_ptr<QMenu> generate_menu();
     std::shared_ptr<QSystemTrayIcon> generate_tray_icon();
@@ -53,10 +55,23 @@ private:
     static std::shared_ptr<SettingsData> data;
     static std::unique_ptr<QAGL::Landing> landing;
 
+    std::unique_ptr<SARibbonPannel> get_panel_run();
+    std::unique_ptr<SARibbonPannel> get_panel_game();
+    std::unique_ptr<SARibbonPannel> get_panel_options();
+    std::unique_ptr<SARibbonPannel> get_panel_proton();
+
     // title shit
     std::shared_ptr<SARibbonMainWindow> given;
 
     std::shared_ptr<SARibbonCategory> given_cat;
+
+    std::unique_ptr<SARibbonPannel> given_panel_options;
+    std::unique_ptr<SARibbonCheckBox> given_option_mangohud;
+    std::unique_ptr<SARibbonCheckBox> given_option_deckenv;
+    std::unique_ptr<SARibbonCheckBox> given_option_obsvk;
+
+    std::unique_ptr<SARibbonCheckBox> get_checkbox(QString title, QString objname);
+    //std::unique_ptr<QAction> given_action_run;
 
     std::unique_ptr<SARibbonPannel> given_panel_run;
     std::unique_ptr<QAction> given_action_run;

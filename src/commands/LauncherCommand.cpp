@@ -41,57 +41,102 @@ std::shared_ptr<QAction> LauncherCommand::get_action_exit() {
     return action_exit;
 }
 
+std::unique_ptr<SARibbonCheckBox> LauncherCommand::get_checkbox(QString title, QString objname) {
+    std::unique_ptr<SARibbonCheckBox> cb = std::make_unique<SARibbonCheckBox>();
+    cb->setText(title);
+    cb->setObjectName(objname);
+    //cb->setChecked(/*config*/);
+    return std::move(cb);
+}
+
+std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_options() {
+    given_option_mangohud = std::move(get_checkbox("MangoHUD", "cbMango"));
+    given_option_deckenv = std::move(get_checkbox("Fakeout Deck", "cbDeckMode"));
+    given_option_obsvk = std::move(get_checkbox("OBS VkCapture Mode", "cbVkCap"));
+
+    std::unique_ptr<SARibbonPannel> panel_opt = std::make_unique<SARibbonPannel>();
+    panel_opt->addSmallWidget(given_option_mangohud.get());
+    panel_opt->addSmallWidget(given_option_deckenv.get());
+    panel_opt->addSmallWidget(given_option_obsvk.get());
+    panel_opt->setPannelName("Options");
+    return std::move(panel_opt);
+}
+
+std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_proton() {
+    given_proton_combo = std::make_unique<SARibbonComboBox>();
+    given_proton_combo->setWindowTitle("ProtonSelect");
+    given_proton_combo->setObjectName("ProtonSelect");
+    for (auto str: vlvproton::getInstance()->get_available_protons()) {
+        given_proton_combo->addItem(QString(str.c_str()));
+    }
+    // TODO: set current selected to match config that's not implemented yet
+    std::unique_ptr<SARibbonPannel> panel_proton = std::make_unique<SARibbonPannel>();
+    panel_proton->addSmallWidget(given_proton_combo.get());
+    panel_proton->setPannelName("Proton Runtime");
+    return std::move(panel_proton);
+}
+
+void LauncherCommand::run_the_magic() {
+    std::map<std::string, std::string> envs = {};
+    if (given_option_mangohud->isChecked()) envs["MANGOHUD"] = "1";
+    if (given_option_deckenv->isChecked()) envs["SteamDeck"] = "1";
+    if (given_option_obsvk->isChecked()) envs["OBS_VKCAPTURE"] = "1";
+    steam_integration::get_steam_integration_instance()->proton()->try_run(
+        target_exec.toStdString(), {}, envs
+    );
+}
+
+std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_run() {
+    given_action_run = std::make_unique<QAction>("Try to run");
+    given->connect(
+        given_action_run.get(),
+        &QAction::triggered,
+        [&](bool) {
+            steam_integration::get_steam_integration_instance()->proton()->select(
+                given_proton_combo->currentText().toStdString()
+            );
+            if (!target_exec.isEmpty()) {
+                run_the_magic();
+            }
+        }
+    );
+    std::unique_ptr<SARibbonPannel> panel_run = std::make_unique<SARibbonPannel>("Run game");
+    panel_run->addLargeAction(given_action_run.get());
+    return std::move(panel_run);
+}
+
+std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_game() {
+    given_action_game = std::make_unique<QAction>("Select Launch Executable");
+    given->connect(
+        given_action_game.get(),
+        &QAction::triggered,
+        [&](bool) {
+            target_exec = QFileDialog::getOpenFileName(
+                nullptr,
+                "Get me the genshin",
+                QString(std::getenv("STEAM_COMPAT_DATA_PATH")), "*.exe"
+            );
+        }
+    );
+
+    std::unique_ptr<SARibbonPannel> panel_game = std::make_unique<SARibbonPannel>("Game Runtime");
+    panel_game->addLargeAction(given_action_game.get());
+
+    return std::move(panel_game);
+}
+
 std::shared_ptr<SARibbonCategory> LauncherCommand::getLauncherCat() {
     if (!given_panel_game) {
-        given_action_game = std::make_unique<QAction>();
-        given_action_game->setText("Select Launch Executable");
-        given->connect(
-            given_action_game.get(),
-            &QAction::triggered,
-            [&](bool) {
-                target_exec = QFileDialog::getOpenFileName(
-                    nullptr,
-                    "Get me the genshin",
-                    QString(std::getenv("STEAM_COMPAT_DATA_PATH")), "*.exe"
-                );
-            }
-        );
-        given_panel_game = std::make_unique<SARibbonPannel>();
-        given_panel_game->addLargeAction(given_action_game.get());
-        given_panel_game->setPannelName("Game Runtime");
+        given_panel_game = std::move(get_panel_game());
     }
     if (!given_panel_proton) {
-        given_proton_combo = std::make_unique<SARibbonComboBox>();
-        given_proton_combo->setWindowTitle("ProtonSelect");
-        given_proton_combo->setObjectName("ProtonSelect");
-        for (auto str: vlvproton::getInstance()->get_available_protons()) {
-            given_proton_combo->addItem(QString(str.c_str()));
-        }
-        // TODO: set current selected to match config that's not implemented yet
-        given_panel_proton = std::make_unique<SARibbonPannel>();
-        given_panel_proton->addSmallWidget(given_proton_combo.get());
-        given_panel_proton->setPannelName("Proton Runtime");
+        given_panel_proton = std::move(get_panel_proton());
+    }
+    if (!given_panel_options) {
+        given_panel_options = std::move(get_panel_options());
     }
     if (!given_panel_run) {
-        given_action_run = std::make_unique<QAction>();
-        given_action_run->setText("Try to run");
-        given->connect(
-            given_action_run.get(),
-            &QAction::triggered,
-            [&](bool) {
-                steam_integration::get_steam_integration_instance()->proton()->select(
-                    given_proton_combo->currentText().toStdString()
-                );
-                if (!target_exec.isEmpty()) {
-                    steam_integration::get_steam_integration_instance()->proton()->try_run(
-                        target_exec.toStdString()
-                    );
-                }
-            }
-        );
-        given_panel_run = std::make_unique<SARibbonPannel>();
-        given_panel_run->addLargeAction(given_action_run.get());
-        given_panel_run->setPannelName("Run game");
+        given_panel_run = std::move(get_panel_run());
     }
     if (!given_cat) {
         given_cat = std::make_shared<SARibbonCategory>();
@@ -100,6 +145,7 @@ std::shared_ptr<SARibbonCategory> LauncherCommand::getLauncherCat() {
 
         if (!exec_provided_by_environment) given_cat->addPannel(given_panel_game.get());
         given_cat->addPannel(given_panel_proton.get());
+        given_cat->addPannel(given_panel_options.get());
         given_cat->addPannel(given_panel_run.get());
     }
     return given_cat;
@@ -126,7 +172,7 @@ void LauncherCommand::launcher() {
             *this_app,
             std::move(data),
             QAGL::QAGL_App_Style::Normal,
-            QAGL::QAGL_Game::h4ke, // Genshin
+            QAGL::QAGL_Game::h4ke,     // Genshin
             QAGL::QAGL_Region::global, // Global
             given
         );

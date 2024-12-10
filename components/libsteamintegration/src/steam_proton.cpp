@@ -55,7 +55,7 @@ void steam_proton::try_setup() {
 void steam_proton::try_run(
     const std::string& target_executable,
     const std::list<std::string>& arguments,
-    std::map<std::string, std::string> env_overrides
+    const std::map<std::string, std::string>& env_overrides
 ) {
 
     // Process init
