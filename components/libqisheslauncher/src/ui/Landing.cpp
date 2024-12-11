@@ -95,6 +95,7 @@ namespace QAGL {
     void Landing::everythingHasLoaded() {
         if (!launcher_loaded)
             launcher_loaded = true;
+        launcher_Window->setStyleSheet("QWidget{border-bottom-left-radius:20px; border-bottom-right-radius:20px;}");
         launcher_Window->show();
     }
 
