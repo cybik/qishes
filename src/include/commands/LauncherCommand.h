@@ -33,7 +33,20 @@ protected:
     void command_process_parser() override;
     int  command_run() override;
 private:
-    void run_the_magic();
+    typedef enum {
+        Genshin,
+        HonkaiSR,
+        Honkai3rd,
+        Nap,
+        Launcher,
+
+        WutheringWaves,
+        InfinityNikki,
+        Strinova,
+
+        Unknown
+    } ExeType;
+    void run_the_magic(const QString& target_exec);
 
     std::shared_ptr<QApplication> this_app = nullptr;
     std::shared_ptr<QMenu> generate_menu();
@@ -96,17 +109,20 @@ private:
 
     std::map<int, std::string> target_execs_found;
     const std::map<std::string, bool> supported_games_shit_impl = {
-        {"launcher.exe", true},
-        //{"HYP.exe", true},
-        {"GenshinImpact.exe", true},
-        {"StarRail.exe", true},
-        {"ZenlessZoneZero.exe", true},
+        {"launcher.exe", ExeType::Launcher},
+        {"GenshinImpact.exe", ExeType::Genshin},
+        {"StarRail.exe", ExeType::HonkaiSR},
+        {"ZenlessZoneZero.exe", ExeType::Nap},
+        {"BH3.exe", ExeType::Honkai3rd},
         // WuWa?
         // Nikki?
         // Some other anime boobfest?
         // Bueller?
     };
+    std::list<std::shared_ptr<QAction>> actions_execs;
     std::shared_ptr<std::list<std::shared_ptr<QFile>>> filtered_files;
+
+    void enlist_launch_action(QString message, QString executable);
 };
 
 

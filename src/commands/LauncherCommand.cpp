@@ -76,32 +76,49 @@ std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_proton() {
     return std::move(panel_proton);
 }
 
-void LauncherCommand::run_the_magic() {
+void LauncherCommand::run_the_magic(const QString& target_exe) {
     std::map<std::string, std::string> envs = {};
     if (given_option_mangohud->isChecked()) envs["MANGOHUD"] = "1";
     if (given_option_deckenv->isChecked()) envs["SteamDeck"] = "1";
     if (given_option_obsvk->isChecked()) envs["OBS_VKCAPTURE"] = "1";
     steam_integration::get_steam_integration_instance()->proton()->try_run(
-        target_exec.toStdString(), {}, envs
+        target_exe.toStdString(), {}, envs
     );
 }
 
-std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_run() {
-    given_action_run = std::make_unique<QAction>("Try to run");
+void LauncherCommand::enlist_launch_action(QString message, QString executable) {
+    std::shared_ptr<QAction> action_run = std::make_unique<QAction>(message);
     given->connect(
-        given_action_run.get(),
+        action_run.get(),
         &QAction::triggered,
-        [&](bool) {
+        [&, executable](bool) {
             steam_integration::get_steam_integration_instance()->proton()->select(
                 given_proton_combo->currentText().toStdString()
             );
-            if (!target_exec.isEmpty()) {
-                run_the_magic();
+            if (!executable.isEmpty()) {
+                std::cout << executable.toStdString() << std::endl;
+                run_the_magic(executable);
             }
         }
     );
+    actions_execs.emplace_back(action_run);
+}
+
+std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_run() {
+    enlist_launch_action("Try to run", target_exec);
+    for (auto file : *filtered_files) {
+        std::cout << file->fileName().toStdString() << std::endl;
+        if ( !target_exec.contains(file->filesystemFileName().filename().c_str()) ) {
+            enlist_launch_action(
+                QString(file->filesystemFileName().filename().c_str()),
+                QFileInfo(*file).absoluteFilePath());
+        }
+    }
     std::unique_ptr<SARibbonPannel> panel_run = std::make_unique<SARibbonPannel>("Run game");
-    panel_run->addLargeAction(given_action_run.get());
+    //panel_run->addLargeAction(given_action_run.get());
+    for (std::shared_ptr<QAction> action: actions_execs) {
+        panel_run->addLargeAction(action.get());
+    }
     return std::move(panel_run);
 }
 
@@ -222,8 +239,7 @@ void LauncherCommand::command_create_application(int& argc, char **argv) {
             if (steam_integration::get_steam_integration_instance()->is_steam_env()) {
                 // TODO: fix getFiles, it REALLY ain't seeking right
                 for (std::shared_ptr<QFile> file : *gachafs::getFiles("**/*.exe", resolve_executable_path(), true)) {
-                    // noop
-                    if (supported_games_shit_impl.contains(file->fileName().toStdString())) {
+                    if (supported_games_shit_impl.contains(file->filesystemFileName().filename())) {
                         filtered_files->push_back(file);
                     }
                 }

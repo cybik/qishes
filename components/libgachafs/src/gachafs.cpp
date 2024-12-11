@@ -60,7 +60,8 @@ std::shared_ptr<std::list<std::shared_ptr<QFile>>> gachafs::getFiles(
                 matched_files.append(fileInfo.filePath());
             } else if (stringList.size() <= 2 && stringList.last().startsWith("*.")) {
                 if (fileInfo.fileName().endsWith(stringList.last().last(stringList.last().size()-1))) {
-                    matched_files.append(fileInfo.fileName()); // absolute f*cking trash wildcard support
+                    std::cout << fileInfo.absoluteFilePath().toStdString() << std::endl;
+                    matched_files.append(fileInfo.absoluteFilePath()); // absolute f*cking trash wildcard support
                 }
             }
         }
