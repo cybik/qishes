@@ -16,10 +16,10 @@
 
 #include <iostream>
 
-#include <QWebEngineView>
-
 #include <chrono>
-#include "steam_integration.h"
+#include <steam_integration.h>
+
+#include <gachafs.h>
 
 const QString LauncherCommand::CommandSpecifier = "launcher";
 
@@ -126,18 +126,15 @@ std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_game() {
 }
 
 std::shared_ptr<SARibbonCategory> LauncherCommand::getLauncherCat() {
-    if (!given_panel_game) {
+    if (!given_panel_game)
         given_panel_game = std::move(get_panel_game());
-    }
-    if (!given_panel_proton) {
+    if (!given_panel_proton)
         given_panel_proton = std::move(get_panel_proton());
-    }
-    if (!given_panel_options) {
+    if (!given_panel_options)
         given_panel_options = std::move(get_panel_options());
-    }
-    if (!given_panel_run) {
+    if (!given_panel_run)
         given_panel_run = std::move(get_panel_run());
-    }
+
     if (!given_cat) {
         given_cat = std::make_shared<SARibbonCategory>();
         given_cat->setCategoryName("Game");
@@ -186,7 +183,22 @@ void LauncherCommand::launcher() {
     landing->show(*this_app);
 }
 
+QString LauncherCommand::resolve_executable_path() {
+    if (!target_exec.contains(":\\")) {
+        return target_exec;
+    }
+    QString reparsed_exec_path = target_exec.split(":")[1];
+    reparsed_exec_path = reparsed_exec_path.replace("\\", "/");
+    reparsed_exec_path = reparsed_exec_path.replace("//", "/"); // dedupe
+    reparsed_exec_path = (qgetenv("STEAM_COMPAT_DATA_PATH") + "/pfx/drive_c/" + reparsed_exec_path);
+    reparsed_exec_path = reparsed_exec_path.replace("//", "/"); // dedupe
+    reparsed_exec_path = reparsed_exec_path.first(reparsed_exec_path.lastIndexOf("/"));
+
+    return reparsed_exec_path;
+}
+
 void LauncherCommand::command_create_application(int& argc, char **argv) {
+    filtered_files = std::make_shared<std::list<std::shared_ptr<QFile>>>();
     // Quirk: Early detection of Steam Startup environment
     if (auto clientlaunch = std::getenv("SteamClientLaunch") ;
         std::getenv("SteamUser") &&
@@ -207,6 +219,15 @@ void LauncherCommand::command_create_application(int& argc, char **argv) {
             // all right we have an exe
             target_exec = this_app->arguments().at(2);
             exec_provided_by_environment = true;
+            if (steam_integration::get_steam_integration_instance()->is_steam_env()) {
+                // TODO: fix getFiles, it REALLY ain't seeking right
+                for (std::shared_ptr<QFile> file : *gachafs::getFiles("**/*.exe", resolve_executable_path(), true)) {
+                    // noop
+                    if (supported_games_shit_impl.contains(file->fileName().toStdString())) {
+                        filtered_files->push_back(file);
+                    }
+                }
+            }
         }
     }
 
@@ -234,9 +255,8 @@ void LauncherCommand::command_create_application(int& argc, char **argv) {
     );
 }
 
-void LauncherCommand::remove_panel_and_action(  std::shared_ptr<SARibbonCategory> cat,
-                                                std::unique_ptr<SARibbonPannel> panel,
-                                                std::unique_ptr<QAction> action
+void LauncherCommand::remove_panel_and_action(
+    std::shared_ptr<SARibbonCategory> cat, std::unique_ptr<SARibbonPannel> panel, std::unique_ptr<QAction> action
 ) {
     if (cat && panel) {
         cat->removePannel(panel.get());

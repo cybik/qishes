@@ -18,7 +18,9 @@
 
 class gachafs {
 public:
-    static std::shared_ptr<std::list<std::shared_ptr<QFile>>> getFiles(const QString& filter, QString& game_path);
+    static std::shared_ptr<std::list<std::shared_ptr<QFile>>> getFiles(
+        const QString& filter, const QString& game_path, bool fail_ok = false
+    );
 protected:
 private:
     static int seek_depth(int base_level, const QStringList& levels_check, const QFileInfo& compare);

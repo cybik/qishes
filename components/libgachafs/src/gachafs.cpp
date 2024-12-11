@@ -29,7 +29,9 @@ int gachafs::seek_depth(int level, const QStringList &stringList, const QFileInf
     return level;
 }
 
-std::shared_ptr<std::list<std::shared_ptr<QFile>>> gachafs::getFiles(const QString& filter, QString& game_path) {
+std::shared_ptr<std::list<std::shared_ptr<QFile>>> gachafs::getFiles(
+    const QString& filter, const QString& game_path, bool fail_ok
+) {
     /**
      * Generalized(ish) file finder to get a given file following an ant-styled file filter descriptor.
      * This is unlikely to be truly functional. It's a bit of a hack.
@@ -45,13 +47,21 @@ std::shared_ptr<std::list<std::shared_ptr<QFile>>> gachafs::getFiles(const QStri
         QDir dir = QDir(dirname);
         dir.setFilter(QDir::Dirs | QDir::Files | QDir::NoSymLinks | QDir::NoDot | QDir::NoDotDot);
         static const QStringList stringList = pattern.split('/');
-        for (const QFileInfo& fileInfo: dir.entryInfoList(stringList.mid(level, 1))) {
+        for (const QFileInfo& fileInfo: dir.entryInfoList(
+            stringList.count() == 1
+                ? QStringList { stringList.last() }
+                : stringList.mid(level, 1))
+        ) {
             if (fileInfo.isDir() && fileInfo.isReadable()) {
                 // Emulating ** behaviour
                 search_deep( pattern, fileInfo.filePath(), seek_depth(level, stringList, fileInfo) );
             } else if (stringList.size() == (level + 1) ) {
                 // We hit a file. Nice!
                 matched_files.append(fileInfo.filePath());
+            } else if (stringList.size() <= 2 && stringList.last().startsWith("*.")) {
+                if (fileInfo.fileName().endsWith(stringList.last().last(stringList.last().size()-1))) {
+                    matched_files.append(fileInfo.fileName()); // absolute f*cking trash wildcard support
+                }
             }
         }
     };
@@ -65,7 +75,7 @@ std::shared_ptr<std::list<std::shared_ptr<QFile>>> gachafs::getFiles(const QStri
         }
     }
     if(stdlist->empty()) {
-        throw EGachaFS_Exception("No files found");
+        if (!fail_ok) throw EGachaFS_Exception("No files found");
     }
     return stdlist;
 }

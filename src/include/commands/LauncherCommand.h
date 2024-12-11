@@ -91,6 +91,22 @@ private:
     //
     QString target_exec;
     bool    exec_provided_by_environment = false;
+
+    QString resolve_executable_path();
+
+    std::map<int, std::string> target_execs_found;
+    const std::map<std::string, bool> supported_games_shit_impl = {
+        {"launcher.exe", true},
+        //{"HYP.exe", true},
+        {"GenshinImpact.exe", true},
+        {"StarRail.exe", true},
+        {"ZenlessZoneZero.exe", true},
+        // WuWa?
+        // Nikki?
+        // Some other anime boobfest?
+        // Bueller?
+    };
+    std::shared_ptr<std::list<std::shared_ptr<QFile>>> filtered_files;
 };
 
 
