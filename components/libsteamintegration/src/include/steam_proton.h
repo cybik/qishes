@@ -35,7 +35,6 @@ private:
     std::string                                   mSelected;
     std::shared_ptr<QProcess>                     mProcess;
     std::shared_ptr<QProcessEnvironment>          mProcessEnvironment;
-    std::shared_ptr<QStringList>                  mArguments;
 
     std::map<std::string, std::string>            mSetupEnvironment;
 };

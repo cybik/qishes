@@ -96,7 +96,6 @@ void LauncherCommand::enlist_launch_action(QString message, QString executable) 
                 given_proton_combo->currentText().toStdString()
             );
             if (!executable.isEmpty()) {
-                std::cout << executable.toStdString() << std::endl;
                 run_the_magic(executable);
             }
         }

@@ -26,7 +26,7 @@ std::shared_ptr<steam_proton> steam_proton::getInstance() {
 
 steam_proton::steam_proton() {
     mProton = vlvproton::getInstance(SteamEnvironment::get_steam_environment_instance()->getSteamBaseFolder());
-    mArguments = std::make_shared<QStringList>();
+    //mArguments = std::make_shared<QStringList>();
     mProcessEnvironment = std::make_shared<QProcessEnvironment>(QProcessEnvironment::systemEnvironment());
     try_setup();
 }
@@ -57,6 +57,7 @@ void steam_proton::try_run(
     const std::list<std::string>& arguments,
     const std::map<std::string, std::string>& env_overrides
 ) {
+    QStringList lArguments = QStringList();
 
     // Process init
     mProcess = std::make_shared<QProcess>();
@@ -69,14 +70,18 @@ void steam_proton::try_run(
     // What we cookin'
     // TODO: execution decorator
     mProcess->setProgram(mProton->get_selected_proton()->exec().c_str()); // proton
-    mArguments->append("waitforexitandrun"); // always this
-    mArguments->append(target_executable.c_str());
+    lArguments.append("waitforexitandrun"); // always this
+    lArguments.append(target_executable.c_str());
 
     // Arguments carry
-    for (auto arg: arguments) (*mArguments) << arg.c_str(); // ah, standards conversion.
-    mProcess->setArguments(*mArguments);
+    for (auto arg: arguments) lArguments << arg.c_str(); // ah, standards conversion.
+    mProcess->setArguments(lArguments);
     qint64 mikkiku;
     mProcess->startDetached(&mikkiku);
     mProcess->waitForStarted();
     std::cout << QString::number(mikkiku).toStdString() << std::endl;
+    // TODO: UI element saying "this is running"
+    // TODO: file watch on data_2 to auto-seek any new history URL
+    // TODO: URL chooser with consult history recording
+    // TODO: Consult history "mark all as consulted"
 }
