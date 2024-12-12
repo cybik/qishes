@@ -230,6 +230,7 @@ namespace QAGL {
         launcher_WebEngine = std::make_shared<QWebEngineView>();
         launcher_WebEngine->setContextMenuPolicy(Qt::NoContextMenu);
         launcher_WebEngine->setAcceptDrops(false);
+        launcher_WebEngine->setStyleSheet("QWebEngineView { border-bottom-left-radius:20px; border-bottom-right-radius:20px; }");
         launcher_WebPage = std::make_shared<QAGL::LandingWebEnginePage>();
         launcher_WebPage->setParentWindow(launcher_Window);
         launcher_WebEngine->setPage(launcher_WebPage.get());

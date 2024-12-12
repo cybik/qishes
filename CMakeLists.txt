@@ -202,3 +202,16 @@ install(
 set(CPACK_GENERATOR ${CPACK_GENERATOR} "DEB")
 
 include(CPack)
+
+# Unit tests!
+add_executable(
+    "${MY_PROJECT_NAME}-test"
+)
+
+target_link_libraries(
+    "${MY_PROJECT_NAME}-test"
+        GTest::gtest_main
+)
+
+include(GoogleTest)
+gtest_discover_tests("${MY_PROJECT_NAME}-test")
