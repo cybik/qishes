@@ -83,6 +83,19 @@ namespace QAGL {
             launcher_WebEngine->page()->runJavaScript(
                 "document.body.background = ('"+back+"');",
                 [this](const QVariant&) {
+                    launcher_WebEngine->page()->runJavaScript(
+                        "[document.getElementsByClassName('home')[0].clientWidth,document.getElementsByClassName('home')[0].clientHeight];",
+                        [this](const QVariant& v) {
+                            launcher_Window->setFixedSize( QSize(
+                                v.toJsonArray().at(0).toInt(),
+                                v.toJsonArray().at(1).toInt() + titlebar_height
+                            ));
+                            launcher_Window->updateGeometry();
+                            launcher_Window->move(
+                                QGuiApplication::primaryScreen()->geometry().center() - launcher_Window->rect().center()
+                            );
+                        }
+                    );
                     networkRequest.reset();
                     everythingHasLoaded();
                 }
@@ -132,24 +145,8 @@ namespace QAGL {
 
     void Landing::loaded(bool is) {
         if(is) {
-            launcher_WebEngine->page()->runJavaScript(
-                "document.getElementsByClassName('home')[0].clientWidth;",
-                [this](const QVariant& var) {
-                    launcher_Window->setFixedWidth(var.toInt());
-                    launcher_WebEngine->page()->runJavaScript(
-                        "document.getElementsByClassName('home')[0].clientHeight;",
-                        [this](const QVariant& var) {
-                            std::cout << QString::number(var.toInt()).toStdString() << std::endl;
-                            launcher_Window->setFixedHeight(var.toInt() + titlebar_height);
-                            launcher_Window->move(
-                                QGuiApplication::primaryScreen()->geometry().center() - launcher_Window->rect().center()
-                            );
-                            runBackground();
-                        }
-                    );
-                }
-            );
-
+            runBackground();
+            // fuck was i doing with this?
             if (networkLink_data == nullptr) {
                 networkLink_data = std::make_shared<QNetworkAccessManager>();
                 QObject::connect(
@@ -218,7 +215,7 @@ namespace QAGL {
         launcher_Window = given_window ? given_window: std::make_shared<QMainWindow>();
 
         // defaults
-        launcher_Window->setFixedSize(1280, 730);
+        //launcher_Window->setFixedSize(1280, 730);
         //launcher_Window->setFixedSize(1280, 720 - QApplication::style()->pixelMetric(QStyle::PM_TitleBarHeight));
         launcher_Window->setWindowTitle("Yet Another Anime Game Launcher");
 

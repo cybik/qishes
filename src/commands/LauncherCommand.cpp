@@ -182,10 +182,8 @@ void LauncherCommand::launcher() {
         given = std::make_shared<SARibbonMainWindow>();
 
         given->window()->setAttribute(Qt::WA_TranslucentBackground);
-        //given->ribbonBar()->ribbonTabBar()->setStyleSheet("QWidget{border-top-left-radius:20px; border-top-right-radius:20px;}");
         given->ribbonBar()->setStyleSheet("QMenuBar { border-top-left-radius:20px; border-top-right-radius:20px; }");
-        //given->window()->setStyleSheet("QWidget { border-bottom-left-radius:20px; border-bottom-right-radius:20px; }");
-        given->windowButtonBar()->setStyleSheet("QWidget{border-top-right-radius:20px;}");
+        given->windowButtonBar()->closeButton()->setStyleSheet("QToolButton {border-top-right-radius:20px;};");
 
         landing = std::make_unique<QAGL::Landing>(
             *this_app,
