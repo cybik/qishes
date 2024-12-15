@@ -29,7 +29,7 @@ std::unique_ptr<QAGL::Landing> LauncherCommand::landing = nullptr;
 std::shared_ptr<QAction> LauncherCommand::get_action_exit() {
     action_exit = std::make_shared<QAction>();
 
-    action_exit->setText("Test yeet");
+    action_exit->setText("Quit");
     QObject::connect(
             action_exit.get(), &QAction::triggered, // Signal
             [&](bool) {
@@ -298,13 +298,15 @@ int LauncherCommand::command_run() {
 
     generate_tray_icon()->show();
 
+    launcher();
+
     return this_app->exec();
 }
 
 std::shared_ptr<QAction> LauncherCommand::get_action_launcher_test() {
     action_launch = std::make_shared<QAction>();
 
-    action_launch->setText("Test Launch");
+    action_launch->setText("Open Launcher");
     QObject::connect(
         action_launch.get(), &QAction::triggered, // Signal
         [&](bool) { launcher(); }
