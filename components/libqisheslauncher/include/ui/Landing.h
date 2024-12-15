@@ -55,6 +55,7 @@ Q_OBJECT
     class Landing : public QObject {
 Q_OBJECT
     public:
+        void setOfflineMode(bool);
         explicit Landing(const QApplication &app,
             std::shared_ptr<SettingsData> settings,
             QAGL_App_Style style = QAGL_App_Style::Normal,
@@ -119,6 +120,9 @@ Q_OBJECT
         QAGL_Game _game = QAGL_Game::h4ke;
         QAGL_Region _region = QAGL_Region::global;
         int titlebar_height = 0;
+        bool is_offline = false;
+        void enable_offline_mode();
+        void setWindowGeometry(int, int);
     };
 }
 

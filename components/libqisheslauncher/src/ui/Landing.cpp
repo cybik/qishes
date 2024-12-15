@@ -60,7 +60,8 @@ namespace QAGL {
     void Landing::background_set() {
         QString back = "";
         // TODO: game selection. Initial: support for hk4e only
-        if (!background->isNull()
+        if (!is_offline
+            && !background->isNull()
             && (*background)["data"].isObject()
             && (*background)["data"]["game_info_list"].isArray()
         ) {
@@ -79,20 +80,16 @@ namespace QAGL {
                 }
             }
         }
-        if (!back.isEmpty()) {
+        if (!is_offline && !back.isEmpty()) {
             launcher_WebEngine->page()->runJavaScript(
                 "document.body.background = ('"+back+"');",
                 [this](const QVariant&) {
                     launcher_WebEngine->page()->runJavaScript(
                         "[document.getElementsByClassName('home')[0].clientWidth,document.getElementsByClassName('home')[0].clientHeight];",
                         [this](const QVariant& v) {
-                            launcher_Window->setFixedSize( QSize(
+                            setWindowGeometry(
                                 v.toJsonArray().at(0).toInt(),
-                                v.toJsonArray().at(1).toInt() + titlebar_height
-                            ));
-                            launcher_Window->updateGeometry();
-                            launcher_Window->move(
-                                QGuiApplication::primaryScreen()->geometry().center() - launcher_Window->rect().center()
+                                v.toJsonArray().at(1).toInt()
                             );
                         }
                     );
@@ -103,6 +100,14 @@ namespace QAGL {
         } else {
             everythingHasLoaded();
         }
+    }
+
+    void Landing::setWindowGeometry(int width, int height) {
+        launcher_Window->setFixedSize( QSize(width, height + titlebar_height));
+        launcher_Window->updateGeometry();
+        launcher_Window->move(
+            QGuiApplication::primaryScreen()->geometry().center() - launcher_Window->rect().center()
+        );
     }
 
     void Landing::everythingHasLoaded() {
@@ -126,7 +131,7 @@ namespace QAGL {
     }
 
     void Landing::runBackground() {
-        if(!background) {
+        if(!is_offline && !background) {
             if(!networkLink) {
                 QObject::connect(
                     (networkLink = std::make_shared<QNetworkAccessManager>()).get(),
@@ -286,7 +291,20 @@ namespace QAGL {
             .append(".com%2Fhk4e_global&key=gcStgarh&prev=false");
     }
 
+    void Landing::setOfflineMode(bool is_offline) {
+        this->is_offline = is_offline;
+    }
+
+    void Landing::enable_offline_mode() {
+        setWindowGeometry(1280, 800);
+        launcher_loaded = true; // override and gtfo
+        //abort();
+    }
+
     void Landing::show(const QApplication &app) {
+        if (is_offline)
+            enable_offline_mode();
+
         if (launcher_loaded)
             everythingHasLoaded();
         else

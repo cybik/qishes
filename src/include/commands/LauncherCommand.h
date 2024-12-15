@@ -48,7 +48,7 @@ private:
     } ExeType;
     void run_the_magic(const QString& target_exec);
 
-    std::shared_ptr<QApplication> this_app = nullptr;
+    std::shared_ptr<QApplication> qishes_launcher = nullptr;
     std::shared_ptr<QMenu> generate_menu();
     std::shared_ptr<QSystemTrayIcon> generate_tray_icon();
 
@@ -123,6 +123,10 @@ private:
     std::shared_ptr<std::list<std::shared_ptr<QFile>>> filtered_files;
 
     void enlist_launch_action(QString message, QString executable);
+
+    bool command_offline;
+    std::shared_ptr<QCommandLineOption> offline;
+
 };
 
 

@@ -186,7 +186,7 @@ void LauncherCommand::launcher() {
         given->windowButtonBar()->closeButton()->setStyleSheet("QToolButton {border-top-right-radius:20px;};");
 
         landing = std::make_unique<QAGL::Landing>(
-            *this_app,
+            *qishes_launcher,
             std::move(data),
             QAGL::QAGL_App_Style::Normal,
             QAGL::QAGL_Game::h4ke,     // Genshin
@@ -200,7 +200,9 @@ void LauncherCommand::launcher() {
     }
     dis->report_presence_message("qishes on main");
 
-    landing->show(*this_app);
+    landing->setOfflineMode(this->command_offline);
+
+    landing->show(*qishes_launcher);
 }
 
 QString LauncherCommand::resolve_executable_path() {
@@ -229,15 +231,15 @@ void LauncherCommand::command_create_application(int& argc, char **argv) {
 
     QApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
     QApplication::setAttribute(Qt::AA_DontCreateNativeWidgetSiblings); // QWindowKit
-    this_app = std::make_shared<QApplication>(argc, argv);
+    qishes_launcher = std::make_shared<QApplication>(argc, argv);
     QApplication::setApplicationName(APPNAME_GEN(.launcher));
     QApplication::setApplicationVersion(APP_VERSION);
 
-    if (this_app->arguments().size() > 2) {
+    if (qishes_launcher->arguments().size() > 2) {
         // we can assume we have a 3rd argument. Use that as the execution target.
-        if (this_app->arguments().at(2).endsWith("exe") ) {
+        if (qishes_launcher->arguments().at(2).endsWith("exe") ) {
             // all right we have an exe
-            target_exec = this_app->arguments().at(2);
+            target_exec = qishes_launcher->arguments().at(2);
             exec_provided_by_environment = true;
             if (steam_integration::get_steam_integration_instance()->is_steam_env()) {
                 // TODO: fix getFiles, it REALLY ain't seeking right
@@ -254,7 +256,7 @@ void LauncherCommand::command_create_application(int& argc, char **argv) {
         ->loadFromData(QByteArray::fromBase64(qiqi_smol.toLocal8Bit(), QByteArray::Base64Encoding));
 
     QApplication::connect(
-        this_app.get(), &QApplication::aboutToQuit,
+        qishes_launcher.get(), &QApplication::aboutToQuit,
         [&]() {
             // Discord yeet
             dis.reset();
@@ -285,11 +287,31 @@ void LauncherCommand::remove_panel_and_action(
 }
 
 void LauncherCommand::command_setup_parser() {
+    parser->addPositionalArgument(
+        "command",
+        L18N_M("Command to run. MUST be launcher.")
+    );
+
+    // Offline mode is essentially "don't try to download metadata from the launcher upstream"
+    //  right now this is only Hoyoverse's Genshin Impact, but it is intended to expand to multiple
+    //  launcher arts by way of "guessed launcher profiles"
+    parser->addOption(
+        *(offline = std::make_shared<QCommandLineOption>(
+            QStringList() << "o" << "offline",
+            L18N("Enable Offline Mode.")
+        ))
+    );
 
 }
 
 void LauncherCommand::command_process_parser() {
-
+    parser->process(*qishes_launcher);
+    if( parser->positionalArguments().empty() ||
+        parser->positionalArguments()[0].compare(CommandSpecifier, Qt::CaseInsensitive) != 0
+    ) {
+        parser->showHelp(0);
+    }
+    this->command_offline =        parser->isSet(*offline);        // if set, always true
 }
 
 int LauncherCommand::command_run() {
@@ -300,7 +322,7 @@ int LauncherCommand::command_run() {
 
     launcher();
 
-    return this_app->exec();
+    return qishes_launcher->exec();
 }
 
 std::shared_ptr<QAction> LauncherCommand::get_action_launcher_test() {
