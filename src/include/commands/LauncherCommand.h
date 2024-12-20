@@ -82,8 +82,9 @@ private:
     std::unique_ptr<SARibbonCheckBox> given_option_mangohud;
     std::unique_ptr<SARibbonCheckBox> given_option_deckenv;
     std::unique_ptr<SARibbonCheckBox> given_option_obsvk;
+    std::unique_ptr<SARibbonCheckBox> given_option_cloudpc;
 
-    std::unique_ptr<SARibbonCheckBox> get_checkbox(QString title, QString objname);
+    std::unique_ptr<SARibbonCheckBox> get_checkbox(QString title, QString objname, bool default_val = false);
     //std::unique_ptr<QAction> given_action_run;
 
     std::unique_ptr<SARibbonPannel> given_panel_run;

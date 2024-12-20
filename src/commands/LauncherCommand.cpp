@@ -41,23 +41,27 @@ std::shared_ptr<QAction> LauncherCommand::get_action_exit() {
     return action_exit;
 }
 
-std::unique_ptr<SARibbonCheckBox> LauncherCommand::get_checkbox(QString title, QString objname) {
+std::unique_ptr<SARibbonCheckBox> LauncherCommand::get_checkbox(QString title, QString objname, bool default_val) {
     std::unique_ptr<SARibbonCheckBox> cb = std::make_unique<SARibbonCheckBox>();
     cb->setText(title);
     cb->setObjectName(objname);
-    //cb->setChecked(/*config*/);
+    cb->setChecked(default_val);
     return std::move(cb);
 }
 
 std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_options() {
-    given_option_mangohud = std::move(get_checkbox("MangoHUD", "cbMango"));
-    given_option_deckenv = std::move(get_checkbox("Fakeout Deck", "cbDeckMode"));
-    given_option_obsvk = std::move(get_checkbox("OBS VkCapture Mode", "cbVkCap"));
+    given_option_mangohud = std::move(get_checkbox("MangoHUD", "cbMango", true));
+    given_option_deckenv = std::move(get_checkbox("Fakeout Deck", "cbDeckMode", true));
+    given_option_obsvk = std::move(get_checkbox("OBS VkCapture Mode", "cbVkCap", true));
+    given_option_cloudpc = std::move(get_checkbox(
+        "Cloud Masquerade", "cbImpersonateCloud", true)
+    );
 
     std::unique_ptr<SARibbonPannel> panel_opt = std::make_unique<SARibbonPannel>();
     panel_opt->addSmallWidget(given_option_mangohud.get());
     panel_opt->addSmallWidget(given_option_deckenv.get());
     panel_opt->addSmallWidget(given_option_obsvk.get());
+    panel_opt->addSmallWidget(given_option_cloudpc.get());
     panel_opt->setPannelName("Options");
     return std::move(panel_opt);
 }
@@ -78,11 +82,16 @@ std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_proton() {
 
 void LauncherCommand::run_the_magic(const QString& target_exe) {
     std::map<std::string, std::string> envs = {};
+    std::list<std::string> arguments = {};
     if (given_option_mangohud->isChecked()) envs["MANGOHUD"] = "1";
-    if (given_option_deckenv->isChecked()) envs["SteamDeck"] = "1";
-    if (given_option_obsvk->isChecked()) envs["OBS_VKCAPTURE"] = "1";
+    if (given_option_deckenv->isChecked())  envs["SteamDeck"] = "1";
+    if (given_option_obsvk->isChecked())    envs["OBS_VKCAPTURE"] = "1";
+    if (given_option_cloudpc->isChecked()) {
+        arguments.emplace_back("-platform_type");
+        arguments.emplace_back("CLOUD_THIRD_PARTY_PC");
+    }
     steam_integration::get_steam_integration_instance()->proton()->try_run(
-        target_exe.toStdString(), {}, envs
+        target_exe.toStdString(), arguments, envs
     );
 }
 
