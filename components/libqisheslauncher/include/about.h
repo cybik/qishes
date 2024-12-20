@@ -7,7 +7,7 @@
 
 //#define ORG_NAME "Cybikbase"
 #define ORG_DOMAIN "cybik.moe"
-#define APP_NAME "A Qt Anime Game Launcher"
+#define APP_NAME "A Qute Anime Game Launcher"
 #define APP_NAME_SHORT "AQAGL"
 
 #endif //QAGL_ABOUT_H
