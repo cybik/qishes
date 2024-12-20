@@ -28,6 +28,7 @@ void examine(const QJsonObject& object) {
 #include <vlvproton.h>
 #include <steam_proton.h>
 
+#include "about.h"
 #include "steam_integration.h"
 
 namespace QAGL {
@@ -223,7 +224,7 @@ namespace QAGL {
         // defaults
         //launcher_Window->setFixedSize(1280, 730);
         //launcher_Window->setFixedSize(1280, 720 - QApplication::style()->pixelMetric(QStyle::PM_TitleBarHeight));
-        launcher_Window->setWindowTitle("Yet Another Anime Game Launcher");
+        launcher_Window->setWindowTitle(APP_NAME);
 
         // Menu
         devTools_Combo = std::make_shared<QShortcut>(QKeySequence(Qt::Key_F12), launcher_Window.get());
