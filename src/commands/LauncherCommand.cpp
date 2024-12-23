@@ -20,6 +20,7 @@
 #include <steam_integration.h>
 
 #include <gachafs.h>
+#include <wine.h>
 
 const QString LauncherCommand::CommandSpecifier = "launcher";
 
@@ -115,7 +116,7 @@ void LauncherCommand::enlist_launch_action(QString message, QString executable) 
 std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_run() {
     enlist_launch_action("Try to run", target_exec);
     for (auto file : *filtered_files) {
-        std::cout << file->fileName().toStdString() << std::endl;
+        //std::cout << file->fileName().toStdString() << std::endl;
         if ( !target_exec.contains(file->filesystemFileName().filename().c_str()) ) {
             enlist_launch_action(
                 QString(file->filesystemFileName().filename().c_str()),
@@ -214,20 +215,6 @@ void LauncherCommand::launcher() {
     landing->show(*qishes_launcher);
 }
 
-QString LauncherCommand::resolve_executable_path() {
-    if (!target_exec.contains(":\\")) {
-        return target_exec;
-    }
-    QString reparsed_exec_path = target_exec.split(":")[1];
-    reparsed_exec_path = reparsed_exec_path.replace("\\", "/");
-    reparsed_exec_path = reparsed_exec_path.replace("//", "/"); // dedupe
-    reparsed_exec_path = (qgetenv("STEAM_COMPAT_DATA_PATH") + "/pfx/drive_c/" + reparsed_exec_path);
-    reparsed_exec_path = reparsed_exec_path.replace("//", "/"); // dedupe
-    reparsed_exec_path = reparsed_exec_path.first(reparsed_exec_path.lastIndexOf("/"));
-
-    return reparsed_exec_path;
-}
-
 void LauncherCommand::command_create_application(int& argc, char **argv) {
     filtered_files = std::make_shared<std::list<std::shared_ptr<QFile>>>();
     // Quirk: Early detection of Steam Startup environment
@@ -252,7 +239,12 @@ void LauncherCommand::command_create_application(int& argc, char **argv) {
             exec_provided = true;
             if (steam_integration::get_steam_integration_instance()->is_steam_env()) {
                 // TODO: fix getFiles, it REALLY ain't seeking right
-                for (std::shared_ptr<QFile> file : *gachafs::getFiles("**/*.exe", resolve_executable_path(), true)) {
+                for (std::shared_ptr<QFile> file : *gachafs::getFiles(
+                        "**/*.exe",
+                        QString::fromStdString(wine::resolve_executable_path(target_exec.toStdString())),
+                        true
+                    )
+                ) {
                     if (supported_games_impl.contains(file->filesystemFileName().filename())) {
                         filtered_files->push_back(file);
                     }

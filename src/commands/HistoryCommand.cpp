@@ -108,7 +108,7 @@ int HistoryCommand::command_run() {
             return 0;
         }
         if(this->command_max_return_num == 1 || results->size() == 1) {
-            std::cout << results->front().to_stdstring() << std::endl;
+            //std::cout << results->front().to_stdstring() << std::endl;
             if(this->command_open_url) {
                 // seems qt doesn't want to allow use desktop services in cli
                 QDesktopServices::openUrl(QUrl(results->front().to_qstring()));

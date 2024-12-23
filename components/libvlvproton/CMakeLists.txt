@@ -35,6 +35,7 @@ set(
     SOURCES_CPP
         "${PROJECT_SOURCE_DIR}/proton.cpp"
         "${PROJECT_SOURCE_DIR}/vlvproton.cpp"
+        "${PROJECT_SOURCE_DIR}/wine.cpp"
 )
 
 # For AutoMOC
@@ -42,6 +43,7 @@ set(
     SOURCES_H
         "${PROJECT_SOURCE_DIR}/include/proton.h"
         "${PROJECT_SOURCE_DIR}/include/vlvproton.h"
+        "${PROJECT_SOURCE_DIR}/include/wine.h"
 )
 
 add_library(

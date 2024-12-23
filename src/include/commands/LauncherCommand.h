@@ -107,8 +107,6 @@ private:
     QString target_exec;
     bool    exec_provided = false;
 
-    QString resolve_executable_path();
-
     std::map<int, std::string> target_execs_found;
     const std::map<std::string, LauncherCommand::ExeType> supported_games_impl = {
         {"launcher.exe", ExeType::Launcher},
