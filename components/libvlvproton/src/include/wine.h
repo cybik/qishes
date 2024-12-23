@@ -10,4 +10,3 @@ class wine {
 public:
     static std::string resolve_executable_path(const std::string & string);
 };
-
