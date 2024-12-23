@@ -1,6 +1,7 @@
-#include <QString>
+//#include <QString>
 
-QString idx_sass  = "body\n"
+#include <string>
+std::string idx_sass  = "body\n"
                     "    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif\n"
                     "    \n"
                     "    margin: 0\n"

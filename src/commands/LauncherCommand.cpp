@@ -165,7 +165,7 @@ std::shared_ptr<SARibbonCategory> LauncherCommand::getLauncherCat() {
         given_cat->setCategoryName("Game");
         given_cat->setObjectName("gamedata");
 
-        if (!exec_provided_by_environment) given_cat->addPannel(given_panel_game.get());
+        if (!exec_provided) given_cat->addPannel(given_panel_game.get());
         given_cat->addPannel(given_panel_proton.get());
         given_cat->addPannel(given_panel_options.get());
         given_cat->addPannel(given_panel_run.get());
@@ -249,11 +249,11 @@ void LauncherCommand::command_create_application(int& argc, char **argv) {
         if (qishes_launcher->arguments().at(2).endsWith("exe") ) {
             // all right we have an exe
             target_exec = qishes_launcher->arguments().at(2);
-            exec_provided_by_environment = true;
+            exec_provided = true;
             if (steam_integration::get_steam_integration_instance()->is_steam_env()) {
                 // TODO: fix getFiles, it REALLY ain't seeking right
                 for (std::shared_ptr<QFile> file : *gachafs::getFiles("**/*.exe", resolve_executable_path(), true)) {
-                    if (supported_games_shit_impl.contains(file->filesystemFileName().filename())) {
+                    if (supported_games_impl.contains(file->filesystemFileName().filename())) {
                         filtered_files->push_back(file);
                     }
                 }
@@ -270,17 +270,36 @@ void LauncherCommand::command_create_application(int& argc, char **argv) {
             // Discord yeet
             dis.reset();
 
+            icon.reset();
+            action_exit.reset();
+            action_launch.reset();
+
+            actions_execs.clear();
+            filtered_files->clear();
+            filtered_files.reset();
+
+            given_option_cloudpc.reset();
+            given_option_deckenv.reset();
+            given_option_obsvk.reset();
+            given_option_mangohud.reset();
+
             // Panel yeets
             if (given_proton_combo) given_proton_combo.reset();
             remove_panel_and_action(given_cat, std::move(given_panel_proton), nullptr);
             remove_panel_and_action(given_cat, std::move(given_panel_game), std::move(given_action_game));
             remove_panel_and_action(given_cat, std::move(given_panel_run), std::move(given_action_run));
+            remove_panel_and_action(given_cat, std::move(given_panel_options), nullptr);
 
             // Ribbon reset
             given_cat.reset();
 
             // Landing window yeet
             landing.reset();
+            tray.reset();
+            tray_menu.reset();
+
+            // last call
+            given.reset();
         }
     );
 }

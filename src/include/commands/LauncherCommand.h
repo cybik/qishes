@@ -25,6 +25,7 @@ class LauncherCommand : public AbstractCommand {
 public:
     static const QString CommandSpecifier;
     LauncherCommand() = default;
+    ~LauncherCommand() = default;
 
 protected:
     void launcher();
@@ -40,11 +41,11 @@ private:
         Nap,
         Launcher,
 
-        WutheringWaves,
-        InfinityNikki,
-        Strinova,
+        WutheringWaves, /** Unsupported for now */
+        InfinityNikki,  /** Unsupported for now */
+        Strinova,       /** Unsupported for now */
 
-        Unknown
+        Unknown         /** NYANEEEEEEEEEEEEEEH */
     } ExeType;
     void run_the_magic(const QString& target_exec);
 
@@ -104,12 +105,12 @@ private:
 
     //
     QString target_exec;
-    bool    exec_provided_by_environment = false;
+    bool    exec_provided = false;
 
     QString resolve_executable_path();
 
     std::map<int, std::string> target_execs_found;
-    const std::map<std::string, bool> supported_games_shit_impl = {
+    const std::map<std::string, LauncherCommand::ExeType> supported_games_impl = {
         {"launcher.exe", ExeType::Launcher},
         {"GenshinImpact.exe", ExeType::Genshin},
         {"StarRail.exe", ExeType::HonkaiSR},

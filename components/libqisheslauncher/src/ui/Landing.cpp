@@ -176,7 +176,7 @@ namespace QAGL {
             script.setSourceCode(
                 QString::fromLatin1(QAGL_INJECT_STYLESHEET)
                     .arg("cpp-sends-their-regards")
-                    .arg(SASSProcess(idx_sass.toStdString()).c_str())
+                    .arg(QString::fromStdString(SASSProcess(idx_sass)))
             );
 
             script.setName("cpp-sends-their-regards");

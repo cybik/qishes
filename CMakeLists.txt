@@ -40,6 +40,7 @@ include("${CMAKE_SOURCE_DIR}/cmake/RpathDefinitions.cmake")
 
 set(SARIBBON_BUILD_EXAMPLES OFF CACHE BOOL "Exported" FORCE)
 set(SARIBBON_USE_FRAMELESS_LIB ON CACHE BOOL "Exported" FORCE)
+#set(ASAN ON CACHE BOOL "Check memory" FORCE)
 #set(QWINDOWKIT_INSTALL OFF CACHE BOOL "Exported" FORCE)
 #set(QWindowKit_DIR "${PROJECT_3RDPARTY_DIR}/qwindowkit/src" CACHE STRING "Exported" FORCE)
 #set(QWindowKit_DIR "${PROJECT_BIN_3RDPARTY_DIR}/qwindowkit/src" CACHE STRING "Exported" FORCE)
