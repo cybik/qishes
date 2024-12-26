@@ -18,6 +18,8 @@
 
 #include <steam/steam_api.h>
 
+#include <iostream>
+
 std::shared_ptr<steam_integration> steam_integration::mInstance = nullptr;
 
 bool steam_integration::is_steam_deck() {
@@ -34,15 +36,32 @@ bool steam_integration::launched_from_steam_client() {
 
 bool steam_integration::launched_as_steam_application() {
     // First check: SteamAPI present as object was initialized
-    if (mSteamInitResult != ESteamAPIInitResult::k_ESteamAPIInitResult_OK) return false;
-
-    // Second check: rerun for liveness
-    try_initialize_steamapi();
-    if (mSteamInitResult != ESteamAPIInitResult::k_ESteamAPIInitResult_OK) return false;
+    if (mSteamInitResult != ESteamAPIInitResult::k_ESteamAPIInitResult_OK) {
+        // Second check: rerun for liveness
+        try_initialize_steamapi();
+        if (mSteamInitResult != ESteamAPIInitResult::k_ESteamAPIInitResult_OK) {
+            return false;
+        }
+    }
 
     // Third check: okay, now we're cooking. ask Steam for things for no other reason than
     //  "cybik is playing with the API", really. This is an unofficial Launcher of Launcher,
     //  and is quite literally worlds apart from any official experience.
+    if ( !SteamClient()
+      || !SteamUser()
+      || !SteamUser()->BLoggedOn()
+      || !SteamUserStats()
+    )
+        return false;
+
+    return true;
+}
+
+void steam_integration::set_the_dumb_achievement() {
+    if (launched_as_steam_application()) {
+        SteamUserStats()->SetAchievement("CHIEVO_YOU_ARE_USER");
+        SteamUserStats()->StoreStats(); // run it back
+    }
 }
 
 bool steam_integration::running_under_steam() {
@@ -56,6 +75,9 @@ std::shared_ptr<steam_proton> steam_integration::proton() {
 // so that we can retry, even though it's unlikely that we should or would ever need to.
 void steam_integration::try_initialize_steamapi() {
     mSteamInitResult = SteamAPI_InitEx(&mSteamInitErrMsg);
+
+    if (mSteamInitResult == ESteamAPIInitResult::k_ESteamAPIInitResult_OK)
+        set_the_dumb_achievement();
 }
 
 steam_integration::steam_integration() {

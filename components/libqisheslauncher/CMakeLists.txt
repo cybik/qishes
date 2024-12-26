@@ -46,6 +46,11 @@ include_directories(
         "${PROJECT_INCLUDE_DIR}"
 )
 
+include_directories(
+    AFTER
+        "${PROJECT_3RDPARTY_DIR}/steamworks/public"
+)
+
 find_package(Qt6 REQUIRED COMPONENTS Core)
 qt_standard_project_setup()
 

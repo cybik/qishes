@@ -13,6 +13,10 @@ set(QT_VER "Qt6")
 include_directories(
     BEFORE
         "${CMAKE_CURRENT_LIST_DIR}/src/include"
+)
+
+include_directories(
+    AFTER
         "${PROJECT_3RDPARTY_DIR}/steamworks/public"
 )
 

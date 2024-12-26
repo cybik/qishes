@@ -23,6 +23,7 @@ public:
     bool                                        launched_as_steam_application();
     bool                                        running_under_steam();
     std::shared_ptr<steam_proton>               proton();
+    void                                        set_the_dumb_achievement();
 protected:
 private:
     /*CTOR*/                                    steam_integration();
