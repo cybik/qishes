@@ -77,6 +77,7 @@ include_directories(
         "${PROJECT_3RDPARTY_DIR}/qwindowkit/src"
         "${PROJECT_3RDPARTY_DIR}/saribbon/src"
         #"${PROJECT_3RDPARTY_DIR}/discord-game-sdk/include"
+        "${PROJECT_3RDPARTY_DIR}/steamworks/public"
 )
 
 PreconfigureApplicationRpath()
@@ -162,6 +163,7 @@ target_link_libraries(
         # todo: fix this bloody thing tbh
         "${PROJECT_3RDPARTY_DIR}/libsass/lib/libsass.a"
         "${PROJECT_3RDPARTY_DIR}/discord-rpc-classic-bin/lib/libdiscord-rpc.so"
+        "${PROJECT_3RDPARTY_DIR}/steamworks/redistributable_bin/linux64/libsteam_api.so"
 )
 
 add_dependencies(

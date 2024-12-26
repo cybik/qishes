@@ -1,5 +1,5 @@
 
-set(PROJECT_3RDPARTY_DIR "${CMAKE_SOURCE_DIR}/3rdParty")
+set(PROJECT_3RDPARTY_DIR "${CMAKE_SOURCE_DIR}/3rdParty" CACHE STRING "Exported" FORCE)
 set(PROJECT_BIN_3RDPARTY_DIR "${CMAKE_CURRENT_BINARY_DIR}/3rdParty")
 
 macro(PreconfigureApplicationRpath)
@@ -100,14 +100,16 @@ function(AutoconfigureApplicationRpath targetproj dependencies)
 
     # Discord SDK library
     set(DISCORD_FORCED_LIB_FILE "${PROJECT_3RDPARTY_DIR}/discord-rpc-classic-bin/lib/libdiscord-rpc.so")
+    set(STEAM_FORCED_LIB_FILE "${PROJECT_3RDPARTY_DIR}/steamworks/redistributable_bin/linux64/libsteam_api.so")
     #set(DISCORD_FORCED_LIB_FILE "${PROJECT_3RDPARTY_DIR}/discord-game-sdk/lib/linux/x86_64/libdiscord_game_sdk.so")
     target_link_libraries(
         ${targetproj}
         PRIVATE
             "${DISCORD_FORCED_LIB_FILE}"
+            "${STEAM_FORCED_LIB_FILE}"
     )
 
-    foreach(PROJECT_TO_INSTALL IN ITEMS ${DISCORD_FORCED_LIB_FILE})
+    foreach(PROJECT_TO_INSTALL IN ITEMS ${DISCORD_FORCED_LIB_FILE} ${STEAM_FORCED_LIB_FILE})
         add_custom_command(
             TARGET
                 ${targetproj}

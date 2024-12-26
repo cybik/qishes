@@ -13,6 +13,7 @@ set(QT_VER "Qt6")
 include_directories(
     BEFORE
         "${CMAKE_CURRENT_LIST_DIR}/src/include"
+        "${PROJECT_3RDPARTY_DIR}/steamworks/public"
 )
 
 find_package(Qt6 REQUIRED COMPONENTS Core)
@@ -26,6 +27,8 @@ find_package(
 )
 
 include("${CMAKE_SOURCE_DIR}/cmake/RpathDefinitions.cmake")
+
+include_directories()
 
 PreconfigureLibraryRpath()
 
