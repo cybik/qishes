@@ -12,7 +12,8 @@ Welcome back to the fold, me.
 > of the cold wastes was ever communicated to the gaming audience.
 > 
 > I do not guarantee this works. If anything, I hereby tell you that this probably WILL
-> end up breaking at some point.
+> end up breaking at some point, and that Electronic Jesus / Sun Wukong will get into your
+> account and eat your best unit.
 > 
 > You have thus been forewarned.
 
