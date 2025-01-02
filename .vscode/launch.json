@@ -13,12 +13,12 @@
       "MIMode": "gdb",
       "setupCommands": [
           {
-              "description": "Activer l'impression en mode Pretty pour gdb",
+              "description": "Activate GDB prettehs",
               "text": "-enable-pretty-printing",
               "ignoreFailures": true
           },
           {
-              "description": "Définir la version désassemblage sur Intel",
+              "description": "Set Disassembly Version",
               "text": "-gdb-set disassembly-flavor intel",
               "ignoreFailures": true
           }
@@ -40,12 +40,12 @@
       "MIMode": "gdb",
       "setupCommands": [
           {
-              "description": "Activer l'impression en mode Pretty pour gdb",
+              "description": "Activate GDB prettehs",
               "text": "-enable-pretty-printing",
               "ignoreFailures": true
           },
           {
-              "description": "Définir la version désassemblage sur Intel",
+              "description": "Set Disassembly Version",
               "text": "-gdb-set disassembly-flavor intel",
               "ignoreFailures": true
           }
@@ -67,16 +67,42 @@
       "MIMode": "gdb",
       "setupCommands": [
           {
-              "description": "Activer l'impression en mode Pretty pour gdb",
+              "description": "Activate GDB prettehs",
               "text": "-enable-pretty-printing",
               "ignoreFailures": true
           },
           {
-              "description": "Définir la version désassemblage sur Intel",
+              "description": "Set Disassembly Version",
               "text": "-gdb-set disassembly-flavor intel",
               "ignoreFailures": true
           }
       ]
     },
+    {
+      "name": "Launcher (no dir)",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/qgachawishes",
+      "args": [
+        "launcher"
+      ],
+      "stopAtEntry": false,
+      "cwd": "${fileDirname}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+          {
+              "description": "Activate GDB prettehs",
+              "text": "-enable-pretty-printing",
+              "ignoreFailures": true
+          },
+          {
+              "description": "Set Disassembly Version",
+              "text": "-gdb-set disassembly-flavor intel",
+              "ignoreFailures": true
+          }
+      ]
+    }
   ]
 }
