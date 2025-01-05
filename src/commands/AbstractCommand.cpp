@@ -52,24 +52,24 @@ void AbstractCommand::printSingleFilePath(const QString &filename) {
         << std::endl;
 }
 
-std::shared_ptr<QStringList> AbstractCommand::runUrlSearch(const std::shared_ptr<QFile>& qfile) {
+std::unique_ptr<QStringList> AbstractCommand::runUrlSearch(const std::shared_ptr<QFile>& qfile) {
     if(!qfile->exists()) return nullptr;
     qfile->open(QFile::ReadOnly);
     QRegularExpressionMatchIterator qrem =
         QRegularExpression("1/0/https(.*)\0\0\0\0\0\0\0\0").globalMatch(qfile->readAll());
-    std::shared_ptr<QStringList> retList = std::make_shared<QStringList>();
+    std::unique_ptr<QStringList> retList = std::make_unique<QStringList>();
     while(qrem.hasNext()) retList->append(qrem.next().captured(0));
     qfile->close();
-    return retList;
+    return std::move(retList);
 }
 
-std::shared_ptr<QStringList> AbstractCommand::runUrlCleanup(const std::shared_ptr<QStringList>& ptr) {
-    std::shared_ptr<QStringList> retList; // don't initialize unless necessary
+std::unique_ptr<QStringList> AbstractCommand::runUrlCleanup(const std::unique_ptr<QStringList>& ptr) {
+    std::unique_ptr<QStringList> retList; // don't initialize unless necessary
     for(const auto& single_string: (*ptr)) {
         for(const auto& split_string_1: single_string.split("1/0/")) { /** cut on 1/0/ **/
             for(const auto& split_string_2: split_string_1.split(QChar('\0'), Qt::SkipEmptyParts)) {
                 if(split_string_2.startsWith("http")) {
-                    if(!retList) retList = std::make_shared<QStringList>();
+                    if(!retList) retList = std::make_unique<QStringList>();
                     // always split after a cache entry, defined by nullchars
                     retList->append(split_string_2); // first of the second level
                 }
@@ -77,18 +77,14 @@ std::shared_ptr<QStringList> AbstractCommand::runUrlCleanup(const std::shared_pt
         }
     }
     ptr->clear(); /** cleanup **/
-    return retList;
+    return std::move(retList);
 }
 
-std::unique_ptr<std::list<WishLog>> AbstractCommand::runFilterForLogs(const std::shared_ptr<QStringList>& ptr) {
+std::unique_ptr<std::list<WishLog>> AbstractCommand::runFilterForLogs(const std::unique_ptr<QStringList>& ptr) {
     if(!ptr) return nullptr;
     std::unique_ptr<std::list<WishLog>> retList = std::make_unique<std::list<WishLog>>();
     for(const auto& single_string: (*ptr)) {
         if(WishLog::is_accepted_url(single_string)) {
-            std::cout
-                << termcolor::bold  << termcolor::cyan
-                << "accept " << single_string.toStdString()
-                << termcolor::reset << std::endl;
             retList->emplace_front(single_string, WishLog::History); // last is always first. :D
         }
     }
@@ -96,8 +92,7 @@ std::unique_ptr<std::list<WishLog>> AbstractCommand::runFilterForLogs(const std:
     return std::move(retList);
 }
 
-void AbstractCommand::warnHelp(int exit_code, const QString& message)
-{
+void AbstractCommand::warnHelp(int exit_code, const QString& message) {
     Log::get_logger()->critical(message);
     if(parser) parser->showHelp(exit_code);
 }

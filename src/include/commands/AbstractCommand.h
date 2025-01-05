@@ -34,9 +34,9 @@ protected:
     // common calls
     std::shared_ptr<std::list<std::shared_ptr<QFile>>> getGameWishesCache();
     void printSingleFilePath(const QString& filename);
-    std::shared_ptr<QStringList> runUrlSearch(const std::shared_ptr<QFile>& qfile);
-    std::shared_ptr<QStringList> runUrlCleanup(const std::shared_ptr<QStringList>& ptr);
-    std::unique_ptr<std::list<WishLog>> runFilterForLogs(const std::shared_ptr<QStringList>& ptr);
+    std::unique_ptr<QStringList> runUrlSearch(const std::shared_ptr<QFile>& qfile);
+    std::unique_ptr<QStringList> runUrlCleanup(const std::unique_ptr<QStringList>& ptr);
+    std::unique_ptr<std::list<WishLog>> runFilterForLogs(const std::unique_ptr<QStringList>& ptr);
 
     void warnHelp(int exit_code, const QString& message = "");
     std::shared_ptr<QCommandLineParser> parser;
