@@ -36,7 +36,7 @@ protected:
     void printSingleFilePath(const QString& filename);
     std::shared_ptr<QStringList> runUrlSearch(const std::shared_ptr<QFile>& qfile);
     std::shared_ptr<QStringList> runUrlCleanup(const std::shared_ptr<QStringList>& ptr);
-    std::shared_ptr<std::list<WishLog>> runFilterForLogs(const std::shared_ptr<QStringList>& ptr);
+    std::unique_ptr<std::list<WishLog>> runFilterForLogs(const std::shared_ptr<QStringList>& ptr);
 
     void warnHelp(int exit_code, const QString& message = "");
     std::shared_ptr<QCommandLineParser> parser;

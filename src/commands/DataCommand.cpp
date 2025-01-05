@@ -114,7 +114,7 @@ int DataCommand::command_run() {
 }
 
 void DataCommand::started() {
-    auto results = runFilterForLogs(runUrlCleanup(runUrlSearch(*(*caches).begin())));
+    auto results = runFilterForLogs(runUrlCleanup(runUrlSearch(*caches->begin())));
     if(!results || results->empty()) warnHelp(4, "No URLs read, detected or otherwise found.");
     run_data_sync(results->front());
 }

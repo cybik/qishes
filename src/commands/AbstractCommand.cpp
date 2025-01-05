@@ -80,16 +80,20 @@ std::shared_ptr<QStringList> AbstractCommand::runUrlCleanup(const std::shared_pt
     return retList;
 }
 
-std::shared_ptr<std::list<WishLog>> AbstractCommand::runFilterForLogs(const std::shared_ptr<QStringList>& ptr) {
+std::unique_ptr<std::list<WishLog>> AbstractCommand::runFilterForLogs(const std::shared_ptr<QStringList>& ptr) {
     if(!ptr) return nullptr;
-    std::shared_ptr<std::list<WishLog>> retList = std::make_shared<std::list<WishLog>>();
+    std::unique_ptr<std::list<WishLog>> retList = std::make_unique<std::list<WishLog>>();
     for(const auto& single_string: (*ptr)) {
         if(WishLog::is_accepted_url(single_string)) {
+            std::cout
+                << termcolor::bold  << termcolor::cyan
+                << "accept " << single_string.toStdString()
+                << termcolor::reset << std::endl;
             retList->emplace_front(single_string, WishLog::History); // last is always first. :D
         }
     }
     ptr->clear();
-    return retList;
+    return std::move(retList);
 }
 
 void AbstractCommand::warnHelp(int exit_code, const QString& message)
