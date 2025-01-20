@@ -81,6 +81,7 @@ namespace QAGL {
                 }
             }
         }
+
         if (!is_offline && !back.isEmpty()) {
             launcher_WebEngine->page()->runJavaScript(
                 "document.body.background = ('"+back+"');",
@@ -134,7 +135,7 @@ namespace QAGL {
     void Landing::runBackground() {
         if(!is_offline && !background) {
             if(!networkLink) {
-                QObject::connect(
+                connect(
                     (networkLink = std::make_shared<QNetworkAccessManager>()).get(),
                     &QNetworkAccessManager::finished,
                     [&](QNetworkReply *reply) { background_req(reply); }
@@ -151,6 +152,7 @@ namespace QAGL {
     }
 
     void Landing::loaded(bool is) {
+        std::cout << "loaded flow" << std::endl;
         if(is) {
             runBackground();
             // fuck was i doing with this?
@@ -228,7 +230,10 @@ namespace QAGL {
 
         // Menu
         devTools_Combo = std::make_shared<QShortcut>(QKeySequence(Qt::Key_F12), launcher_Window.get());
-        QObject::connect( devTools_Combo.get(), &QShortcut::activated,[&]() { show_dev(); } );
+        connect(
+            devTools_Combo.get(), &QShortcut::activated,
+            [&]() { show_dev(); }
+        );
 
         // Web core
         launcher_WebEngine = std::make_shared<QWebEngineView>();
@@ -237,11 +242,14 @@ namespace QAGL {
         launcher_WebPage = std::make_shared<QAGL::LandingWebEnginePage>();
         launcher_WebPage->setParentWindow(launcher_Window);
         launcher_WebEngine->setPage(launcher_WebPage.get());
+
         inject_stylesheet();
         inject_settings();
-        QObject::connect(
-            launcher_WebEngine.get(), SIGNAL(loadFinished(bool)),
-            this, SLOT(loaded(bool))
+        connect(
+            launcher_WebEngine.get(), &QWebEngineView::loadFinished,
+            [&]() {
+                this->loaded(true);
+            }
         );
 
         // Add the web core to the window

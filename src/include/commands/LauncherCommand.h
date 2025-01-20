@@ -127,6 +127,9 @@ private:
     bool command_offline;
     std::shared_ptr<QCommandLineOption> offline;
 
+    bool command_steam;
+    std::shared_ptr<QCommandLineOption> steam;
+
 };
 
 

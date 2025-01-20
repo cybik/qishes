@@ -322,6 +322,13 @@ void LauncherCommand::command_setup_parser() {
         ))
     );
 
+    parser->addOption(
+        *(steam = std::make_shared<QCommandLineOption>(
+            QStringList() << "s" << "steam",
+            L18N("Enable Steam Mode.")
+        ))
+    );
+
 }
 
 void LauncherCommand::command_process_parser() {
@@ -331,6 +338,7 @@ void LauncherCommand::command_process_parser() {
     ) {
         parser->showHelp(0);
     }
+    this->command_steam =          parser->isSet(*steam);          // if set, always true
     this->command_offline =        parser->isSet(*offline);        // if set, always true
 }
 
