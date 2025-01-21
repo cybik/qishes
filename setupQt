@@ -1,0 +1,9 @@
+#! /bin/bash
+
+command -v aqt || { pip install --break-system-packages --user aqtinstall; }
+QT_VER="6.7.3"
+aqt install-qt \
+    --outputdir "$(pwd)/3rdParty/qt-precompiled" \
+    linux desktop ${QT_VER} linux_gcc_64 \
+        -m qtwebengine qtwebview qtwebchannel qtnetworkauth qtmultimedia \
+        qtimageformats qthttpserver qtpositioning qtwaylandcompositor

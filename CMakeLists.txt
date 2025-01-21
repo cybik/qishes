@@ -20,9 +20,23 @@ project(
 )
 set(USE_QT6 ON)
 
+set(LOC_QT_VER "6.7.2")
+
 option(ASAN "Check memory" OFF)
 
-find_package(Qt6 REQUIRED COMPONENTS Core)
+#find_package(Qt6 REQUIRED COMPONENTS Core)
+include("${CMAKE_SOURCE_DIR}/cmake/RpathDefinitions.cmake")
+
+#set(Qt6Core_DIR "${PROJECT_3RDPARTY_DIR}/qt-precompiled/${LOC_QT_VER}/gcc_64/lib/cmake/Qt6Core")
+
+set(CMAKE_PREFIX_PATH "${PROJECT_3RDPARTY_DIR}/qt-precompiled/${LOC_QT_VER}/gcc_64/lib/cmake" CACHE STRING "Exported" FORCE)
+set(Qt6_DIR "${PROJECT_3RDPARTY_DIR}/qt-precompiled/${LOC_QT_VER}/gcc_64/lib/cmake/Qt6" CACHE STRING "Exported" FORCE)
+
+find_package(Qt6
+    REQUIRED
+    COMPONENTS
+        Core
+)
 qt_standard_project_setup()
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
