@@ -32,11 +32,10 @@ std::shared_ptr<QAction> LauncherCommand::get_action_exit() {
 
     action_exit->setText("Quit");
     QObject::connect(
-            action_exit.get(), &QAction::triggered, // Signal
-            [&](bool) {
-                std::cout << "mikkikue" << std::endl;
-                QApplication::quit();
-            }
+        action_exit.get(), &QAction::triggered, // Signal
+        [&](bool) {
+            QApplication::quit();
+        }
     );
 
     return action_exit;
@@ -51,9 +50,15 @@ std::unique_ptr<SARibbonCheckBox> LauncherCommand::get_checkbox(QString title, Q
 }
 
 std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_options() {
-    given_option_mangohud = std::move(get_checkbox("MangoHUD", "cbMango", true));
-    given_option_deckenv = std::move(get_checkbox("Fakeout Deck", "cbDeckMode", true));
-    given_option_obsvk = std::move(get_checkbox("OBS VkCapture Mode", "cbVkCap", true));
+    given_option_mangohud = std::move(get_checkbox(
+        "MangoHUD", "cbMango", true)
+    );
+    given_option_deckenv = std::move(get_checkbox(
+        "Fakeout Deck", "cbDeckMode", true)
+    );
+    given_option_obsvk = std::move(get_checkbox(
+        "OBS VkCapture Mode", "cbVkCap", true)
+    );
     given_option_cloudpc = std::move(get_checkbox(
         "Cloud Masquerade", "cbImpersonateCloud", true)
     );
@@ -65,6 +70,30 @@ std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_options() {
     panel_opt->addSmallWidget(given_option_cloudpc.get());
     panel_opt->setPannelName("Options");
     return std::move(panel_opt);
+}
+
+void LauncherCommand::checkDiscord() {
+    if (!given_option_discord->isChecked()) {
+        Discord::dis_clear();
+    } else {
+        this->discord_report("qishes on main");
+    }
+}
+
+std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_socials() {
+    given_option_discord = std::move(get_checkbox("Discord", "cbDiscord", false));
+
+    QObject::connect(
+        given_option_discord.get(), &QCheckBox::toggled,
+        [&](bool) {
+            this->checkDiscord();
+        }
+    );
+
+    std::unique_ptr<SARibbonPannel> panel_socials = std::make_unique<SARibbonPannel>();
+    panel_socials->addSmallWidget(given_option_discord.get());
+    panel_socials->setPannelName("Social Integrations");
+    return std::move(panel_socials);
 }
 
 std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_proton() {
@@ -151,6 +180,20 @@ std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_game() {
     return std::move(panel_game);
 }
 
+std::shared_ptr<SARibbonCategory> LauncherCommand::getSocialsCat() {
+    if (!given_panel_socials)
+        given_panel_socials = std::move(get_panel_socials());
+
+    if (!socials_cat) {
+        socials_cat = std::make_shared<SARibbonCategory>();
+        socials_cat->setCategoryName("Socials");
+        socials_cat->setObjectName("socials_integration");
+
+        socials_cat->addPannel(given_panel_socials.get());
+    }
+    return socials_cat;
+}
+
 std::shared_ptr<SARibbonCategory> LauncherCommand::getLauncherCat() {
     if (!given_panel_game)
         given_panel_game = std::move(get_panel_game());
@@ -182,6 +225,7 @@ void LauncherCommand::setupRibbonWindow() {
     given->ribbonBar()->setTabOnTitle(true);
     given->ribbonBar()->setApplicationButton(nullptr);
     given->ribbonBar()->addCategoryPage(getLauncherCat().get());
+    given->ribbonBar()->addCategoryPage(getSocialsCat().get());
 
     given->windowButtonBar()->setupMaximizeButton(false);
 }
@@ -208,7 +252,7 @@ void LauncherCommand::launcher() {
         landing->hint_titlebar_height(given->ribbonBar()->titleBarHeight());
 
     }
-    dis->report_presence_message("qishes on main");
+    this->discord_report("qishes on main");
 
     landing->setOfflineMode(this->command_offline);
 
@@ -259,8 +303,6 @@ void LauncherCommand::command_create_application(int& argc, char **argv) {
     QApplication::connect(
         qishes_launcher.get(), &QApplication::aboutToQuit,
         [&]() {
-            // Discord yeet
-            dis.reset();
 
             icon.reset();
             action_exit.reset();
@@ -274,9 +316,11 @@ void LauncherCommand::command_create_application(int& argc, char **argv) {
             given_option_deckenv.reset();
             given_option_obsvk.reset();
             given_option_mangohud.reset();
+            given_option_discord.reset();
 
             // Panel yeets
             if (given_proton_combo) given_proton_combo.reset();
+            remove_panel_and_action(socials_cat, std::move(given_panel_socials), nullptr);
             remove_panel_and_action(given_cat, std::move(given_panel_proton), nullptr);
             remove_panel_and_action(given_cat, std::move(given_panel_game), std::move(given_action_game));
             remove_panel_and_action(given_cat, std::move(given_panel_run), std::move(given_action_run));
@@ -284,6 +328,7 @@ void LauncherCommand::command_create_application(int& argc, char **argv) {
 
             // Ribbon reset
             given_cat.reset();
+            socials_cat.reset();
 
             // Landing window yeet
             landing.reset();
@@ -342,8 +387,14 @@ void LauncherCommand::command_process_parser() {
     this->command_offline =        parser->isSet(*offline);        // if set, always true
 }
 
+void LauncherCommand::discord_report(QString message) {
+    if (given_option_discord && given_option_discord->isChecked()) {
+        Discord::get_instance()->report_presence_message(message);
+    }
+}
+
 int LauncherCommand::command_run() {
-    dis = Discord::get_instance()->report_presence_message("qishes loading");
+    this->discord_report("qishes loading");
     vlvproton::getInstance()->identify_installs();
 
     generate_tray_icon()->show();

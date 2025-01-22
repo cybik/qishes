@@ -23,6 +23,17 @@ std::shared_ptr<Discord> Discord::get_instance() {
     return _instance;
 }
 
+std::shared_ptr<Discord> Discord::clear() {
+    Discord_ClearPresence();
+    return _instance;
+}
+
+void Discord::dis_clear() {
+    get_instance()->clear();
+    Discord_Shutdown();
+    _instance = nullptr;
+}
+
 std::shared_ptr<Discord> Discord::report_presence_message(QString msg) {
     DiscordRichPresence* drp = new DiscordRichPresence();
     drp->details = msg.toStdString().c_str();
@@ -37,9 +48,16 @@ void Discord::quit() {
 }
 
 Discord::Discord() {
+    this->deh = std::make_shared<DiscordEventHandlers>();
+    this->deh->ready = nullptr;
+    this->deh->disconnected = nullptr;
+    this->deh->errored = nullptr;
+    this->deh->joinGame = nullptr;
+    this->deh->spectateGame = nullptr;
+    this->deh->joinRequest = nullptr;
     Discord_Initialize(
         "478233407323897871",
-        nullptr,
+        deh.get(),
         1,
         nullptr
     );

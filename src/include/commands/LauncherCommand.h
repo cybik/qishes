@@ -57,13 +57,13 @@ private:
     void                     setupRibbonWindow();
     std::shared_ptr<QAction> get_action_launcher_test();
     std::shared_ptr<SARibbonCategory> getLauncherCat();
+    std::shared_ptr<SARibbonCategory> getSocialsCat();
 
     std::shared_ptr<QMenu> tray_menu;
     std::shared_ptr<QAction> action_exit;
     std::shared_ptr<QAction> action_launch;
     std::shared_ptr<QSystemTrayIcon> tray;
 
-    std::shared_ptr<Discord> dis;
     std::shared_ptr<QPixmap> icon;
     //std::shared_ptr<QAction> action_launcher;
     static std::shared_ptr<SettingsData> data;
@@ -72,18 +72,23 @@ private:
     std::unique_ptr<SARibbonPannel> get_panel_run();
     std::unique_ptr<SARibbonPannel> get_panel_game();
     std::unique_ptr<SARibbonPannel> get_panel_options();
+    std::unique_ptr<SARibbonPannel> get_panel_socials();
     std::unique_ptr<SARibbonPannel> get_panel_proton();
 
     // title shit
     std::shared_ptr<SARibbonMainWindow> given;
 
     std::shared_ptr<SARibbonCategory> given_cat;
+    std::shared_ptr<SARibbonCategory> socials_cat;
 
     std::unique_ptr<SARibbonPannel> given_panel_options;
     std::unique_ptr<SARibbonCheckBox> given_option_mangohud;
     std::unique_ptr<SARibbonCheckBox> given_option_deckenv;
     std::unique_ptr<SARibbonCheckBox> given_option_obsvk;
     std::unique_ptr<SARibbonCheckBox> given_option_cloudpc;
+
+    std::unique_ptr<SARibbonPannel> given_panel_socials;
+    std::unique_ptr<SARibbonCheckBox> given_option_discord;
 
     std::unique_ptr<SARibbonCheckBox> get_checkbox(QString title, QString objname, bool default_val = false);
     //std::unique_ptr<QAction> given_action_run;
@@ -103,17 +108,19 @@ private:
                                     std::unique_ptr<QAction>
     );
 
+    void checkDiscord();
+
     //
     QString target_exec;
     bool    exec_provided = false;
 
     std::map<int, std::string> target_execs_found;
     const std::map<std::string, LauncherCommand::ExeType> supported_games_impl = {
-        {"launcher.exe", ExeType::Launcher},
-        {"GenshinImpact.exe", ExeType::Genshin},
-        {"StarRail.exe", ExeType::HonkaiSR},
-        {"ZenlessZoneZero.exe", ExeType::Nap},
-        {"BH3.exe", ExeType::Honkai3rd},
+        {"launcher.exe", ExeType::Launcher},     // Rocket emoji
+        {"GenshinImpact.exe", ExeType::Genshin}, // Genshin Launcher Art
+        {"StarRail.exe", ExeType::HonkaiSR},     // HSR Launcher Art
+        {"ZenlessZoneZero.exe", ExeType::Nap},   // ZZZ Launcher Art
+        {"BH3.exe", ExeType::Honkai3rd},         // BH3 Launcher Art
         // WuWa?
         // Nikki?
         // Some other anime boobfest?
@@ -129,6 +136,8 @@ private:
 
     bool command_steam;
     std::shared_ptr<QCommandLineOption> steam;
+
+    void discord_report(QString message);
 
 };
 
