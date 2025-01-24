@@ -130,7 +130,6 @@ private:
     std::list<std::shared_ptr<QAction>> actions_execs;
     std::shared_ptr<std::list<std::shared_ptr<QFile>>> filtered_files;
 
-    void enlist_launch_action(QString message, QString executable);
     void enlist_launch_action(std::pair<LauncherCommand::ExeType, std::string> incoming, QString executable);
 
     bool command_offline;
