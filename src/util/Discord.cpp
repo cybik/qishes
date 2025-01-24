@@ -47,14 +47,17 @@ void Discord::quit() {
     Discord_Shutdown();
 }
 
+void Discord::ready(const DiscordUser* r) { }
+
+void Discord::disconnected(int errorCode, const char* message) { }
+
+void Discord::errored(int errorCode, const char* message) { }
+
 Discord::Discord() {
     this->deh = std::make_shared<DiscordEventHandlers>();
-    this->deh->ready = nullptr;
-    this->deh->disconnected = nullptr;
-    this->deh->errored = nullptr;
-    this->deh->joinGame = nullptr;
-    this->deh->spectateGame = nullptr;
-    this->deh->joinRequest = nullptr;
+    this->deh->ready = &ready;
+    this->deh->disconnected = &disconnected;
+    this->deh->errored = &errored;
     Discord_Initialize(
         "478233407323897871",
         deh.get(),

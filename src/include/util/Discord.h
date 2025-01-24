@@ -23,6 +23,10 @@ public:
     static void dis_clear();
     void quit();
 
+    static void ready(const DiscordUser* r);
+    static void disconnected(int errorCode, const char* message);
+    static void errored(int errorCode, const char* message);
+
 private:
     Discord();
 

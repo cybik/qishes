@@ -20,6 +20,7 @@
 
 //#include <discord.h>
 #include <SARibbon.h>
+#include <utility>
 
 class LauncherCommand : public AbstractCommand {
 public:
@@ -115,12 +116,12 @@ private:
     bool    exec_provided = false;
 
     std::map<int, std::string> target_execs_found;
-    const std::map<std::string, LauncherCommand::ExeType> supported_games_impl = {
-        {"launcher.exe", ExeType::Launcher},     // Rocket emoji
-        {"GenshinImpact.exe", ExeType::Genshin}, // Genshin Launcher Art
-        {"StarRail.exe", ExeType::HonkaiSR},     // HSR Launcher Art
-        {"ZenlessZoneZero.exe", ExeType::Nap},   // ZZZ Launcher Art
-        {"BH3.exe", ExeType::Honkai3rd},         // BH3 Launcher Art
+    const std::map<std::string, std::pair<LauncherCommand::ExeType, std::string>> supported_games_impl = {
+        {"launcher.exe", std::pair<ExeType, std::string>(ExeType::Launcher, "Launcher")},  // Rocket emoji
+        {"GenshinImpact.exe", std::pair<ExeType, std::string>(ExeType::Genshin, "Genshin Impact")}, // Genshin Launcher Art
+        {"StarRail.exe", std::pair<ExeType, std::string>(ExeType::HonkaiSR, "Honkai: Star Rail")},     // HSR Launcher Art
+        {"ZenlessZoneZero.exe", std::pair<ExeType, std::string>(ExeType::Nap, "Zenless Zone Zero")},   // ZZZ Launcher Art
+        {"BH3.exe", std::pair<ExeType, std::string>(ExeType::Honkai3rd, "Honkai: Impact 3rd")},         // BH3 Launcher Art
         // WuWa?
         // Nikki?
         // Some other anime boobfest?
@@ -130,6 +131,7 @@ private:
     std::shared_ptr<std::list<std::shared_ptr<QFile>>> filtered_files;
 
     void enlist_launch_action(QString message, QString executable);
+    void enlist_launch_action(std::pair<LauncherCommand::ExeType, std::string> incoming, QString executable);
 
     bool command_offline;
     std::shared_ptr<QCommandLineOption> offline;

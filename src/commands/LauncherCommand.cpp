@@ -125,8 +125,10 @@ void LauncherCommand::run_the_magic(const QString& target_exe) {
     );
 }
 
-void LauncherCommand::enlist_launch_action(QString message, QString executable) {
-    std::shared_ptr<QAction> action_run = std::make_unique<QAction>(message);
+void LauncherCommand::enlist_launch_action(
+    std::pair<LauncherCommand::ExeType, std::string> incoming, QString executable
+) {
+    std::shared_ptr<QAction> action_run = std::make_unique<QAction>(incoming.second.c_str());
     given->connect(
         action_run.get(),
         &QAction::triggered,
@@ -145,15 +147,14 @@ void LauncherCommand::enlist_launch_action(QString message, QString executable) 
 std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_run() {
     enlist_launch_action("Try to run", target_exec);
     for (auto file : *filtered_files) {
-        //std::cout << file->fileName().toStdString() << std::endl;
         if ( !target_exec.contains(file->filesystemFileName().filename().c_str()) ) {
             enlist_launch_action(
-                QString(file->filesystemFileName().filename().c_str()),
-                QFileInfo(*file).absoluteFilePath());
+                supported_games_impl.at(file->filesystemFileName().filename().c_str()),
+                QFileInfo(*file).absoluteFilePath()
+            );
         }
     }
     std::unique_ptr<SARibbonPannel> panel_run = std::make_unique<SARibbonPannel>("Run game");
-    //panel_run->addLargeAction(given_action_run.get());
     for (std::shared_ptr<QAction> action: actions_execs) {
         panel_run->addLargeAction(action.get());
     }
