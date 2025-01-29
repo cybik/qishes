@@ -244,7 +244,7 @@ namespace QAGL {
         launcher_WebEngine->setPage(launcher_WebPage.get());
 
         inject_stylesheet();
-        inject_settings();
+        //inject_settings();
         connect(
             launcher_WebEngine.get(), &QWebEngineView::loadFinished,
             [&]() {

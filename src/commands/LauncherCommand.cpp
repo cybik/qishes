@@ -100,13 +100,13 @@ std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_proton() {
     given_proton_combo = std::make_unique<SARibbonComboBox>();
     given_proton_combo->setWindowTitle("ProtonSelect");
     given_proton_combo->setObjectName("ProtonSelect");
-    for (auto str: vlvproton::getInstance()->get_available_protons()) {
-        given_proton_combo->addItem(QString(str.c_str()));
-    }
     // TODO: set current selected to match config that's not implemented yet
     std::unique_ptr<SARibbonPannel> panel_proton = std::make_unique<SARibbonPannel>();
     panel_proton->addSmallWidget(given_proton_combo.get());
     panel_proton->setPannelName("Proton Runtime");
+    for (auto str: vlvproton::getInstance()->get_available_protons()) {
+        given_proton_combo->addItem(QString(str.c_str()));
+    }
     return std::move(panel_proton);
 }
 
@@ -145,7 +145,11 @@ void LauncherCommand::enlist_launch_action(
 }
 
 std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_run() {
-    enlist_launch_action("Try to run", target_exec);
+    /**
+     * Always the Launcher, pretty much. Keep this out so I can refactor into game-dedicated panels
+     *  with a background switch
+     **/
+    enlist_launch_action(std::pair(ExeType::Launcher, "Try-to-run"), target_exec);
     for (auto file : *filtered_files) {
         if ( !target_exec.contains(file->filesystemFileName().filename().c_str()) ) {
             enlist_launch_action(

@@ -157,8 +157,8 @@ void SettingsFolders::update() {
 
 void SettingsLanguage::parse(const YAML::Node &file) {
     launcher = getStringFromNode(file, "launcher");
-    if(file["voice"].Type() != YAML::NodeType::Sequence) {
-        abort();
+    if(!file["voice"] || file["voice"].Type() != YAML::NodeType::Sequence) {
+        return;
     }
     for(int i = 0; i < file["voice"].size(); i++) {
         //voice.push_back( file["voice"][i].as<std::string>());

@@ -8,7 +8,7 @@
 
 #include <yaml-cpp/node/emit.h>
 
-#define ANIME_PATH "/moe.cybik.qishe"
+#define ANIME_PATH "/moe.cybik.qishes"
 
 #include <iostream>
 #include <fstream>
@@ -37,11 +37,12 @@ std::shared_ptr<Settings> SettingsData::getSettings() {
 SettingsData::SettingsData(std::filesystem::path path) {
     _file = ((_path = path).string() + "/config.yaml");
 
-    if(is_regular_file(_file)) {
+    if(!is_regular_file(_file)) {
+        _settings = std::make_shared<Settings>();
+        this->saveSettings(); // initial create. this is basically turbo junk.
+    } else {
         _settings = std::make_shared<Settings>(YAML::LoadFile(_file.string()));
-        return;
     }
-    //_settings = std::make_shared<Settings>();
 }
 
 void SettingsData::saveSettings() {
