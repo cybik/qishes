@@ -71,10 +71,13 @@ namespace QAGL {
                     && elem.toObject()["game"].isObject()
                     && elem.toObject()["backgrounds"].isArray()
                 ) {
+
+                    std::cout << QJsonDocument(elem.toObject()).toJson(QJsonDocument::Indented).toStdString() << std::endl;
                     if (elem.toObject()["game"].toObject()["biz"].isString()) {
                         if (elem.toObject()["game"].toObject()["biz"].toString().compare(bg_gamebiz()) == 0) {
                             back = elem.toObject()["backgrounds"]
                                     .toArray().at(0).toObject()["background"].toObject()["url"].toString();
+
                             break;
                         }
                     }

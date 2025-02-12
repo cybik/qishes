@@ -55,7 +55,8 @@ void steam_proton::try_setup() {
 void steam_proton::try_run(
     const std::string& target_executable,
     const std::list<std::string>& arguments,
-    const std::map<std::string, std::string>& env_overrides
+    const std::map<std::string, std::string>& env_overrides,
+    const QString prefix
 ) {
     QStringList lArguments = QStringList();
 
@@ -69,7 +70,15 @@ void steam_proton::try_run(
 
     // What we cookin'
     // TODO: execution decorator
-    mProcess->setProgram(mProton->get_selected_proton()->exec().c_str()); // proton
+    if (!prefix.isEmpty()) {
+        lArguments.append(mProton->get_selected_proton()->exec().c_str());
+    }
+    mProcess->setProgram(
+        prefix.isEmpty()
+            ? mProton->get_selected_proton()->exec().c_str()
+            : prefix
+    ); // proton
+
     lArguments.append("waitforexitandrun"); // always this
     lArguments.append(target_executable.c_str());
 

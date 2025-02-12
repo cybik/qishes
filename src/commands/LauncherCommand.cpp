@@ -22,6 +22,8 @@
 #include <gachafs.h>
 #include <wine.h>
 
+#include <ui/dwishes.h>
+
 const QString LauncherCommand::CommandSpecifier = "launcher";
 
 std::shared_ptr<SettingsData> LauncherCommand::data = nullptr;
@@ -62,12 +64,16 @@ std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_options() {
     given_option_cloudpc = std::move(get_checkbox(
         "Cloud Masquerade", "cbImpersonateCloud", true)
     );
+    given_option_gamemode = std::move(get_checkbox(
+        "GameModeRun", "cbGameMode", true)
+    );
 
     std::unique_ptr<SARibbonPannel> panel_opt = std::make_unique<SARibbonPannel>();
     panel_opt->addSmallWidget(given_option_mangohud.get());
     panel_opt->addSmallWidget(given_option_deckenv.get());
     panel_opt->addSmallWidget(given_option_obsvk.get());
     panel_opt->addSmallWidget(given_option_cloudpc.get());
+    panel_opt->addSmallWidget(given_option_gamemode.get());
     panel_opt->setPannelName("Options");
     return std::move(panel_opt);
 }
@@ -113,6 +119,8 @@ std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_proton() {
 void LauncherCommand::run_the_magic(const QString& target_exe) {
     std::map<std::string, std::string> envs = {};
     std::list<std::string> arguments = {};
+    std::string true_command = target_exe.toStdString();
+
     if (given_option_mangohud->isChecked()) envs["MANGOHUD"] = "1";
     if (given_option_deckenv->isChecked())  envs["SteamDeck"] = "1";
     if (given_option_obsvk->isChecked())    envs["OBS_VKCAPTURE"] = "1";
@@ -120,8 +128,13 @@ void LauncherCommand::run_the_magic(const QString& target_exe) {
         arguments.emplace_back("-platform_type");
         arguments.emplace_back("CLOUD_THIRD_PARTY_PC");
     }
+    if (given_option_gamemode->isChecked()) {
+        arguments.emplace_front(true_command);
+        true_command = "gamemoderun";
+    }
     steam_integration::get_steam_integration_instance()->proton()->try_run(
-        target_exe.toStdString(), arguments, envs
+        target_exe.toStdString(), arguments, envs,
+        (given_option_gamemode->isChecked()?"gamemoderun":"")
     );
 }
 
@@ -144,10 +157,45 @@ void LauncherCommand::enlist_launch_action(
     actions_execs.emplace_back(action_run);
 }
 
+QAGL::QAGL_Game LauncherCommand::convert_exetype(ExeType target_type) {
+    switch (target_type) {
+        case Genshin: return QAGL::QAGL_Game::h4ke;
+        case HonkaiSR: return QAGL::QAGL_Game::hkrpg;
+        case Honkai3rd: return QAGL::QAGL_Game::bh3 ;
+        case Nap: return QAGL::QAGL_Game::nap;
+        default: return QAGL::QAGL_Game::UNKNOWN;
+    }
+}
+
 std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_run() {
     /**
      * Always the Launcher, pretty much. Keep this out so I can refactor into game-dedicated panels
      *  with a background switch
+     **/
+    enlist_launch_action(std::pair(ExeType::Launcher, "Try-to-run"), target_exec);
+    for (auto file : *filtered_files) {
+        if ( !target_exec.contains(file->filesystemFileName().filename().c_str()) ) {
+            auto inc = supported_games_impl.at(file->filesystemFileName().filename().c_str());
+            if (first_game_detected == QAGL::QAGL_Game::UNKNOWN) first_game_detected = convert_exetype(inc.first);
+            enlist_launch_action(inc,QFileInfo(*file).absoluteFilePath());
+        }
+    }
+    std::unique_ptr<SARibbonPannel> panel_run = std::make_unique<SARibbonPannel>("Run game");
+    for (std::shared_ptr<QAction> action: actions_execs) {
+        panel_run->addLargeAction(action.get());
+    }
+    return std::move(panel_run);
+}
+
+std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_wishes() {
+    DWishes wishes = DWishes(nullptr);
+    wishes.show();
+    return nullptr;
+    /**
+     * First, get the data_2 files.
+     * Then, ask the user to select which one to look into.
+     * Then, get all the URLs from it.
+     * Then, show either the most recent one, or a list with a copy button on the right.
      **/
     enlist_launch_action(std::pair(ExeType::Launcher, "Try-to-run"), target_exec);
     for (auto file : *filtered_files) {
@@ -176,6 +224,7 @@ std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_game() {
                 "Get me the genshin",
                 QString(std::getenv("STEAM_COMPAT_DATA_PATH")), "*.exe"
             );
+            show_wishes_getter();
         }
     );
 
@@ -199,6 +248,8 @@ std::shared_ptr<SARibbonCategory> LauncherCommand::getSocialsCat() {
     return socials_cat;
 }
 
+void LauncherCommand::show_wishes_getter() {}
+
 std::shared_ptr<SARibbonCategory> LauncherCommand::getLauncherCat() {
     if (!given_panel_game)
         given_panel_game = std::move(get_panel_game());
@@ -208,13 +259,18 @@ std::shared_ptr<SARibbonCategory> LauncherCommand::getLauncherCat() {
         given_panel_options = std::move(get_panel_options());
     if (!given_panel_run)
         given_panel_run = std::move(get_panel_run());
+    if (!given_panel_wishes)
+        given_panel_wishes = std::move(get_panel_wishes());
 
     if (!given_cat) {
         given_cat = std::make_shared<SARibbonCategory>();
         given_cat->setCategoryName("Game");
         given_cat->setObjectName("gamedata");
 
-        if (!exec_provided) given_cat->addPannel(given_panel_game.get());
+        if (exec_provided)
+            show_wishes_getter();
+        else
+            given_cat->addPannel(given_panel_game.get()); // launch sig?
         given_cat->addPannel(given_panel_proton.get());
         given_cat->addPannel(given_panel_options.get());
         given_cat->addPannel(given_panel_run.get());
@@ -244,16 +300,16 @@ void LauncherCommand::launcher() {
         given->ribbonBar()->setStyleSheet("QMenuBar { border-top-left-radius:20px; border-top-right-radius:20px; }");
         given->windowButtonBar()->closeButton()->setStyleSheet("QToolButton {border-top-right-radius:20px;};");
 
+        setupRibbonWindow();
         landing = std::make_unique<QAGL::Landing>(
             *qishes_launcher,
             std::move(data),
             QAGL::QAGL_App_Style::Normal,
-            QAGL::QAGL_Game::h4ke,     // Genshin
+            first_game_detected,     // TODO: autoselect "only exe detected"
             QAGL::QAGL_Region::global, // Global
             given
         );
 
-        setupRibbonWindow();
         landing->hint_titlebar_height(given->ribbonBar()->titleBarHeight());
 
     }

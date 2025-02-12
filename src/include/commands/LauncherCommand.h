@@ -72,9 +72,14 @@ private:
 
     std::unique_ptr<SARibbonPannel> get_panel_run();
     std::unique_ptr<SARibbonPannel> get_panel_game();
+    std::unique_ptr<SARibbonPannel> get_panel_wishes();
+    std::unique_ptr<SARibbonPannel> get_panel_proton();
     std::unique_ptr<SARibbonPannel> get_panel_options();
     std::unique_ptr<SARibbonPannel> get_panel_socials();
-    std::unique_ptr<SARibbonPannel> get_panel_proton();
+
+    QAGL::QAGL_Game get_game();
+    QAGL::QAGL_Game first_game_detected = QAGL::QAGL_Game::UNKNOWN;
+    QAGL::QAGL_Game convert_exetype(ExeType target_type);
 
     // title shit
     std::shared_ptr<SARibbonMainWindow> given;
@@ -83,10 +88,11 @@ private:
     std::shared_ptr<SARibbonCategory> socials_cat;
 
     std::unique_ptr<SARibbonPannel> given_panel_options;
-    std::unique_ptr<SARibbonCheckBox> given_option_mangohud;
-    std::unique_ptr<SARibbonCheckBox> given_option_deckenv;
     std::unique_ptr<SARibbonCheckBox> given_option_obsvk;
+    std::unique_ptr<SARibbonCheckBox> given_option_deckenv;
     std::unique_ptr<SARibbonCheckBox> given_option_cloudpc;
+    std::unique_ptr<SARibbonCheckBox> given_option_mangohud;
+    std::unique_ptr<SARibbonCheckBox> given_option_gamemode;
 
     std::unique_ptr<SARibbonPannel> given_panel_socials;
     std::unique_ptr<SARibbonCheckBox> given_option_discord;
@@ -100,6 +106,9 @@ private:
     std::unique_ptr<SARibbonPannel> given_panel_game;
     std::unique_ptr<QAction> given_action_game;
 
+    std::unique_ptr<SARibbonPannel> given_panel_wishes;
+    std::unique_ptr<QAction> given_action_wishes;
+
     std::unique_ptr<SARibbonPannel> given_panel_proton;
     //std::unique_ptr<QAction> given_action_proton;
     std::unique_ptr<SARibbonComboBox> given_proton_combo;
@@ -108,7 +117,7 @@ private:
                                     std::unique_ptr<SARibbonPannel>,
                                     std::unique_ptr<QAction>
     );
-
+    void show_wishes_getter();
     void checkDiscord();
 
     //
@@ -130,7 +139,7 @@ private:
     std::list<std::shared_ptr<QAction>> actions_execs;
     std::shared_ptr<std::list<std::shared_ptr<QFile>>> filtered_files;
 
-    void enlist_launch_action(std::pair<LauncherCommand::ExeType, std::string> incoming, QString executable);
+    void            enlist_launch_action(std::pair<LauncherCommand::ExeType, std::string> incoming, QString executable);
 
     bool command_offline;
     std::shared_ptr<QCommandLineOption> offline;

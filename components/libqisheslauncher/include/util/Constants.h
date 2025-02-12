@@ -12,6 +12,7 @@
 
 #define atob(X) QByteArray::fromBase64(X, QByteArray::Base64Encoding).toStdString()
 
+// Constants for Genshin right now.
 namespace QAGL {
     namespace placeholders {
         namespace uppercase

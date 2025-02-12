@@ -72,6 +72,8 @@ set(
 
         "${PROJECT_SOURCE_DIR}/ui/Landing.cpp"
         "${PROJECT_SOURCE_DIR}/ui/Splash.cpp"
+        "${PROJECT_SOURCE_DIR}/ui/dwishes.ui"
+        "${PROJECT_SOURCE_DIR}/ui/dwishes.cpp"
 
         "${PROJECT_SOURCE_DIR}/process/process.cpp"
         "${PROJECT_SOURCE_DIR}/process/launch.cpp"
@@ -97,6 +99,7 @@ set(
         "${PROJECT_INCLUDE_DIR}/util/Constants.h"
         "${PROJECT_INCLUDE_DIR}/ui/Landing.h"
         "${PROJECT_INCLUDE_DIR}/ui/Splash.h"
+        "${PROJECT_INCLUDE_DIR}/ui/dwishes.h"
 
         "${PROJECT_INCLUDE_DIR}/process/process.h"
         "${PROJECT_INCLUDE_DIR}/process/launch.h"

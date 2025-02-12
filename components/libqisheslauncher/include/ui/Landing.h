@@ -40,7 +40,9 @@ Q_OBJECT
         h4ke,
         nap,
         hkrpg,
-        bh3 // MULTIPLE BACKGROUNDS, DEBUG LOL
+        bh3, // MULTIPLE BACKGROUNDS, DEBUG LOL
+
+        UNKNOWN
     } QAGL_Game;
 
     typedef enum {
