@@ -51,10 +51,12 @@ namespace QAGL {
             : "global"
         );
         switch (_game) {
-        case h4ke: return ("hk4e_" + bg_endswith);
         case nap: return ("nap_" + bg_endswith);
         case bh3: return ("bh3_" + bg_endswith);
         case hkrpg: return ("hkrpg_" + bg_endswith);
+        case h4ke:
+        default:
+            return ("hk4e_" + bg_endswith);
         }
     }
 
@@ -71,8 +73,6 @@ namespace QAGL {
                     && elem.toObject()["game"].isObject()
                     && elem.toObject()["backgrounds"].isArray()
                 ) {
-
-                    std::cout << QJsonDocument(elem.toObject()).toJson(QJsonDocument::Indented).toStdString() << std::endl;
                     if (elem.toObject()["game"].toObject()["biz"].isString()) {
                         if (elem.toObject()["game"].toObject()["biz"].toString().compare(bg_gamebiz()) == 0) {
                             back = elem.toObject()["backgrounds"]

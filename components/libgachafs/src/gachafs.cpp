@@ -29,46 +29,46 @@ int gachafs::seek_depth(int level, const QStringList &stringList, const QFileInf
     return level;
 }
 
-std::shared_ptr<std::list<std::shared_ptr<QFile>>> gachafs::getFiles(
+QStringList gachafs::recursive_seek(const QString& pattern, const QString& dirname, int level) {
+    QStringList matched_files = QStringList();
+    QDir dir = QDir(dirname);
+    dir.setFilter(QDir::Dirs | QDir::Files | QDir::NoSymLinks | QDir::NoDot | QDir::NoDotDot);
+    const QStringList stringList = pattern.split('/');
+    for (const QFileInfo& fileInfo: dir.entryInfoList(
+        stringList.count() == 1
+            ? QStringList { stringList.last() }
+            : stringList.mid(level, 1))
+    ) {
+        if (fileInfo.isDir() && fileInfo.isReadable()) {
+            // Emulating ** behaviour
+            matched_files.append(
+                recursive_seek( pattern, fileInfo.filePath(), seek_depth(level, stringList, fileInfo) )
+            );
+        } else if (stringList.size() == (level + 1) ) {
+            // We hit a file. Nice!
+            matched_files.append(fileInfo.filePath());
+        } else if (stringList.size() <= 2 && stringList.last().startsWith("*.")) {
+            if (fileInfo.fileName().endsWith(stringList.last().last(stringList.last().size()-1))) {
+                //std::cout << fileInfo.absoluteFilePath().toStdString() << std::endl;
+                matched_files.append(fileInfo.absoluteFilePath()); // absolute f*cking trash wildcard support
+            }
+        }
+    }
+    return matched_files;
+}
+
+std::unique_ptr<std::list<std::shared_ptr<QFile>>> gachafs::getFiles(
     const QString& filter, const QString& game_path, bool fail_ok
 ) {
+    std::cout << filter.toStdString() << " :: " << game_path.toStdString() << std::endl;
     /**
      * Generalized(ish) file finder to get a given file following an ant-styled file filter descriptor.
      * This is unlikely to be truly functional. It's a bit of a hack.
      *
      * https://stackoverflow.com/a/27643657 adapted for deep directory traversal and ant filter approach
      **/
-    QStringList matched_files = QStringList();
-    std::function<void(const QString&, const QString&, int)> search_deep;
-
-    // Define search_deep flow
-    search_deep = [&search_deep, &matched_files](const QString& pattern, const QString& dirname, int level)
-    {
-        QDir dir = QDir(dirname);
-        dir.setFilter(QDir::Dirs | QDir::Files | QDir::NoSymLinks | QDir::NoDot | QDir::NoDotDot);
-        static const QStringList stringList = pattern.split('/');
-        for (const QFileInfo& fileInfo: dir.entryInfoList(
-            stringList.count() == 1
-                ? QStringList { stringList.last() }
-                : stringList.mid(level, 1))
-        ) {
-            if (fileInfo.isDir() && fileInfo.isReadable()) {
-                // Emulating ** behaviour
-                search_deep( pattern, fileInfo.filePath(), seek_depth(level, stringList, fileInfo) );
-            } else if (stringList.size() == (level + 1) ) {
-                // We hit a file. Nice!
-                matched_files.append(fileInfo.filePath());
-            } else if (stringList.size() <= 2 && stringList.last().startsWith("*.")) {
-                if (fileInfo.fileName().endsWith(stringList.last().last(stringList.last().size()-1))) {
-                    //std::cout << fileInfo.absoluteFilePath().toStdString() << std::endl;
-                    matched_files.append(fileInfo.absoluteFilePath()); // absolute f*cking trash wildcard support
-                }
-            }
-        }
-    };
-    // Let's run.
-    search_deep(filter, game_path, 0);
-    std::shared_ptr<std::list<std::shared_ptr<QFile>>> stdlist = std::make_shared<std::list<std::shared_ptr<QFile>>>();
+    QStringList matched_files = recursive_seek(filter, game_path, 0);
+    std::unique_ptr<std::list<std::shared_ptr<QFile>>> stdlist = std::make_unique<std::list<std::shared_ptr<QFile>>>();
     if(!matched_files.empty()) {
         //std::cout << "Caches found" << std::endl;
         for(const auto& filepath: matched_files) {
@@ -78,5 +78,5 @@ std::shared_ptr<std::list<std::shared_ptr<QFile>>> gachafs::getFiles(
     if(stdlist->empty()) {
         if (!fail_ok) throw EGachaFS_Exception("No files found");
     }
-    return stdlist;
+    return std::move(stdlist);
 }

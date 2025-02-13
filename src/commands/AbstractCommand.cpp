@@ -20,11 +20,15 @@
 
 #include "egachafs.h"
 
-const QString filter = "**/webCaches/**/Cache/Cache_Data/data_2";
-
-std::shared_ptr<std::list<std::shared_ptr<QFile>>> AbstractCommand::getGameWishesCache() {
+std::shared_ptr<std::list<std::shared_ptr<QFile>>> AbstractCommand::getGameWishesCache(QString path) {
     try {
-        return gachafs::getFiles(filter, this->command_game_path);
+        return std::move(gachafs::getFiles(
+            filter,
+            path == ""
+                ? this->command_game_path
+                : path,
+            true
+        ));
     } catch (EGachaFS_Exception& e) {
         warnHelp(0);
     }

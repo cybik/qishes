@@ -79,7 +79,8 @@ void steam_proton::try_run(
             : prefix
     ); // proton
 
-    lArguments.append("waitforexitandrun"); // always this
+    //lArguments.append("waitforexitandrun"); // always this
+    lArguments.append("run"); // always this
     lArguments.append(target_executable.c_str());
 
     // Arguments carry

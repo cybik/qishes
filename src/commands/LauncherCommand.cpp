@@ -21,8 +21,11 @@
 
 #include <gachafs.h>
 #include <wine.h>
+#include <sys/socket.h>
 
 #include <ui/dwishes.h>
+
+#include <data/wishlog.h>
 
 const QString LauncherCommand::CommandSpecifier = "launcher";
 
@@ -130,11 +133,23 @@ void LauncherCommand::run_the_magic(const QString& target_exe) {
     }
     if (given_option_gamemode->isChecked()) {
         arguments.emplace_front(true_command);
-        true_command = "gamemoderun";
+        /*
+        arguments.emplace_front("--");
+        arguments.emplace_front("--steam");
+        arguments.emplace_front("wayland");
+        arguments.emplace_front("--backend");
+        arguments.emplace_front("--expose-wayland");
+        arguments.emplace_front("--hdr-enabled");
+        arguments.emplace_front("1600");
+        arguments.emplace_front("--output-height");
+        arguments.emplace_front("3840");
+        arguments.emplace_front("--output-width");
+        */
     }
     steam_integration::get_steam_integration_instance()->proton()->try_run(
         target_exe.toStdString(), arguments, envs,
         (given_option_gamemode->isChecked()?"gamemoderun":"")
+        //(given_option_gamemode->isChecked()?"gamescope":"")
     );
 }
 
@@ -167,6 +182,42 @@ QAGL::QAGL_Game LauncherCommand::convert_exetype(ExeType target_type) {
     }
 }
 
+void LauncherCommand::create_fs_integration(const std::pair<ExeType, std::string>& inc, std::shared_ptr<QFile> file) {
+    switch(inc.first) {
+        default: return;
+        case(ExeType::Genshin):
+        case(ExeType::HonkaiSR):
+        case(ExeType::Nap): {
+            // QFileSystemWatcher on data_2
+            auto parent = QString(file->filesystemFileName().parent_path().c_str());
+            std::cout << "FSINT p==" << parent.toStdString() << std::endl;
+            auto caches = getGameWishesCache(parent);
+            QStringList paths = QStringList();
+            for (auto cache:*caches) {
+                std::cout << "cache? " <<cache->filesystemFileName().c_str() << std::endl;
+                paths.emplace_back(cache->filesystemFileName().c_str());
+            }
+            if (!qfsw) {
+                qfsw = std::make_shared<QFileSystemWatcher>();
+                for (auto cache: *caches) {
+                    qfsw->addPath(cache->filesystemFileName().c_str());
+                }
+                QApplication::connect(
+                    qfsw.get(), &QFileSystemWatcher::fileChanged,
+                    [&, inc](QString path) {
+                        std::cout << "🇨🇦🇨🇦🇨🇦🇨🇦🇨🇦" << std::endl;
+                        std::cout << inc.second << std::endl;
+                        std::cout << "🇨🇦🇨🇦🇨🇦🇨🇦🇨🇦" << std::endl;
+                    }
+                );
+                //base_list = std::move(runUrlSearch())
+            }
+            return;
+        }
+        //case(ExeType::WutheringWaves):
+    }
+}
+
 std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_run() {
     /**
      * Always the Launcher, pretty much. Keep this out so I can refactor into game-dedicated panels
@@ -176,7 +227,11 @@ std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_run() {
     for (auto file : *filtered_files) {
         if ( !target_exec.contains(file->filesystemFileName().filename().c_str()) ) {
             auto inc = supported_games_impl.at(file->filesystemFileName().filename().c_str());
-            if (first_game_detected == QAGL::QAGL_Game::UNKNOWN) first_game_detected = convert_exetype(inc.first);
+            if (first_game_detected == QAGL::QAGL_Game::UNKNOWN) {
+                first_game_detected = convert_exetype(inc.first);
+                // TODO: filesystemwatcher
+                create_fs_integration(inc, file);
+            }
             enlist_launch_action(inc,QFileInfo(*file).absoluteFilePath());
         }
     }

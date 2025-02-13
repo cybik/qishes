@@ -32,7 +32,7 @@ protected:
     QString command_file_path;
 
     // common calls
-    std::shared_ptr<std::list<std::shared_ptr<QFile>>> getGameWishesCache();
+    std::shared_ptr<std::list<std::shared_ptr<QFile>>> getGameWishesCache(QString path = "");
     void printSingleFilePath(const QString& filename);
     std::unique_ptr<QStringList> runUrlSearch(const std::shared_ptr<QFile>& qfile);
     std::unique_ptr<QStringList> runUrlCleanup(const std::unique_ptr<QStringList>& ptr);
@@ -40,5 +40,6 @@ protected:
 
     void warnHelp(int exit_code, const QString& message = "");
     std::shared_ptr<QCommandLineParser> parser;
+    const QString filter = "**/webCaches/**/Cache/Cache_Data/data_2";
 private:
 };

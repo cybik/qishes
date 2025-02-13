@@ -18,11 +18,12 @@
 
 class gachafs {
 public:
-    static std::shared_ptr<std::list<std::shared_ptr<QFile>>> getFiles(
+    static std::unique_ptr<std::list<std::shared_ptr<QFile>>> getFiles(
         const QString& filter, const QString& game_path, bool fail_ok = false
     );
 protected:
 private:
+    static QStringList recursive_seek(const QString& pattern, const QString& dirname, int level);
     static int seek_depth(int base_level, const QStringList& levels_check, const QFileInfo& compare);
     gachafs() = default;
     ~gachafs() = default;

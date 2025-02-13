@@ -80,6 +80,7 @@ private:
     QAGL::QAGL_Game get_game();
     QAGL::QAGL_Game first_game_detected = QAGL::QAGL_Game::UNKNOWN;
     QAGL::QAGL_Game convert_exetype(ExeType target_type);
+    void            create_fs_integration(const std::pair<ExeType, std::string>& inc, std::shared_ptr<QFile> file);
 
     // title shit
     std::shared_ptr<SARibbonMainWindow> given;
@@ -148,6 +149,9 @@ private:
     std::shared_ptr<QCommandLineOption> steam;
 
     void discord_report(QString message);
+
+    std::shared_ptr<QFileSystemWatcher> qfsw = nullptr;
+    std::unique_ptr<std::map<ExeType, QStringList>> base_lists = nullptr;
 
 };
 
