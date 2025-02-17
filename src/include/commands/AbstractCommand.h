@@ -34,12 +34,14 @@ protected:
     // common calls
     std::shared_ptr<std::list<std::shared_ptr<QFile>>> getGameWishesCache(QString path = "");
     void printSingleFilePath(const QString& filename);
-    std::unique_ptr<QStringList> runUrlSearch(const std::shared_ptr<QFile>& qfile);
-    std::unique_ptr<QStringList> runUrlCleanup(const std::unique_ptr<QStringList>& ptr);
-    std::unique_ptr<std::list<WishLog>> runFilterForLogs(const std::unique_ptr<QStringList>& ptr);
+    std::unique_ptr<QStringList> runUrlSearch(std::shared_ptr<QFile> qfile);
+    std::unique_ptr<QStringList> runUrlCleanup(std::unique_ptr<QStringList> ptr);
+    std::unique_ptr<std::list<WishLog>> runFilterForLogs(std::unique_ptr<QStringList> ptr);
+    std::unique_ptr<QStringList> runUrlCheckOnCache(std::shared_ptr<QFile> file);
 
     void warnHelp(int exit_code, const QString& message = "");
     std::shared_ptr<QCommandLineParser> parser;
     const QString filter = "**/webCaches/**/Cache/Cache_Data/data_2";
+    std::shared_ptr<QStringList> detected_urls;
 private:
 };

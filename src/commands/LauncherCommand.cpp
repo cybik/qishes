@@ -69,6 +69,9 @@ std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_options() {
     );
     given_option_gamemode = std::move(get_checkbox(
         "GameModeRun", "cbGameMode", true)
+        );
+    given_option_auto_open_wishlog = std::move(get_checkbox(
+        "Auto-Open new Wish Log Entries", "cbWishlog", true)
     );
 
     std::unique_ptr<SARibbonPannel> panel_opt = std::make_unique<SARibbonPannel>();
@@ -77,6 +80,7 @@ std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_options() {
     panel_opt->addSmallWidget(given_option_obsvk.get());
     panel_opt->addSmallWidget(given_option_cloudpc.get());
     panel_opt->addSmallWidget(given_option_gamemode.get());
+    panel_opt->addSmallWidget(given_option_auto_open_wishlog.get());
     panel_opt->setPannelName("Options");
     return std::move(panel_opt);
 }
@@ -188,31 +192,42 @@ void LauncherCommand::create_fs_integration(const std::pair<ExeType, std::string
         case(ExeType::Genshin):
         case(ExeType::HonkaiSR):
         case(ExeType::Nap): {
-            // QFileSystemWatcher on data_2
-            auto parent = QString(file->filesystemFileName().parent_path().c_str());
-            std::cout << "FSINT p==" << parent.toStdString() << std::endl;
-            auto caches = getGameWishesCache(parent);
-            QStringList paths = QStringList();
-            for (auto cache:*caches) {
-                std::cout << "cache? " <<cache->filesystemFileName().c_str() << std::endl;
-                paths.emplace_back(cache->filesystemFileName().c_str());
-            }
+            // Initial FS watcher. DO NOT RE-CREATE.
             if (!qfsw) {
+                // QFileSystemWatcher on all data_2 present.
+                // TODO: make it so each game itself, gets its watcher.
+                auto caches = getGameWishesCache(
+                    QString(file->filesystemFileName().parent_path().c_str())
+                );
+                // var: detected urls
+                if (!detected_urls) detected_urls = std::make_shared<QStringList>();
+                for (auto cache: *caches) {
+                    for ( auto url: *runUrlCheckOnCache(cache)) {
+                        if (WishLog::is_accepted_url(url)) detected_urls->append(url);
+                    }
+                }
                 qfsw = std::make_shared<QFileSystemWatcher>();
                 for (auto cache: *caches) {
                     qfsw->addPath(cache->filesystemFileName().c_str());
                 }
                 QApplication::connect(
                     qfsw.get(), &QFileSystemWatcher::fileChanged,
-                    [&, inc](QString path) {
-                        std::cout << "🇨🇦🇨🇦🇨🇦🇨🇦🇨🇦" << std::endl;
-                        std::cout << inc.second << std::endl;
-                        std::cout << "🇨🇦🇨🇦🇨🇦🇨🇦🇨🇦" << std::endl;
+                    [&](QString path) { // c++ reminder: `, inc` in the lambda spec would copy inc.
+                        auto checks = runUrlCheckOnCache(std::make_shared<QFile>(path));
+                        if (checks) {
+                            for (auto url: *checks) {
+                                if (WishLog::is_accepted_url(url)) {
+                                    if (!detected_urls->contains(url)) {
+                                        detected_urls->append(url);
+                                        if (given_option_auto_open_wishlog->isChecked())
+                                            QDesktopServices::openUrl(url.append("#/log"));
+                                    }
+                                }
+                            }
+                        }
                     }
                 );
-                //base_list = std::move(runUrlSearch())
             }
-            return;
         }
         //case(ExeType::WutheringWaves):
     }
@@ -433,6 +448,7 @@ void LauncherCommand::command_create_application(int& argc, char **argv) {
             given_option_obsvk.reset();
             given_option_mangohud.reset();
             given_option_discord.reset();
+            given_option_auto_open_wishlog.reset();
 
             // Panel yeets
             if (given_proton_combo) given_proton_combo.reset();

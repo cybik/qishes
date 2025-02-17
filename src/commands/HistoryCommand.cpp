@@ -102,7 +102,7 @@ int HistoryCommand::command_run() {
         // Header. C++ yet formatted, f*ck you.
         printSingleFilePath(qfile->fileName());
 
-        auto results = runFilterForLogs(runUrlCleanup(runUrlSearch(qfile)));
+        auto results = runFilterForLogs(runUrlCheckOnCache(qfile));
         if(!results || results->empty()) {
             Log::get_logger()->critical("No URLs read, detected or otherwise found.");
             return 0;

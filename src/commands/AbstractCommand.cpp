@@ -56,7 +56,7 @@ void AbstractCommand::printSingleFilePath(const QString &filename) {
         << std::endl;
 }
 
-std::unique_ptr<QStringList> AbstractCommand::runUrlSearch(const std::shared_ptr<QFile>& qfile) {
+std::unique_ptr<QStringList> AbstractCommand::runUrlSearch(std::shared_ptr<QFile> qfile) {
     if(!qfile->exists()) return nullptr;
     qfile->open(QFile::ReadOnly);
     QRegularExpressionMatchIterator qrem =
@@ -67,7 +67,7 @@ std::unique_ptr<QStringList> AbstractCommand::runUrlSearch(const std::shared_ptr
     return std::move(retList);
 }
 
-std::unique_ptr<QStringList> AbstractCommand::runUrlCleanup(const std::unique_ptr<QStringList>& ptr) {
+std::unique_ptr<QStringList> AbstractCommand::runUrlCleanup(std::unique_ptr<QStringList> ptr) {
     std::unique_ptr<QStringList> retList; // don't initialize unless necessary
     for(const auto& single_string: (*ptr)) {
         for(const auto& split_string_1: single_string.split("1/0/")) { /** cut on 1/0/ **/
@@ -84,7 +84,11 @@ std::unique_ptr<QStringList> AbstractCommand::runUrlCleanup(const std::unique_pt
     return std::move(retList);
 }
 
-std::unique_ptr<std::list<WishLog>> AbstractCommand::runFilterForLogs(const std::unique_ptr<QStringList>& ptr) {
+std::unique_ptr<QStringList> AbstractCommand::runUrlCheckOnCache(std::shared_ptr<QFile> file) {
+    return runUrlCleanup(runUrlSearch(file));
+}
+
+std::unique_ptr<std::list<WishLog>> AbstractCommand::runFilterForLogs(std::unique_ptr<QStringList> ptr) {
     if(!ptr) return nullptr;
     std::unique_ptr<std::list<WishLog>> retList = std::make_unique<std::list<WishLog>>();
     for(const auto& single_string: (*ptr)) {

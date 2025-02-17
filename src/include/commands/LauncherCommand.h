@@ -94,6 +94,7 @@ private:
     std::unique_ptr<SARibbonCheckBox> given_option_cloudpc;
     std::unique_ptr<SARibbonCheckBox> given_option_mangohud;
     std::unique_ptr<SARibbonCheckBox> given_option_gamemode;
+    std::unique_ptr<SARibbonCheckBox> given_option_auto_open_wishlog;
 
     std::unique_ptr<SARibbonPannel> given_panel_socials;
     std::unique_ptr<SARibbonCheckBox> given_option_discord;
