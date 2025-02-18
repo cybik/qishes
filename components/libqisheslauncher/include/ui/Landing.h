@@ -67,6 +67,8 @@ Q_OBJECT
         );
         void show(const QApplication &app);
 
+    signals:
+        void bg_loaded();
     public slots:
         void        background_req(QNetworkReply *);
         QUrl        getLocaleBackgroundUri() const;
@@ -78,14 +80,16 @@ Q_OBJECT
 
     protected:
     private:
+        void        setupWebCore();
         Landing() = default;
         void        everythingHasLoaded();
         void        inject_stylesheet();
         void        inject_settings();
-        void        runBackground();
+        static void runBackground(Landing* this_obg);
 
         // Utilities
         QString     generate_url() const;
+        void        background_req();
         void        background_set();
         QString     bg_gamebiz();
 
@@ -125,6 +129,15 @@ Q_OBJECT
         bool is_offline = false;
         void enable_offline_mode();
         void setWindowGeometry(int, int);
+
+        QString cached_bg_uri = "";
+
+        void start_bgs_thread();
+        std::shared_ptr<std::thread> thread_bg;
+        std::unique_lock<std::mutex> lock_bg_mutex;
+        std::mutex bg_get_mutex;
+        std::unique_lock<std::mutex> lock_bg_write_mutex;
+        std::mutex bg_uri_write_mutex;
     };
 }
 

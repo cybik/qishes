@@ -61,33 +61,9 @@ namespace QAGL {
     }
 
     void Landing::background_set() {
-        QString back = "";
-        // TODO: game selection. Initial: support for hk4e only
-        if (!is_offline
-            && !background->isNull()
-            && (*background)["data"].isObject()
-            && (*background)["data"]["game_info_list"].isArray()
-        ) {
-            for (auto elem: (*background)["data"]["game_info_list"].toArray()) {
-                if (!elem.isUndefined()
-                    && elem.toObject()["game"].isObject()
-                    && elem.toObject()["backgrounds"].isArray()
-                ) {
-                    if (elem.toObject()["game"].toObject()["biz"].isString()) {
-                        if (elem.toObject()["game"].toObject()["biz"].toString().compare(bg_gamebiz()) == 0) {
-                            back = elem.toObject()["backgrounds"]
-                                    .toArray().at(0).toObject()["background"].toObject()["url"].toString();
-
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-
-        if (!is_offline && !back.isEmpty()) {
+        if (!is_offline && !cached_bg_uri.isEmpty()) {
             launcher_WebEngine->page()->runJavaScript(
-                "document.body.background = ('"+back+"');",
+                "document.body.background = ('"+cached_bg_uri+"');",
                 [this](const QVariant&) {
                     launcher_WebEngine->page()->runJavaScript(
                         "[document.getElementsByClassName('home')[0].clientWidth,document.getElementsByClassName('home')[0].clientHeight];",
@@ -105,6 +81,40 @@ namespace QAGL {
         } else {
             everythingHasLoaded();
         }
+    }
+
+    void Landing::background_req() {
+        // TODO: game selection. Initial: support for hk4e only
+        lock_bg_write_mutex = std::unique_lock(bg_uri_write_mutex);
+        if (!is_offline
+            && !background->isNull()
+            && (*background)["data"].isObject()
+            && (*background)["data"]["game_info_list"].isArray()
+        ) {
+            for (auto elem: (*background)["data"]["game_info_list"].toArray()) {
+                if (!elem.isUndefined()
+                    && elem.toObject()["game"].isObject()
+                    && elem.toObject()["backgrounds"].isArray()
+                ) {
+                    if (elem.toObject()["game"].toObject()["biz"].isString()) {
+                        if (elem.toObject()["game"].toObject()["biz"].toString().compare(bg_gamebiz()) == 0) {
+                            cached_bg_uri = elem.toObject()["backgrounds"]
+                                                .toArray()
+                                                .at(0)
+                                                .toObject()["background"]
+                                                .toObject()["url"]
+                                                .toString();
+
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        lock_bg_write_mutex.release();
+        emit bg_loaded();
+
+        //background_set(); // set back on main
     }
 
     void Landing::setWindowGeometry(int width, int height) {
@@ -126,7 +136,8 @@ namespace QAGL {
     // Final method after getting background URL, load up
     void Landing::background_req(QNetworkReply *reply) {
         background = std::make_shared<QJsonDocument>(QJsonDocument::fromJson(reply->readAll()));
-        background_set();
+        lock_bg_mutex.release();
+        background_req();
     }
 
     QUrl Landing::getLocaleBackgroundUri() const {
@@ -135,19 +146,23 @@ namespace QAGL {
         return QUrl((backgroundUri_hyp + "en-us").c_str());
     }
 
-    void Landing::runBackground() {
-        if(!is_offline && !background) {
-            if(!networkLink) {
-                connect(
-                    (networkLink = std::make_shared<QNetworkAccessManager>()).get(),
-                    &QNetworkAccessManager::finished,
-                    [&](QNetworkReply *reply) { background_req(reply); }
-                );
-            }
-            networkLink->get(*(networkRequest = std::make_shared<QNetworkRequest>(getLocaleBackgroundUri())));
-        } else {
-            background_set();
+    void Landing::runBackground(Landing* this_obj) {
+        if (this_obj->is_offline || this_obj->background) {
+            this_obj->background_req();
         }
+        this_obj->lock_bg_mutex = std::unique_lock(this_obj->bg_get_mutex);
+        if(!this_obj->networkLink) {
+            connect(
+                (this_obj->networkLink = std::make_shared<QNetworkAccessManager>()).get(),
+                &QNetworkAccessManager::finished,
+                [&, this_obj](QNetworkReply *reply) { this_obj->background_req(reply); }
+            );
+        }
+        this_obj->networkLink->get(
+            *(this_obj->networkRequest = std::make_shared<QNetworkRequest>(
+                this_obj->getLocaleBackgroundUri()
+            ))
+        );
     }
 
     std::shared_ptr<QMainWindow> Landing::getWindow() {
@@ -157,7 +172,7 @@ namespace QAGL {
     void Landing::loaded(bool is) {
         std::cout << "loaded flow" << std::endl;
         if(is) {
-            runBackground();
+            runBackground(this);
             // fuck was i doing with this?
             if (networkLink_data == nullptr) {
                 networkLink_data = std::make_shared<QNetworkAccessManager>();
@@ -218,6 +233,42 @@ namespace QAGL {
         }
     }
 
+    void Landing::setupWebCore() {
+        // Menu
+        devTools_Combo = std::make_shared<QShortcut>(QKeySequence(Qt::Key_F12), launcher_Window.get());
+        connect(
+            devTools_Combo.get(), &QShortcut::activated,
+            [&]() { show_dev(); }
+        );
+
+        launcher_WebEngine = std::make_shared<QWebEngineView>();
+        launcher_WebEngine->setContextMenuPolicy(Qt::NoContextMenu);
+        launcher_WebEngine->setAcceptDrops(false);
+        launcher_WebPage = std::make_shared<QAGL::LandingWebEnginePage>();
+        launcher_WebPage->setParentWindow(launcher_Window);
+        launcher_WebEngine->setPage(launcher_WebPage.get());
+
+        inject_stylesheet();
+        //inject_settings();
+
+        connect(
+            launcher_WebEngine.get(), &QWebEngineView::loadFinished,
+            [&]() {
+                this->loaded(true);
+            }
+        );
+        connect(
+            this, &Landing::bg_loaded,
+            [&]() {
+                background_set();
+            }
+        );
+    }
+
+    void Landing::start_bgs_thread() {
+        thread_bg = std::make_shared<std::thread>(runBackground, this);
+    }
+
     Landing::Landing(
         const QApplication &app, std::shared_ptr<SettingsData> settings,
         QAGL::QAGL_App_Style style, QAGL::QAGL_Game game, QAGL::QAGL_Region region,
@@ -231,33 +282,20 @@ namespace QAGL {
         //launcher_Window->setFixedSize(1280, 720 - QApplication::style()->pixelMetric(QStyle::PM_TitleBarHeight));
         launcher_Window->setWindowTitle(APP_NAME);
 
-        // Menu
-        devTools_Combo = std::make_shared<QShortcut>(QKeySequence(Qt::Key_F12), launcher_Window.get());
-        connect(
-            devTools_Combo.get(), &QShortcut::activated,
-            [&]() { show_dev(); }
-        );
+        launcher_WidgetStack = new QStackedWidget(nullptr);
 
+        // PRELOAD BG TEST
+
+        // IF WEBCORE STYLE
         // Web core
-        launcher_WebEngine = std::make_shared<QWebEngineView>();
-        launcher_WebEngine->setContextMenuPolicy(Qt::NoContextMenu);
-        launcher_WebEngine->setAcceptDrops(false);
-        launcher_WebPage = std::make_shared<QAGL::LandingWebEnginePage>();
-        launcher_WebPage->setParentWindow(launcher_Window);
-        launcher_WebEngine->setPage(launcher_WebPage.get());
-
-        inject_stylesheet();
-        //inject_settings();
-        connect(
-            launcher_WebEngine.get(), &QWebEngineView::loadFinished,
-            [&]() {
-                this->loaded(true);
-            }
-        );
+        setupWebCore();
 
         // Add the web core to the window
-        launcher_WidgetStack = new QStackedWidget(nullptr);
         launcher_WidgetStack->addWidget(launcher_WebEngine.get());
+
+        // ELSE WHEN NOT WEBCORE STYLE
+        // FI
+
         if(style == QAGL_App_Style::Unique_Window) {
             /*
             launcher_WidgetStack->addWidget(createSettings()->getWidget()); // first
@@ -346,13 +384,6 @@ namespace QAGL {
         }
         return true;
     }
-
-    /*
-    LandingWebEnginePage* LandingWebEnginePage::setSettingsLambda(std::function<void()> lambda) {
-        _parentSettings = std::move(lambda);
-        return this;
-    }
-    */
 
     void LandingWebEnginePage::setParentWindow(std::shared_ptr<QMainWindow> ptr) {
         _parent = ptr;
