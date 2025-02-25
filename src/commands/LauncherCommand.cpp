@@ -6,6 +6,9 @@
  *
  * Created by cybik on 24-07-10 for qgachawishes.
  *
+ * TODO
+ *  * Add "Open drive_c in xdg explorer" button
+ *
  ******************************************************************/
 
 #include <commands/LauncherCommand.h>
@@ -137,23 +140,10 @@ void LauncherCommand::run_the_magic(const QString& target_exe) {
     }
     if (given_option_gamemode->isChecked()) {
         arguments.emplace_front(true_command);
-        /*
-        arguments.emplace_front("--");
-        arguments.emplace_front("--steam");
-        arguments.emplace_front("wayland");
-        arguments.emplace_front("--backend");
-        arguments.emplace_front("--expose-wayland");
-        arguments.emplace_front("--hdr-enabled");
-        arguments.emplace_front("1600");
-        arguments.emplace_front("--output-height");
-        arguments.emplace_front("3840");
-        arguments.emplace_front("--output-width");
-        */
     }
     steam_integration::get_steam_integration_instance()->proton()->try_run(
         target_exe.toStdString(), arguments, envs,
         (given_option_gamemode->isChecked()?"gamemoderun":"")
-        //(given_option_gamemode->isChecked()?"gamescope":"")
     );
 }
 
@@ -188,7 +178,6 @@ QAGL::QAGL_Game LauncherCommand::convert_exetype(ExeType target_type) {
 
 void LauncherCommand::create_fs_integration(const std::pair<ExeType, std::string>& inc, std::shared_ptr<QFile> file) {
     switch(inc.first) {
-        default: return;
         case(ExeType::Genshin):
         case(ExeType::HonkaiSR):
         case(ExeType::Nap): {
@@ -199,11 +188,17 @@ void LauncherCommand::create_fs_integration(const std::pair<ExeType, std::string
                 auto caches = getGameWishesCache(
                     QString(file->filesystemFileName().parent_path().c_str())
                 );
+                if (caches->empty()) {
+                    return; // Don't watch since there's nothing.
+                }
                 // var: detected urls
                 if (!detected_urls) detected_urls = std::make_shared<QStringList>();
                 for (auto cache: *caches) {
-                    for ( auto url: *runUrlCheckOnCache(cache)) {
-                        if (WishLog::is_accepted_url(url)) detected_urls->append(url);
+                    auto urlcache = runUrlCheckOnCache(cache);
+                    if ( urlcache && !urlcache->empty()) {
+                        for ( auto url: *runUrlCheckOnCache(cache) ) {
+                            if (WishLog::is_accepted_url(url)) detected_urls->append(url);
+                        }
                     }
                 }
                 qfsw = std::make_shared<QFileSystemWatcher>();
@@ -228,9 +223,12 @@ void LauncherCommand::create_fs_integration(const std::pair<ExeType, std::string
                     }
                 );
             }
+            break;
         }
+        default: break;
         //case(ExeType::WutheringWaves):
     }
+    std::cout << "integration set up" << std::endl;
 }
 
 std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_run() {

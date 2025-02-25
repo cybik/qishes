@@ -113,8 +113,6 @@ namespace QAGL {
         }
         lock_bg_write_mutex.release();
         emit bg_loaded();
-
-        //background_set(); // set back on main
     }
 
     void Landing::setWindowGeometry(int width, int height) {
@@ -284,7 +282,8 @@ namespace QAGL {
 
         launcher_WidgetStack = new QStackedWidget(nullptr);
 
-        // PRELOAD BG TEST
+        // PRELOAD BG TEST - NONFUNC
+        //start_bgs_thread();
 
         // IF WEBCORE STYLE
         // Web core
