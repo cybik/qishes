@@ -6,8 +6,11 @@
  *
  * Created by cybik on 24-07-10 for qgachawishes.
  *
- * TODO
+ * TODOs
  *  * Add "Open drive_c in xdg explorer" button
+ *  * Refactor fswatcher to (re?)run on game launch
+ *    * fswatcher cleanup?
+ *  * Default game setter if more than one game is detected
  *
  ******************************************************************/
 
@@ -148,9 +151,9 @@ void LauncherCommand::run_the_magic(const QString& target_exe) {
 }
 
 void LauncherCommand::enlist_launch_action(
-    std::pair<LauncherCommand::ExeType, std::string> incoming, QString executable
+    std::string incoming, QString executable
 ) {
-    std::shared_ptr<QAction> action_run = std::make_unique<QAction>(incoming.second.c_str());
+    std::shared_ptr<QAction> action_run = std::make_unique<QAction>(incoming.c_str());
     given->connect(
         action_run.get(),
         &QAction::triggered,
@@ -166,21 +169,24 @@ void LauncherCommand::enlist_launch_action(
     actions_execs.emplace_back(action_run);
 }
 
-QAGL::QAGL_Game LauncherCommand::convert_exetype(ExeType target_type) {
+QAGL::QAGL_Game LauncherCommand::convert_exetype(GameInfo::ExeType target_type) {
     switch (target_type) {
-        case Genshin: return QAGL::QAGL_Game::h4ke;
-        case HonkaiSR: return QAGL::QAGL_Game::hkrpg;
-        case Honkai3rd: return QAGL::QAGL_Game::bh3 ;
-        case Nap: return QAGL::QAGL_Game::nap;
+        case GameInfo::ExeType::Genshin: return QAGL::QAGL_Game::h4ke;
+        case GameInfo::ExeType::HonkaiSR: return QAGL::QAGL_Game::hkrpg;
+        case GameInfo::ExeType::WutheringWaves: return QAGL::QAGL_Game::wuwa;
+        case GameInfo::ExeType::Honkai3rd: return QAGL::QAGL_Game::bh3 ;
+        case GameInfo::ExeType::Nap: return QAGL::QAGL_Game::nap;
         default: return QAGL::QAGL_Game::UNKNOWN;
     }
 }
 
-void LauncherCommand::create_fs_integration(const std::pair<ExeType, std::string>& inc, std::shared_ptr<QFile> file) {
-    switch(inc.first) {
-        case(ExeType::Genshin):
-        case(ExeType::HonkaiSR):
-        case(ExeType::Nap): {
+void LauncherCommand::create_fs_integration(GameInfo::ExeType inc, std::shared_ptr<QFile> file) {
+    switch(inc) {
+        case(GameInfo::ExeType::WutheringWaves):
+            abort(); // not supported yet but coming.
+        case(GameInfo::ExeType::Genshin):
+        case(GameInfo::ExeType::HonkaiSR):
+        case(GameInfo::ExeType::Nap): {
             // Initial FS watcher. DO NOT RE-CREATE.
             if (!qfsw) {
                 // QFileSystemWatcher on all data_2 present.
@@ -236,16 +242,17 @@ std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_run() {
      * Always the Launcher, pretty much. Keep this out so I can refactor into game-dedicated panels
      *  with a background switch
      **/
-    enlist_launch_action(std::pair(ExeType::Launcher, "Try-to-run"), target_exec);
+    enlist_launch_action("Launcher", target_exec);
     for (auto file : *filtered_files) {
         if ( !target_exec.contains(file->filesystemFileName().filename().c_str()) ) {
+            //auto inc = supported_games_impl.at(file->filesystemFileName().filename().c_str());
             auto inc = supported_games_impl.at(file->filesystemFileName().filename().c_str());
             if (first_game_detected == QAGL::QAGL_Game::UNKNOWN) {
-                first_game_detected = convert_exetype(inc.first);
-                // TODO: filesystemwatcher
-                create_fs_integration(inc, file);
+                first_game_detected = convert_exetype(inc.get_exetype());
+                // TODO: refactor fswatcher to run *when launching the target game*
+                create_fs_integration(inc.get_exetype(), file);
             }
-            enlist_launch_action(inc,QFileInfo(*file).absoluteFilePath());
+            enlist_launch_action(inc.get_label(),QFileInfo(*file).absoluteFilePath());
         }
     }
     std::unique_ptr<SARibbonPannel> panel_run = std::make_unique<SARibbonPannel>("Run game");
@@ -255,6 +262,7 @@ std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_run() {
     return std::move(panel_run);
 }
 
+// Does nothing yet.
 std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_wishes() {
     DWishes wishes = DWishes(nullptr);
     wishes.show();
@@ -265,13 +273,11 @@ std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_wishes() {
      * Then, get all the URLs from it.
      * Then, show either the most recent one, or a list with a copy button on the right.
      **/
-    enlist_launch_action(std::pair(ExeType::Launcher, "Try-to-run"), target_exec);
+    enlist_launch_action("Launcher", target_exec);
     for (auto file : *filtered_files) {
         if ( !target_exec.contains(file->filesystemFileName().filename().c_str()) ) {
-            enlist_launch_action(
-                supported_games_impl.at(file->filesystemFileName().filename().c_str()),
-                QFileInfo(*file).absoluteFilePath()
-            );
+            auto game =supported_games_impl.at(file->filesystemFileName().filename().c_str());
+            enlist_launch_action( game.get_label(), QFileInfo(*file).absoluteFilePath());
         }
     }
     std::unique_ptr<SARibbonPannel> panel_run = std::make_unique<SARibbonPannel>("Run game");

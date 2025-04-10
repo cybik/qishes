@@ -106,6 +106,7 @@ set(
         "${PROJECT_SOURCE_DIR}/qmain.cpp"
 
         "${PROJECT_SOURCE_DIR}/data/wishlog.cpp"
+        "${PROJECT_SOURCE_DIR}/data/gameinfo.cpp"
 
         "${PROJECT_SOURCE_DIR}/util/log.cpp"
         "${PROJECT_SOURCE_DIR}/util/Discord.cpp"
@@ -123,6 +124,7 @@ set(
         "${PROJECT_SOURCE_DIR}/include/common.h"
 
         "${PROJECT_SOURCE_DIR}/include/data/wishlog.h"
+        "${PROJECT_SOURCE_DIR}/include/data/gameinfo.h"
 
         "${PROJECT_SOURCE_DIR}/include/util/log.h"
         "${PROJECT_SOURCE_DIR}/include/util/Discord.h"
@@ -165,6 +167,7 @@ target_link_libraries(
         gachafs
         steamintegration
         vlvproton
+        workarounds
         httpclient
         qisheslauncher
         #discord-rpc
@@ -199,6 +202,7 @@ list(
         "steamintegration"
         "qisheslauncher"
         "vlvproton"
+        "workarounds"
         #"discord-rpc"
         #"discord-game-sdk-interface"
         "qadwaitadecorations"

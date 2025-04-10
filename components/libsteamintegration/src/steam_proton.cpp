@@ -52,6 +52,10 @@ void steam_proton::try_setup() {
     }
 }
 
+//void steam_proton::get_dir_from_executable_path() {
+//}
+
+// TODO: pwd/cwd to eval the ini properly
 void steam_proton::try_run(
     const std::string& target_executable,
     const std::list<std::string>& arguments,
@@ -73,6 +77,8 @@ void steam_proton::try_run(
     if (!prefix.isEmpty()) {
         lArguments.append(mProton->get_selected_proton()->exec().c_str());
     }
+
+    //mProcess->setWorkingDirectory()
     mProcess->setProgram(
         prefix.isEmpty()
             ? mProton->get_selected_proton()->exec().c_str()

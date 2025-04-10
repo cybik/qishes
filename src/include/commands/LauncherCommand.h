@@ -22,6 +22,8 @@
 #include <SARibbon.h>
 #include <utility>
 
+#include <data/gameinfo.h>
+
 class LauncherCommand : public AbstractCommand {
 public:
     static const QString CommandSpecifier;
@@ -35,19 +37,6 @@ protected:
     void command_process_parser() override;
     int  command_run() override;
 private:
-    typedef enum {
-        Genshin,
-        HonkaiSR,
-        Honkai3rd,
-        Nap,
-        Launcher,
-
-        WutheringWaves, /** Unsupported for now */
-        InfinityNikki,  /** Unsupported for now */
-        Strinova,       /** Unsupported for now */
-
-        Unknown         /** NYANEEEEEEEEEEEEEEH */
-    } ExeType;
     void run_the_magic(const QString& target_exec);
 
     std::shared_ptr<QApplication> qishes_launcher = nullptr;
@@ -79,8 +68,8 @@ private:
 
     QAGL::QAGL_Game get_game();
     QAGL::QAGL_Game first_game_detected = QAGL::QAGL_Game::UNKNOWN;
-    QAGL::QAGL_Game convert_exetype(ExeType target_type);
-    void            create_fs_integration(const std::pair<ExeType, std::string>& inc, std::shared_ptr<QFile> file);
+    QAGL::QAGL_Game convert_exetype(GameInfo::ExeType target_type);
+    void            create_fs_integration(GameInfo::ExeType, std::shared_ptr<QFile> file);
 
     // title shit
     std::shared_ptr<SARibbonMainWindow> given;
@@ -127,13 +116,14 @@ private:
     bool    exec_provided = false;
 
     std::map<int, std::string> target_execs_found;
-    const std::map<std::string, std::pair<LauncherCommand::ExeType, std::string>> supported_games_impl = {
-        {"launcher.exe", std::pair<ExeType, std::string>(ExeType::Launcher, "Launcher")},  // Rocket emoji
-        {"GenshinImpact.exe", std::pair<ExeType, std::string>(ExeType::Genshin, "Genshin Impact")}, // Genshin Launcher Art
-        {"StarRail.exe", std::pair<ExeType, std::string>(ExeType::HonkaiSR, "Honkai: Star Rail")},     // HSR Launcher Art
-        {"ZenlessZoneZero.exe", std::pair<ExeType, std::string>(ExeType::Nap, "Zenless Zone Zero")},   // ZZZ Launcher Art
-        {"BH3.exe", std::pair<ExeType, std::string>(ExeType::Honkai3rd, "Honkai: Impact 3rd")},         // BH3 Launcher Art
-        // WuWa?
+    const std::map<std::string, GameInfo> supported_games_impl = {
+        {"launcher.exe", GameInfo("launcher.exe", "Launcher", GameInfo::Launcher, Workaround::Handler::None)},
+        {"GenshinImpact.exe", GameInfo("GenshinImpact.exe", "Genshin Impact", GameInfo::Genshin, Workaround::Handler::None)},
+        {"ZenlessZoneZero.exe", GameInfo("ZenlessZoneZero.exe", "Zenless Zone Zero", GameInfo::Nap, Workaround::Handler::None)},
+        {"BH3.exe", GameInfo("BH3.exe", "Honkai: Impact 3rd", GameInfo::Honkai3rd, Workaround::Handler::None)},
+        {"StarRail.exe", GameInfo("StarRail.exe", "Honkai: Star Rail", GameInfo::HonkaiSR, Workaround::Handler::Jadeite)},
+        // TODO: figure out how to properly identify this one.
+        {"Client-Win64-Shipping.exe", GameInfo("Client-Win64-Shipping.exe", "Wuthering Waves",GameInfo::WutheringWaves, Workaround::Handler::Jadeite)},
         // Nikki?
         // Some other anime boobfest?
         // Bueller?
@@ -141,7 +131,7 @@ private:
     std::list<std::shared_ptr<QAction>> actions_execs;
     std::shared_ptr<std::list<std::shared_ptr<QFile>>> filtered_files;
 
-    void            enlist_launch_action(std::pair<LauncherCommand::ExeType, std::string> incoming, QString executable);
+    void            enlist_launch_action(std::string incoming, QString executable);
 
     bool command_offline;
     std::shared_ptr<QCommandLineOption> offline;
@@ -152,7 +142,7 @@ private:
     void discord_report(QString message);
 
     std::shared_ptr<QFileSystemWatcher> qfsw = nullptr;
-    std::unique_ptr<std::map<ExeType, QStringList>> base_lists = nullptr;
+    std::unique_ptr<std::map<GameInfo::ExeType, QStringList>> base_lists = nullptr;
 
 };
 

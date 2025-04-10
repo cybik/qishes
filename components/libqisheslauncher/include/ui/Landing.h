@@ -42,6 +42,8 @@ Q_OBJECT
         hkrpg,
         bh3, // MULTIPLE BACKGROUNDS, DEBUG LOL
 
+        wuwa,
+
         UNKNOWN
     } QAGL_Game;
 
