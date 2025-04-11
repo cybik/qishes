@@ -8,14 +8,8 @@
  *
  ******************************************************************/
 
-#include "jadeite.h"
+#include "none.h"
 
-std::list<std::string> JadeiteImpl::decorate() {
-    // TODO: get decorated call to actual game exe
+std::list<std::string> NoneImpl::decorate() {
     return {target_executable};
 }
-
-void JadeiteImpl::obtain() {
-    // TODO: get jadeite from remote, install into drive_c
-}
-

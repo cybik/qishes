@@ -8,10 +8,17 @@
  *
  ******************************************************************/
 
-
 #pragma once
 
+#include <string>
+#include <memory>
+#include <list>
 
+class AWorkaround {
+public:
+    virtual void obtain() = 0;
+    virtual std::list<std::string> decorate() = 0;
+};
 
 class Workaround {
 public:
@@ -19,4 +26,5 @@ public:
         Jadeite,
         None
     } Handler;
+    static std::unique_ptr<AWorkaround> getWorkaround(Handler handler, std::string executable);
 };

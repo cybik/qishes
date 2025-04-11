@@ -14,8 +14,6 @@
 #include <string>
 #include <workaround.h>
 
-#include "components/libworkarounds/src/include/workaround.h"
-
 class GameInfo {
 public:
     typedef enum {

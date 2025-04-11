@@ -180,6 +180,12 @@ QAGL::QAGL_Game LauncherCommand::convert_exetype(GameInfo::ExeType target_type) 
     }
 }
 
+/**
+ * TODO:
+ *  1. Run this on Game Launch
+ *  2. Run this against all caches?
+ *  3. Handle cache deletion cases without crashing the overlauncher
+ */
 void LauncherCommand::create_fs_integration(GameInfo::ExeType inc, std::shared_ptr<QFile> file) {
     switch(inc) {
         case(GameInfo::ExeType::WutheringWaves):

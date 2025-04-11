@@ -64,18 +64,21 @@ target_link_libraries(
     ${MY_PROJECT_NAME}
     PUBLIC
         vlvproton
+        workarounds
         ${QT_VER}::Core
 )
 
 add_dependencies(
     ${MY_PROJECT_NAME}
         vlvproton
+        workarounds
 )
 
 list(
     APPEND
     DEPENDENCIES_LIST
         "vlvproton"
+        "workarounds"
 )
 
 AutoconfigureLibraryRpath( "${MY_PROJECT_NAME}" "${DEPENDENCIES_LIST}" )

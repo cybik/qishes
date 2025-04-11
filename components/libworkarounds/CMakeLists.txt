@@ -34,6 +34,7 @@ set(
     SOURCES_CPP
         "${PROJECT_SOURCE_DIR}/workaround.cpp"
         "${PROJECT_SOURCE_DIR}/jadeite.cpp"
+        "${PROJECT_SOURCE_DIR}/none.cpp"
 )
 
 # For AutoMOC
@@ -41,6 +42,7 @@ set(
     SOURCES_H
         "${PROJECT_SOURCE_DIR}/include/workaround.h"
         "${PROJECT_SOURCE_DIR}/include/jadeite.h"
+        "${PROJECT_SOURCE_DIR}/include/none.h"
 )
 
 add_library(

@@ -16,6 +16,8 @@
 
 #include <QProcess>
 
+#include <workaround.h>
+
 class steam_proton {
 public:
     static std::shared_ptr<steam_proton> getInstance();
