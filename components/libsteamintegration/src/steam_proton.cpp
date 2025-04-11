@@ -15,6 +15,8 @@
 #include <steam_environment.h>
 
 #include <QString>
+#include <termcolor/termcolor.hpp>
+#include <cctype>
 
 std::shared_ptr<steam_proton> steam_proton::mInstance = nullptr;
 
@@ -52,8 +54,9 @@ void steam_proton::try_setup() {
     }
 }
 
-//void steam_proton::get_dir_from_executable_path() {
-//}
+std::string steam_proton::get_compat_dir_path() {
+    return std::getenv("STEAM_COMPAT_DATA_PATH");
+}
 
 // TODO: pwd/cwd to eval the ini properly
 void steam_proton::try_run(
@@ -85,17 +88,39 @@ void steam_proton::try_run(
             : prefix
     ); // proton
 
+    //mProcess->setWorkingDirectory();
+
     //lArguments.append("waitforexitandrun"); // always this
     lArguments.append("run"); // always this
     lArguments.append(target_executable.c_str());
+    QString cwd = "";
+    if (target_executable.substr(1,2) == ":\\" ) {
+        std::string calc_path = target_executable;
+        std::ranges::replace(calc_path, '\\', '/');
+        cwd = QString::fromStdString (
+            get_compat_dir_path().append("/pfx/drive_")
+                + static_cast<char>(std::tolower(calc_path.at(0)))
+                + "/" + calc_path.substr(3)
+            );
+    } else {
+        // unix style. Don't set working dir for now since idgaf yet
+        cwd = QString::fromStdString(target_executable.substr(0, target_executable.find_last_of("/")));
+    }
+    std::cout
+        << termcolor::on_bright_green
+            << "Attempting to launch " << target_executable << std::endl
+            << "\tin prefix " << get_compat_dir_path() << std::endl
+            << (cwd.isEmpty()?"": "\tusing working dir ")
+            << (cwd.isEmpty()?"":cwd.toStdString())
+        << termcolor::reset << std::endl;
 
+    if (!cwd.isEmpty()) mProcess->setWorkingDirectory(cwd);
     // Arguments carry
     for (auto arg: arguments) lArguments << arg.c_str(); // ah, standards conversion.
     mProcess->setArguments(lArguments);
     qint64 mikkiku;
     mProcess->startDetached(&mikkiku);
     mProcess->waitForStarted();
-    std::cout << QString::number(mikkiku).toStdString() << std::endl;
     // TODO: UI element saying "this is running"
     // TODO: file watch on data_2 to auto-seek any new history URL
     // TODO: URL chooser with consult history recording
