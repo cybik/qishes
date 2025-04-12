@@ -1,0 +1,3 @@
+#! /bin/bash
+
+for REMOTE in github gitlab origin; do git push $REMOTE HEAD:feat/launcherwindow; done
