@@ -56,6 +56,7 @@ target_link_libraries(
     ${MY_PROJECT_NAME}
         Qt6::Xml
         Qt6::Core
+        httpclient
 )
 
 target_include_directories(

@@ -17,12 +17,8 @@
 #pragma once
 
 #include "workaround.h"
-/**
- * Direct jq request to get the latest jadeite download.
- * curl -X 'GET' \
- *    'https://codeberg.org/api/v1/repos/mkrsym1/jadeite/releases/latest' \
- *    -H 'accept: application/json' | jq ".assets[0].browser_download_url"
- **/
+
+#include <httpclient/httpclient.h>
 
 class JadeiteImpl : public AWorkaround {
 public:
@@ -31,4 +27,5 @@ public:
     std::list<std::string> decorate() override; // probably the wrong function prototype
 private:
     std::string target_executable;
+    std::shared_ptr<HttpClient> http_client;
 };
