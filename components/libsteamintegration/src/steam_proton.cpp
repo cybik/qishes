@@ -61,12 +61,31 @@ std::string steam_proton::get_compat_dir_path() {
 // TODO: pwd/cwd to eval the ini properly
 void steam_proton::try_run(
     const std::string& target_executable,
+    const Workaround::Handler workaround,
     const std::list<std::string>& arguments,
     const std::map<std::string, std::string>& env_overrides,
     const QString prefix
 ) {
     QStringList lArguments = QStringList();
 
+    // instant decorate
+    std::string true_target_executable = target_executable;
+    std::unique_ptr<AWorkaround> workaround_handler = Workaround::getWorkaround(workaround, target_executable);
+    std::vector<std::string> decorated_executable = workaround_handler->decorate();
+    if (!decorated_executable.empty()) {
+        true_target_executable = decorated_executable[0];
+        decorated_executable.erase(decorated_executable.begin());
+        if (!decorated_executable.empty()) {
+            for (auto element: decorated_executable) {
+                lArguments.push_back(element.c_str());
+            }
+        } else {
+            std::cout
+                << termcolor::on_bright_yellow
+                    << "Nothing else to process other than " << true_target_executable
+                << termcolor::reset << std::endl;
+        }
+    }
     // Process init
     mProcess = std::make_shared<QProcess>();
 
@@ -92,7 +111,7 @@ void steam_proton::try_run(
 
     //lArguments.append("waitforexitandrun"); // always this
     lArguments.append("run"); // always this
-    lArguments.append(target_executable.c_str());
+    lArguments.append(true_target_executable.c_str());
     QString cwd = "";
     if (target_executable.substr(1,2) == ":\\" ) {
         std::string calc_path = target_executable;

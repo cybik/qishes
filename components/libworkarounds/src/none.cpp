@@ -10,6 +10,6 @@
 
 #include "none.h"
 
-std::list<std::string> NoneImpl::decorate() {
+std::vector<std::string> NoneImpl::decorate() {
     return {target_executable};
 }

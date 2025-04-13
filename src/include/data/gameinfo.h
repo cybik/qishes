@@ -37,6 +37,7 @@ public:
         : target_exe(exe), target_label(label), target_exeType(exeType), selected_workaround(workaround) {}
     ExeType get_exetype();
     std::string get_label();
+    Workaround::Handler get_workaround();
 private:
     std::string target_exe;
     std::string target_label;

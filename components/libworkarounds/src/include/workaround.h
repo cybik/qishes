@@ -12,12 +12,12 @@
 
 #include <string>
 #include <memory>
-#include <list>
+#include <vector>
 
 class AWorkaround {
 public:
     virtual void obtain() = 0;
-    virtual std::list<std::string> decorate() = 0;
+    virtual std::vector<std::string> decorate() = 0;
 };
 
 class Workaround {

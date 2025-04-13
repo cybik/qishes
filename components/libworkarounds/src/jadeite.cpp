@@ -23,7 +23,7 @@
 
 #include <iostream>
 
-std::list<std::string> JadeiteImpl::decorate() {
+std::vector<std::string> JadeiteImpl::decorate() {
     // TODO: get decorated call to actual game exe
     return {target_executable};
 }

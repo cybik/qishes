@@ -24,6 +24,7 @@ public:
 
     void try_setup();
     void try_run(   const std::string& target_executable,
+                    const Workaround::Handler workaround,
                     const std::list<std::string>& arguments = {},
                     const std::map<std::string, std::string>& env_overrides = {},
                     const QString prefix = ""

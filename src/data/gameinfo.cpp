@@ -17,3 +17,7 @@ GameInfo::ExeType GameInfo::get_exetype() {
 std::string GameInfo::get_label() {
     return target_label;
 }
+
+Workaround::Handler GameInfo::get_workaround() {
+    return selected_workaround;
+}

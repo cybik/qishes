@@ -24,7 +24,7 @@ class JadeiteImpl : public AWorkaround {
 public:
     JadeiteImpl(std::string executable) : target_executable(executable) {}
     void obtain() override; // get the bloody thing
-    std::list<std::string> decorate() override; // probably the wrong function prototype
+    std::vector<std::string> decorate() override; // probably the wrong function prototype
 private:
     std::string target_executable;
     std::shared_ptr<HttpClient> http_client;

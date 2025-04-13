@@ -129,7 +129,8 @@ std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_proton() {
     return std::move(panel_proton);
 }
 
-void LauncherCommand::run_the_magic(const QString& target_exe) {
+// TODO: run a reg setter to set [HKEY_CURRENT_USER\Control Panel\International] -> sDecimal to '.' to fix shader issues
+void LauncherCommand::run_the_magic(const QString& target_exe, Workaround::Handler workaround) {
     std::map<std::string, std::string> envs = {};
     std::list<std::string> arguments = {};
     std::string true_command = target_exe.toStdString();
@@ -145,24 +146,29 @@ void LauncherCommand::run_the_magic(const QString& target_exe) {
         arguments.emplace_front(true_command);
     }
     steam_integration::get_steam_integration_instance()->proton()->try_run(
-        target_exe.toStdString(), arguments, envs,
+        target_exe.toStdString(),
+        workaround,
+        arguments,
+        envs,
         (given_option_gamemode->isChecked()?"gamemoderun":"")
     );
 }
 
 void LauncherCommand::enlist_launch_action(
-    std::string incoming, QString executable
+    std::string incoming,
+    QString executable,
+    Workaround::Handler workaround
 ) {
     std::shared_ptr<QAction> action_run = std::make_unique<QAction>(incoming.c_str());
     given->connect(
         action_run.get(),
         &QAction::triggered,
-        [&, executable](bool) {
+        [&, executable, workaround](bool) {
             steam_integration::get_steam_integration_instance()->proton()->select(
                 given_proton_combo->currentText().toStdString()
             );
             if (!executable.isEmpty()) {
-                run_the_magic(executable);
+                run_the_magic(executable, workaround);
             }
         }
     );
@@ -188,8 +194,7 @@ QAGL::QAGL_Game LauncherCommand::convert_exetype(GameInfo::ExeType target_type) 
  */
 void LauncherCommand::create_fs_integration(GameInfo::ExeType inc, std::shared_ptr<QFile> file) {
     switch(inc) {
-        case(GameInfo::ExeType::WutheringWaves):
-            abort(); // not supported yet but coming.
+        case(GameInfo::ExeType::WutheringWaves): abort(); /* not supported yet but coming. */
         case(GameInfo::ExeType::Genshin):
         case(GameInfo::ExeType::HonkaiSR):
         case(GameInfo::ExeType::Nap): {
@@ -200,9 +205,8 @@ void LauncherCommand::create_fs_integration(GameInfo::ExeType inc, std::shared_p
                 auto caches = getGameWishesCache(
                     QString(file->filesystemFileName().parent_path().c_str())
                 );
-                if (caches->empty()) {
-                    return; // Don't watch since there's nothing.
-                }
+                if (caches->empty()) { return; } /* Don't watch since there's nothing. */
+
                 // var: detected urls
                 if (!detected_urls) detected_urls = std::make_shared<QStringList>();
                 for (auto cache: *caches) {
@@ -248,7 +252,7 @@ std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_run() {
      * Always the Launcher, pretty much. Keep this out so I can refactor into game-dedicated panels
      *  with a background switch
      **/
-    enlist_launch_action("Launcher", target_exec);
+    enlist_launch_action("Launcher", target_exec, Workaround::Handler::None);
     for (auto file : *filtered_files) {
         if ( !target_exec.contains(file->filesystemFileName().filename().c_str()) ) {
             //auto inc = supported_games_impl.at(file->filesystemFileName().filename().c_str());
@@ -258,7 +262,11 @@ std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_run() {
                 // TODO: refactor fswatcher to run *when launching the target game*
                 create_fs_integration(inc.get_exetype(), file);
             }
-            enlist_launch_action(inc.get_label(),QFileInfo(*file).absoluteFilePath());
+            enlist_launch_action(
+                inc.get_label(),
+                QFileInfo(*file).absoluteFilePath(),
+                inc.get_workaround()
+            );
         }
     }
     std::unique_ptr<SARibbonPannel> panel_run = std::make_unique<SARibbonPannel>("Run game");
@@ -279,11 +287,15 @@ std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_wishes() {
      * Then, get all the URLs from it.
      * Then, show either the most recent one, or a list with a copy button on the right.
      **/
-    enlist_launch_action("Launcher", target_exec);
+    enlist_launch_action("Launcher", target_exec, Workaround::Handler::None);
     for (auto file : *filtered_files) {
         if ( !target_exec.contains(file->filesystemFileName().filename().c_str()) ) {
             auto game =supported_games_impl.at(file->filesystemFileName().filename().c_str());
-            enlist_launch_action( game.get_label(), QFileInfo(*file).absoluteFilePath());
+            enlist_launch_action(
+                game.get_label(),
+                QFileInfo(*file).absoluteFilePath(),
+                game.get_workaround()
+            );
         }
     }
     std::unique_ptr<SARibbonPannel> panel_run = std::make_unique<SARibbonPannel>("Run game");
