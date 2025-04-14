@@ -25,6 +25,7 @@
 #include <iostream>
 
 #include <termcolor/termcolor.hpp>
+#include <qmicroz.h>
 
 std::vector<std::string> JadeiteImpl::decorate() {
     // TODO: get decorated call to actual game exe
@@ -54,10 +55,11 @@ void JadeiteImpl::obtain(std::string c_drive_dir) {
 
     QDir fs_jadeite_dir = QDir((c_drive_dir + "/Jadeite").c_str());
     QString out_filename = processed_url.split('/').last();
+    QDir jadeite_unpack = QDir(fs_jadeite_dir.filesystemPath().append(version.toStdString()));
     QFile jadeite_archive = QFile(fs_jadeite_dir.filesystemPath().append(out_filename.toStdString()));
     if (fs_jadeite_dir.exists()) {
         // Case 1: exists. Check if file we'd queue for download exists; if so, just skip.
-        if ( jadeite_archive.exists() ) {
+        if ( jadeite_archive.exists() || jadeite_unpack.exists() ) {
             std::cout
                 << termcolor::on_bright_yellow
                     << "Jadeite already downloaded"
@@ -79,4 +81,16 @@ void JadeiteImpl::obtain(std::string c_drive_dir) {
     }
     jadeite_archive.open(QIODeviceBase::NewOnly|QIODeviceBase::WriteOnly);
     jadeite_archive.write(http_client->get_sync(processed_url));
+
+    // And extract!
+    QMicroz::extract(
+        absolute(jadeite_archive.filesystemFileName()).c_str(),
+        jadeite_unpack.absolutePath()
+    );
+    local_jadeite_dir = jadeite_unpack.absolutePath();
+
+    // reprocess
+    relative_jadeite_dir = local_jadeite_dir;
+    relative_jadeite_dir.removeFirst(c_drive_dir.c_str());
+    local_jadeite_version = version;
 }

@@ -28,4 +28,9 @@ public:
 private:
     std::string target_executable;
     std::shared_ptr<HttpClient> http_client;
+
+    QString local_jadeite_dir;
+    QString relative_jadeite_dir;
+    QString local_jadeite_version;
+
 };

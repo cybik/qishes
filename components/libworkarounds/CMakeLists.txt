@@ -19,6 +19,7 @@ include_directories(
         "${CMAKE_CURRENT_LIST_DIR}/src/include"
         "${CMAKE_CURRENT_LIST_DIR}/../../3rdParty/qhttpclient"
         "${PROJECT_3RDPARTY_DIR}/termcolor/include"
+        "${PROJECT_3RDPARTY_DIR}/qmicroz/src"
 )
 
 find_package(
