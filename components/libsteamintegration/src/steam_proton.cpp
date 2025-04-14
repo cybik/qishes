@@ -132,9 +132,12 @@ void steam_proton::try_run(
                 + static_cast<char>(std::tolower(calc_path.at(0)))
                 + "/" + calc_path.substr(3)
             );
+        cwd = cwd.sliced(0, cwd.lastIndexOf('/'));
+        std::cout << "Using windows-style guesswork :: " << cwd.toStdString() << std::endl;
     } else {
         // unix style. Don't set working dir for now since idgaf yet
         cwd = QString::fromStdString(target_executable.substr(0, target_executable.find_last_of("/")));
+        std::cout << "Using unix-style guesswork :: " << cwd.toStdString() << std::endl;
     }
     std::cout
         << termcolor::on_bright_green
