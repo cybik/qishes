@@ -23,7 +23,7 @@
 class JadeiteImpl : public AWorkaround {
 public:
     JadeiteImpl(std::string executable) : target_executable(executable) {}
-    void obtain() override; // get the bloody thing
+    void obtain(std::string c_drive_dir) override; // get the bloody thing
     std::vector<std::string> decorate() override; // probably the wrong function prototype
 private:
     std::string target_executable;

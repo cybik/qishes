@@ -58,6 +58,10 @@ std::string steam_proton::get_compat_dir_path() {
     return std::getenv("STEAM_COMPAT_DATA_PATH");
 }
 
+std::string steam_proton::get_compat_c_drive() {
+    return get_compat_dir_path().append("/pfx/drive_c");
+}
+
 // TODO: pwd/cwd to eval the ini properly
 void steam_proton::try_run(
     const std::string& target_executable,
@@ -71,6 +75,10 @@ void steam_proton::try_run(
     // instant decorate
     std::string true_target_executable = target_executable;
     std::unique_ptr<AWorkaround> workaround_handler = Workaround::getWorkaround(workaround, target_executable);
+
+    // Always run
+    workaround_handler->obtain(get_compat_c_drive());
+
     std::vector<std::string> decorated_executable = workaround_handler->decorate();
     if (!decorated_executable.empty()) {
         true_target_executable = decorated_executable[0];

@@ -35,6 +35,7 @@ protected:
 private:
     steam_proton();
     std::string get_compat_dir_path();
+    std::string get_compat_c_drive();
     static std::shared_ptr<steam_proton>          mInstance;
     std::shared_ptr<vlvproton>                    mProton;
     std::string                                   mSelected;

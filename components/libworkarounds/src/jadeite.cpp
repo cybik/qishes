@@ -20,8 +20,11 @@
 
 #include <QJsonDocument>
 #include <QByteArray>
+#include <QDir>
 
 #include <iostream>
+
+#include <termcolor/termcolor.hpp>
 
 std::vector<std::string> JadeiteImpl::decorate() {
     // TODO: get decorated call to actual game exe
@@ -32,12 +35,48 @@ std::vector<std::string> JadeiteImpl::decorate() {
 const QString jadeite_release_rooturl = "https://codeberg.org/api/v1/repos/mkrsym1/jadeite/releases/latest";
 const QString jadeite_versions_url = "https://codeberg.org/mkrsym1/jadeite/raw/branch/master/metadata.json";
 
-void JadeiteImpl::obtain() {
+// 	"https://codeberg.org/mkrsym1/jadeite/releases/download/v5.0.1/v5.0.1.zip"
+
+void JadeiteImpl::obtain(std::string c_drive_dir) {
     // TODO: get jadeite from remote, install into drive_c
     if (!http_client) {
         http_client = std::make_shared<HttpClient>();
     }
     QByteArray versions = http_client->get_sync(jadeite_versions_url);
     QJsonDocument qjson = QJsonDocument::fromJson(versions);
-    std::cout << qjson["jadeite"]["version"].toString().toStdString() << std::endl;
+    QString version = qjson["jadeite"]["version"].toString();
+    QString processed_url = "https://codeberg.org/mkrsym1/jadeite/releases/download/v"+version+"/v"+version+".zip";
+    std::cout
+        << termcolor::on_bright_yellow
+            << "Processed URL:" << processed_url.toStdString()
+            << termcolor::reset
+    << std::endl;
+
+    QDir fs_jadeite_dir = QDir((c_drive_dir + "/Jadeite").c_str());
+    QString out_filename = processed_url.split('/').last();
+    QFile jadeite_archive = QFile(fs_jadeite_dir.filesystemPath().append(out_filename.toStdString()));
+    if (fs_jadeite_dir.exists()) {
+        // Case 1: exists. Check if file we'd queue for download exists; if so, just skip.
+        if ( jadeite_archive.exists() ) {
+            std::cout
+                << termcolor::on_bright_yellow
+                    << "Jadeite already downloaded"
+                    << termcolor::reset
+            << std::endl;
+            return;
+        }
+    } else {
+        if (!std::filesystem::exists(fs_jadeite_dir.filesystemPath().parent_path())) {
+            // The PARENT path Jadeite doesn't exist. This fucked.
+            std::cout
+                << termcolor::on_bright_red << termcolor::blink
+                    << "The folder structure is broken. SOMETHING VERY FUCKED."
+                    << termcolor::reset
+            << std::endl;
+            return;
+        }
+        fs_jadeite_dir.mkpath((c_drive_dir + "/Jadeite").c_str());
+    }
+    jadeite_archive.open(QIODeviceBase::NewOnly|QIODeviceBase::WriteOnly);
+    jadeite_archive.write(http_client->get_sync(processed_url));
 }

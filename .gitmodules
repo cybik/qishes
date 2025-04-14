@@ -34,3 +34,9 @@
 [submodule "3rdParty/steamworks"]
 	path = 3rdParty/steamworks
 	url = https://github.com/rlabrecque/SteamworksSDK.git
+[submodule "3rdParty/qmicroz"]
+	path = 3rdParty/qmicroz
+	url = https://github.com/artemvlas/qmicroz.git
+[submodule "3rdParty/quazip"]
+	path = 3rdParty/quazip
+	url = https://github.com/stachenov/quazip.git

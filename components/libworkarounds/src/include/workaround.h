@@ -16,7 +16,7 @@
 
 class AWorkaround {
 public:
-    virtual void obtain() = 0;
+    virtual void obtain(std::string c_drive_dir) = 0;
     virtual std::vector<std::string> decorate() = 0;
 };
 

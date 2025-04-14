@@ -92,6 +92,7 @@ include_directories(
         "${PROJECT_3RDPARTY_DIR}/saribbon/src"
         #"${PROJECT_3RDPARTY_DIR}/discord-game-sdk/include"
         "${PROJECT_3RDPARTY_DIR}/steamworks/public"
+        "${PROJECT_3RDPARTY_DIR}/quazip"
 )
 
 PreconfigureApplicationRpath()
@@ -174,6 +175,8 @@ target_link_libraries(
         #discord-game-sdk-interface
         QWKCore
         QWKWidgets
+        #quazip
+        qmicroz
 
         SARibbonBar::SARibbonBar
 
@@ -208,6 +211,8 @@ list(
         "qadwaitadecorations"
         "QWKCore"
         "QWKWidgets"
+        "qmicroz"
+        #"quazip"
         "SARibbonBar::SARibbonBar"
 )
 

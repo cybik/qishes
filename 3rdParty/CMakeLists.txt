@@ -11,3 +11,5 @@ add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/googletest")
 add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/QAdwaitaDeco") # todo: needed or not?
 add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/qwindowkit")
 add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/saribbon")
+#add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/quazip")
+add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/qmicroz")

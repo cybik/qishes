@@ -67,7 +67,7 @@ private:
     std::unique_ptr<SARibbonPannel> get_panel_socials();
 
     QAGL::QAGL_Game get_game();
-    QAGL::QAGL_Game first_game_detected = QAGL::QAGL_Game::UNKNOWN;
+    QAGL::QAGL_Game first_game_detected = QAGL::QAGL_Game::GAME_UNKNOWN;
     QAGL::QAGL_Game convert_exetype(GameInfo::ExeType target_type);
     void            create_fs_integration(GameInfo::ExeType, std::shared_ptr<QFile> file);
 

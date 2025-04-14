@@ -19,7 +19,7 @@
 class NoneImpl : public AWorkaround {
 public:
     NoneImpl(std::string executable) : target_executable(executable) {}
-    void obtain() override {} // None is a noop.
+    void obtain(std::string c_drive_dir) override {} // None is a noop.
     std::vector<std::string> decorate() override; // probably the wrong function prototype
 private:
     std::string target_executable;

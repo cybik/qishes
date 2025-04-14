@@ -180,9 +180,9 @@ QAGL::QAGL_Game LauncherCommand::convert_exetype(GameInfo::ExeType target_type) 
         case GameInfo::ExeType::Genshin: return QAGL::QAGL_Game::h4ke;
         case GameInfo::ExeType::HonkaiSR: return QAGL::QAGL_Game::hkrpg;
         case GameInfo::ExeType::WutheringWaves: return QAGL::QAGL_Game::wuwa;
-        case GameInfo::ExeType::Honkai3rd: return QAGL::QAGL_Game::bh3 ;
+        case GameInfo::ExeType::Honkai3rd: return QAGL::QAGL_Game::bh3;
         case GameInfo::ExeType::Nap: return QAGL::QAGL_Game::nap;
-        default: return QAGL::QAGL_Game::UNKNOWN;
+        default: return QAGL::QAGL_Game::GAME_UNKNOWN;
     }
 }
 
@@ -257,7 +257,7 @@ std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_run() {
         if ( !target_exec.contains(file->filesystemFileName().filename().c_str()) ) {
             //auto inc = supported_games_impl.at(file->filesystemFileName().filename().c_str());
             auto inc = supported_games_impl.at(file->filesystemFileName().filename().c_str());
-            if (first_game_detected == QAGL::QAGL_Game::UNKNOWN) {
+            if (first_game_detected == QAGL::QAGL_Game::GAME_UNKNOWN) {
                 first_game_detected = convert_exetype(inc.get_exetype());
                 // TODO: refactor fswatcher to run *when launching the target game*
                 create_fs_integration(inc.get_exetype(), file);
@@ -313,7 +313,7 @@ std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_game() {
         [&](bool) {
             target_exec = QFileDialog::getOpenFileName(
                 nullptr,
-                "Get me the genshin",
+                "Get me the gacha",
                 QString(std::getenv("STEAM_COMPAT_DATA_PATH")), "*.exe"
             );
             show_wishes_getter();

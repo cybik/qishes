@@ -18,6 +18,7 @@ include_directories(
     BEFORE
         "${CMAKE_CURRENT_LIST_DIR}/src/include"
         "${CMAKE_CURRENT_LIST_DIR}/../../3rdParty/qhttpclient"
+        "${PROJECT_3RDPARTY_DIR}/termcolor/include"
 )
 
 find_package(
@@ -57,6 +58,7 @@ target_link_libraries(
         Qt6::Xml
         Qt6::Core
         httpclient
+        qmicroz
 )
 
 target_include_directories(

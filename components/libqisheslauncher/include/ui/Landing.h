@@ -44,12 +44,21 @@ Q_OBJECT
 
         wuwa,
 
-        UNKNOWN
+        GAME_UNKNOWN
     } QAGL_Game;
+    typedef enum {
+        GT_Normal,
+
+        GT_UnrealEngine,
+
+        GT_UNKNOWN
+    } QAGL_Game_Type;
 
     typedef enum {
         global, // cn defines this as overseas
-        cn
+        cn,     // ignored for now
+
+        R_UNKNOWN
     } QAGL_Region;
 
     typedef enum {
