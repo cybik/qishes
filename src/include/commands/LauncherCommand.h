@@ -37,7 +37,7 @@ protected:
     void command_process_parser() override;
     int  command_run() override;
 private:
-    void run_the_magic(const QString& target_exec, Workaround::Handler);
+    void run_the_magic(const QString& target_exec, Workaround::Handler, GameInfo::ExeType);
 
     std::shared_ptr<QApplication> qishes_launcher = nullptr;
     std::shared_ptr<QMenu> generate_menu();
@@ -131,7 +131,7 @@ private:
     std::list<std::shared_ptr<QAction>> actions_execs;
     std::shared_ptr<std::list<std::shared_ptr<QFile>>> filtered_files;
 
-    void            enlist_launch_action(std::string incoming, QString executable, Workaround::Handler);
+    void            enlist_launch_action(std::string incoming, QString executable, Workaround::Handler, GameInfo::ExeType);
 
     bool command_offline;
     std::shared_ptr<QCommandLineOption> offline;

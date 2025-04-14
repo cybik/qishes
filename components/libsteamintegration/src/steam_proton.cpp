@@ -139,6 +139,9 @@ void steam_proton::try_run(
         cwd = QString::fromStdString(target_executable.substr(0, target_executable.find_last_of("/")));
         std::cout << "Using unix-style guesswork :: " << cwd.toStdString() << std::endl;
     }
+    if (target_executable.starts_with("reg")) {
+        cwd = ""; // Special case: reg workaround.
+    }
     std::cout
         << termcolor::on_bright_green
             << "Attempting to launch " << target_executable << std::endl

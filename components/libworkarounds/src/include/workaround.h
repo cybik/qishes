@@ -28,3 +28,8 @@ public:
     } Handler;
     static std::unique_ptr<AWorkaround> getWorkaround(Handler handler, std::string executable);
 };
+
+/***
+* add "HKCU\\Control Panel\\International" /v sDecimal /t REG_SZ /d "."
+ *
+ */

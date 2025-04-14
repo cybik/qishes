@@ -130,7 +130,10 @@ std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_proton() {
 }
 
 // TODO: run a reg setter to set [HKEY_CURRENT_USER\Control Panel\International] -> sDecimal to '.' to fix shader issues
-void LauncherCommand::run_the_magic(const QString& target_exe, Workaround::Handler workaround) {
+void LauncherCommand::run_the_magic(const QString& target_exe,
+    Workaround::Handler workaround,
+    GameInfo::ExeType game_type
+) {
     std::map<std::string, std::string> envs = {};
     std::list<std::string> arguments = {};
     std::string true_command = target_exe.toStdString();
@@ -145,6 +148,21 @@ void LauncherCommand::run_the_magic(const QString& target_exe, Workaround::Handl
     if (given_option_gamemode->isChecked()) {
         arguments.emplace_front(true_command);
     }
+    if (game_type == GameInfo::ExeType::Genshin) { // Shader misgeneration workaround
+        steam_integration::get_steam_integration_instance()->proton()->try_run(
+            "reg",
+            Workaround::Handler::None,
+            {
+                "add", "\"HKCU\\Control Panel\\International\"",
+                "/v", "sDecimal",   // Value name
+                "/t", "REG_SZ",     // Type string
+                "/d", "\".\"",      // Data proper
+                "/f"                   // Force write
+            },
+            {},
+            ""
+        );
+    }
     steam_integration::get_steam_integration_instance()->proton()->try_run(
         target_exe.toStdString(),
         workaround,
@@ -155,20 +173,21 @@ void LauncherCommand::run_the_magic(const QString& target_exe, Workaround::Handl
 }
 
 void LauncherCommand::enlist_launch_action(
-    std::string incoming,
-    QString executable,
-    Workaround::Handler workaround
+    std::string         incoming,
+    QString             executable,
+    Workaround::Handler workaround,
+    GameInfo::ExeType   game_type
 ) {
     std::shared_ptr<QAction> action_run = std::make_unique<QAction>(incoming.c_str());
     given->connect(
         action_run.get(),
         &QAction::triggered,
-        [&, executable, workaround](bool) {
+        [&, executable, workaround, game_type](bool) {
             steam_integration::get_steam_integration_instance()->proton()->select(
                 given_proton_combo->currentText().toStdString()
             );
             if (!executable.isEmpty()) {
-                run_the_magic(executable, workaround);
+                run_the_magic(executable, workaround, game_type);
             }
         }
     );
@@ -252,7 +271,12 @@ std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_run() {
      * Always the Launcher, pretty much. Keep this out so I can refactor into game-dedicated panels
      *  with a background switch
      **/
-    enlist_launch_action("Launcher", target_exec, Workaround::Handler::None);
+    enlist_launch_action(
+        "Launcher",
+        target_exec,
+        Workaround::Handler::None,
+        GameInfo::ExeType::Launcher
+    );
     for (auto file : *filtered_files) {
         if ( !target_exec.contains(file->filesystemFileName().filename().c_str()) ) {
             //auto inc = supported_games_impl.at(file->filesystemFileName().filename().c_str());
@@ -265,7 +289,8 @@ std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_run() {
             enlist_launch_action(
                 inc.get_label(),
                 QFileInfo(*file).absoluteFilePath(),
-                inc.get_workaround()
+                inc.get_workaround(),
+                inc.get_exetype()
             );
         }
     }
@@ -287,14 +312,16 @@ std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_wishes() {
      * Then, get all the URLs from it.
      * Then, show either the most recent one, or a list with a copy button on the right.
      **/
-    enlist_launch_action("Launcher", target_exec, Workaround::Handler::None);
+    enlist_launch_action(
+        "Launcher",
+        target_exec, Workaround::Handler::None, GameInfo::ExeType::Launcher);
     for (auto file : *filtered_files) {
         if ( !target_exec.contains(file->filesystemFileName().filename().c_str()) ) {
             auto game =supported_games_impl.at(file->filesystemFileName().filename().c_str());
             enlist_launch_action(
                 game.get_label(),
                 QFileInfo(*file).absoluteFilePath(),
-                game.get_workaround()
+                game.get_workaround(), game.get_exetype()
             );
         }
     }
