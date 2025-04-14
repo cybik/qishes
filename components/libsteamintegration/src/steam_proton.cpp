@@ -80,7 +80,7 @@ void steam_proton::try_run(
     workaround_handler->obtain(get_compat_c_drive());
 
     std::vector<std::string> decorated_executable = workaround_handler->decorate();
-    if (!decorated_executable.empty()) {
+    /*if (!decorated_executable.empty()) {
         true_target_executable = decorated_executable[0];
         decorated_executable.erase(decorated_executable.begin());
         if (!decorated_executable.empty()) {
@@ -93,7 +93,7 @@ void steam_proton::try_run(
                     << "Nothing else to process other than " << true_target_executable
                 << termcolor::reset << std::endl;
         }
-    }
+    }*/
     // Process init
     mProcess = std::make_shared<QProcess>();
 
@@ -108,7 +108,6 @@ void steam_proton::try_run(
         lArguments.append(mProton->get_selected_proton()->exec().c_str());
     }
 
-    //mProcess->setWorkingDirectory()
     mProcess->setProgram(
         prefix.isEmpty()
             ? mProton->get_selected_proton()->exec().c_str()
@@ -119,7 +118,11 @@ void steam_proton::try_run(
 
     //lArguments.append("waitforexitandrun"); // always this
     lArguments.append("run"); // always this
-    lArguments.append(true_target_executable.c_str());
+    if (decorated_executable.empty()) {
+        lArguments.append(target_executable.c_str());
+    } else {
+        for (auto el: decorated_executable) lArguments.append(el.c_str());
+    }
     QString cwd = "";
     if (target_executable.substr(1,2) == ":\\" ) {
         std::string calc_path = target_executable;

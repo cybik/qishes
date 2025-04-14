@@ -29,6 +29,9 @@
 
 std::vector<std::string> JadeiteImpl::decorate() {
     // TODO: get decorated call to actual game exe
+    if (jadeite_active) {
+        return { calculated_jadeite_path.toStdString(), target_executable };
+    }
     return {target_executable};
 }
 
@@ -57,14 +60,38 @@ void JadeiteImpl::obtain(std::string c_drive_dir) {
     QString out_filename = processed_url.split('/').last();
     QDir jadeite_unpack = QDir(fs_jadeite_dir.filesystemPath().append(version.toStdString()));
     QFile jadeite_archive = QFile(fs_jadeite_dir.filesystemPath().append(out_filename.toStdString()));
+
+    // guessed paths
+    local_jadeite_dir = jadeite_unpack.absolutePath();
+
+    // reprocess
+    relative_jadeite_dir = local_jadeite_dir;
+    relative_jadeite_dir.replace(c_drive_dir.c_str(), "");
+    relative_jadeite_dir_wine_variant = relative_jadeite_dir;
+    relative_jadeite_dir_wine_variant.replace("/", "\\");
+    local_jadeite_version = version;
+
+    calculated_jadeite_path = jadeite_unpack.filesystemPath().append("jadeite.exe").c_str();
+    std::cout
+        << termcolor::green
+            << "Guessed information:" << std::endl
+                << "\t" << "absolute file\t\t\t"         << calculated_jadeite_path.toStdString() << std::endl
+                << "\t" << "absolute dir\t\t\t"          << local_jadeite_dir.toStdString() << std::endl
+                << "\t" << "relative dir\t\t\t"          << relative_jadeite_dir.toStdString() << std::endl
+                << "\t" << "relative dir (wine)\t\t"     << relative_jadeite_dir_wine_variant.toStdString() << std::endl
+                << "\t" << "jadeite version\t\t\t"       << local_jadeite_version.toStdString() << std::endl
+            << termcolor::reset
+    << std::endl;
+
     if (fs_jadeite_dir.exists()) {
         // Case 1: exists. Check if file we'd queue for download exists; if so, just skip.
-        if ( jadeite_archive.exists() || jadeite_unpack.exists() ) {
+        if ( (jadeite_archive.exists() || jadeite_unpack.exists()) && QFile(calculated_jadeite_path).exists() ) {
             std::cout
                 << termcolor::on_bright_yellow
                     << "Jadeite already downloaded"
                     << termcolor::reset
             << std::endl;
+            jadeite_active = true;
             return;
         }
     } else {
@@ -87,10 +114,5 @@ void JadeiteImpl::obtain(std::string c_drive_dir) {
         absolute(jadeite_archive.filesystemFileName()).c_str(),
         jadeite_unpack.absolutePath()
     );
-    local_jadeite_dir = jadeite_unpack.absolutePath();
-
-    // reprocess
-    relative_jadeite_dir = local_jadeite_dir;
-    relative_jadeite_dir.removeFirst(c_drive_dir.c_str());
-    local_jadeite_version = version;
+    jadeite_active = true;
 }

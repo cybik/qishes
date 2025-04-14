@@ -31,6 +31,8 @@ private:
 
     QString local_jadeite_dir;
     QString relative_jadeite_dir;
+    QString relative_jadeite_dir_wine_variant;
     QString local_jadeite_version;
-
+    QString calculated_jadeite_path;
+    bool jadeite_active = false;
 };
