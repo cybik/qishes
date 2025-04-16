@@ -107,7 +107,16 @@ void JadeiteImpl::obtain(std::string c_drive_dir) {
         fs_jadeite_dir.mkpath((c_drive_dir + "/Jadeite").c_str());
     }
     jadeite_archive.open(QIODeviceBase::NewOnly|QIODeviceBase::WriteOnly);
+    try {
     jadeite_archive.write(http_client->get_sync(processed_url));
+    } catch ( const NetworkException& e ) {
+        std::cout
+            << termcolor::on_bright_red
+                << "The URL at " << processed_url.toStdString() << " did not respond."
+                << termcolor::reset
+        << std::endl;
+        return;
+    }
 
     // And extract!
     QMicroz::extract(
