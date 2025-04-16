@@ -46,9 +46,25 @@ void JadeiteImpl::obtain(std::string c_drive_dir) {
     if (!http_client) {
         http_client = std::make_shared<HttpClient>();
     }
-    QByteArray versions = http_client->get_sync(jadeite_versions_url);
-    QJsonDocument qjson = QJsonDocument::fromJson(versions);
-    QString version = qjson["jadeite"]["version"].toString();
+    QByteArray versions;
+    QDir fs_jadeite_dir = QDir((c_drive_dir + "/Jadeite").c_str());
+    fs_jadeite_dir.mkpath((c_drive_dir + "/Jadeite").c_str());
+    QFile jadeite_latest = QFile(fs_jadeite_dir.filesystemPath().append(".latest"));
+    QString version;
+    try {
+        versions = http_client->get_sync(jadeite_versions_url);
+        QJsonDocument qjson = QJsonDocument::fromJson(versions);
+        version = qjson["jadeite"]["version"].toString();
+    } catch ( const NetworkException& e ) {
+        std::cout
+            << termcolor::on_bright_red
+                << "The URL at " << jadeite_versions_url.toStdString() << " did not respond."
+                << termcolor::reset
+        << std::endl;
+        jadeite_latest.open(QIODeviceBase::ReadOnly);
+        version = QString::fromStdString(jadeite_latest.readAll().toStdString()).trimmed();
+    }
+
     QString processed_url = "https://codeberg.org/mkrsym1/jadeite/releases/download/v"+version+"/v"+version+".zip";
     std::cout
         << termcolor::on_bright_yellow
@@ -56,7 +72,6 @@ void JadeiteImpl::obtain(std::string c_drive_dir) {
             << termcolor::reset
     << std::endl;
 
-    QDir fs_jadeite_dir = QDir((c_drive_dir + "/Jadeite").c_str());
     QString out_filename = processed_url.split('/').last();
     QDir jadeite_unpack = QDir(fs_jadeite_dir.filesystemPath().append(version.toStdString()));
     QFile jadeite_archive = QFile(fs_jadeite_dir.filesystemPath().append(out_filename.toStdString()));
@@ -104,11 +119,16 @@ void JadeiteImpl::obtain(std::string c_drive_dir) {
             << std::endl;
             return;
         }
-        fs_jadeite_dir.mkpath((c_drive_dir + "/Jadeite").c_str());
     }
-    jadeite_archive.open(QIODeviceBase::NewOnly|QIODeviceBase::WriteOnly);
+
     try {
-    jadeite_archive.write(http_client->get_sync(processed_url));
+        jadeite_archive.open(QIODeviceBase::NewOnly|QIODeviceBase::WriteOnly);
+        jadeite_archive.write(http_client->get_sync(processed_url));
+        // And extract!
+        QMicroz::extract(
+            absolute(jadeite_archive.filesystemFileName()).c_str(),
+            jadeite_unpack.absolutePath()
+        );
     } catch ( const NetworkException& e ) {
         std::cout
             << termcolor::on_bright_red
@@ -117,11 +137,5 @@ void JadeiteImpl::obtain(std::string c_drive_dir) {
         << std::endl;
         return;
     }
-
-    // And extract!
-    QMicroz::extract(
-        absolute(jadeite_archive.filesystemFileName()).c_str(),
-        jadeite_unpack.absolutePath()
-    );
     jadeite_active = true;
 }
