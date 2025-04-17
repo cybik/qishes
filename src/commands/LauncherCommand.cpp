@@ -401,6 +401,7 @@ void LauncherCommand::setupRibbonWindow() {
     // Cool thing?
     given->setRibbonTheme(SARibbonTheme::RibbonThemeDark2);
     given->ribbonBar()->setRibbonStyle(SARibbonBar::RibbonStyleCompactThreeRow);
+    given->ribbonBar()->setWindowTitleTextColor(QColorConstants::LightGray);
     given->ribbonBar()->setMinimumMode(true);
     given->ribbonBar()->setTabOnTitle(true);
     given->ribbonBar()->setApplicationButton(nullptr);
