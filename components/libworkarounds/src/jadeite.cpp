@@ -46,15 +46,16 @@ void JadeiteImpl::obtain(std::string c_drive_dir) {
     if (!http_client) {
         http_client = std::make_shared<HttpClient>();
     }
-    QByteArray versions;
     QDir fs_jadeite_dir = QDir((c_drive_dir + "/Jadeite").c_str());
     fs_jadeite_dir.mkpath((c_drive_dir + "/Jadeite").c_str());
     QFile jadeite_latest = QFile(fs_jadeite_dir.filesystemPath().append(".latest"));
     QString version;
     try {
-        versions = http_client->get_sync(jadeite_versions_url);
+        http_client->setGlobalTimeout(std::chrono::milliseconds(1000));
+        QByteArray versions = http_client->get_sync(jadeite_versions_url);
         QJsonDocument qjson = QJsonDocument::fromJson(versions);
         version = qjson["jadeite"]["version"].toString();
+        http_client->resetGlobalTimeout();
     } catch ( const NetworkException& e ) {
         std::cout
             << termcolor::on_bright_red

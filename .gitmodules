@@ -12,7 +12,7 @@
 	url = https://github.com/FedoraQt/QAdwaitaDecorations.git
 [submodule "3rdParty/qthttpclient"]
 	path = 3rdParty/qthttpclient
-	url = https://github.com/abiiranathan/httpclient.git
+	url = git@github.com:cybik/httpclient.git
 [submodule "3rdParty/spinnersplusplus"]
 	path = 3rdParty/spinnersplusplus
 	url = https://github.com/jmslocum/spinners-plus-plus.git
