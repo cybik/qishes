@@ -51,7 +51,9 @@ add_library(
 target_link_libraries(
     ${MY_PROJECT_NAME}
     PUBLIC
+        common
         workarounds
+        steamintegration
 )
 
 target_include_directories(
@@ -59,6 +61,7 @@ target_include_directories(
     PUBLIC
         "${PROJECT_SOURCE_DIR}/include"
         "${CMAKE_SOURCE_DIR}/3rdParty/termcolor/include"
+        "${CMAKE_SOURCE_DIR}/3rdParty/steamworks/public"
 )
 
 # shim

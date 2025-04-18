@@ -1,6 +1,6 @@
 /******************************************************************
  *
- * honkai_star_rail.h
+ * HonkaiStarRail.h
  *
  * \brief A brief summary of what this class intends to accomplish.
  *

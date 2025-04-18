@@ -1,6 +1,6 @@
 /******************************************************************
  *
- * honkai_star_rail.cpp
+ * HonkaiStarRail.cpp
  *
  * \brief A brief summary of what this class intends to accomplish.
  *
@@ -8,7 +8,7 @@
  *
  ******************************************************************/
 
-#include "include/HonkaiStarRail.h"
+#include "HonkaiStarRail.h"
 //GameInfo("StarRail.exe", "Honkai: Star Rail", GameInfo::HonkaiSR, Workaround::Handler::Jadeite)
 std::string HonkaiStarRail::getExecutableName() {
     return "StarRail.exe";

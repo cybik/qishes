@@ -38,7 +38,7 @@ protected:
     void command_process_parser() override;
     int  command_run() override;
 private:
-    void run_the_magic(const QString& target_exec, Workaround::Handler, GameInfo::ExeType);
+    void run_the_magic(std::shared_ptr<AGame>, const QString& target_exec, Workaround::Handler, GameInfo::ExeType);
 
     std::shared_ptr<QApplication> qishes_launcher = nullptr;
     std::shared_ptr<QMenu> generate_menu();
@@ -117,13 +117,15 @@ private:
     bool    exec_provided = false;
 
     std::map<int, std::string> target_execs_found;
-    std::map<std::string, std::shared_ptr<AGame>> supported_games_impl_v2;
+    std::map<std::string, std::shared_ptr<AGame>> supported_games;
     std::list<std::shared_ptr<QAction>> actions_execs;
 
     // todo: clean up filtered files, this is unsightly as HELL.
     std::shared_ptr<std::list<std::pair<std::shared_ptr<AGame>, std::shared_ptr<QFile>>>> filtered_files;
 
-    void            enlist_launch_action(std::string incoming, QString executable, Workaround::Handler, GameInfo::ExeType);
+    void            enlist_launch_action(
+            std::shared_ptr<AGame> aGame, std::string incoming, QString executable, Workaround::Handler, GameInfo::ExeType
+    );
 
     bool command_offline;
     std::shared_ptr<QCommandLineOption> offline;

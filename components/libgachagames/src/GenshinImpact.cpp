@@ -1,6 +1,6 @@
 /******************************************************************
  *
- * genshin_impact.cpp
+ * GenshinImpact.cpp
  *
  * \brief A brief summary of what this class intends to accomplish.
  *
@@ -8,8 +8,10 @@
  *
  ******************************************************************/
 
-#include "include/GenshinImpact.h"
+#include "GenshinImpact.h"
+#include <steam_integration.h>
 
+#include <util/log.h>
 std::string GenshinImpact::getExecutableName() {
     return "GenshinImpact.exe";
 }
@@ -27,3 +29,22 @@ Workaround::Handler GenshinImpact::getWorkaround() {
 std::filesystem::path GenshinImpact::getExecutablePath(std::filesystem::path searchRoot) {
     abort();
 }
+
+void GenshinImpact::prepareEnvironment() {
+    // Genshin Impact shader mis-generation workaround
+    Log::get_logger()->info("Correcting decimal separator for Genshin shader tech.");
+    steam_integration::get_steam_integration_instance()->proton()->try_run(
+        "reg",
+        Workaround::Handler::None,
+        {
+            "add", "\"HKCU\\Control Panel\\International\"",
+            "/v", "sDecimal",   // Value name
+            "/t", "REG_SZ",     // Type string
+            "/d", "\".\"",      // Data proper
+            "/f"                   // Force write
+        },
+        {},
+        ""
+    );
+}
+

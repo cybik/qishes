@@ -1,6 +1,6 @@
 /******************************************************************
  *
- * HonkaiImpact3Rd.h
+ * HonkaiImpact3rd.h
  *
  * \brief A brief summary of what this class intends to accomplish.
  *

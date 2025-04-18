@@ -42,7 +42,7 @@ std::unique_ptr<QAGL::Landing> LauncherCommand::landing = nullptr;
 
 LauncherCommand::LauncherCommand() {
     for (std::shared_ptr<AGame> el: *AGame::getSupportedGames()) {
-        supported_games_impl_v2.insert({el->getExecutableName(), el});
+        supported_games.insert({el->getExecutableName(), el});
     }
 }
 
@@ -138,7 +138,9 @@ std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_proton() {
 }
 
 // TODO: run a reg setter to set [HKEY_CURRENT_USER\Control Panel\International] -> sDecimal to '.' to fix shader issues
-void LauncherCommand::run_the_magic(const QString& target_exe,
+void LauncherCommand::run_the_magic(
+    std::shared_ptr<AGame> game,
+    const QString&      target_exe,
     Workaround::Handler workaround,
     GameInfo::ExeType game_type
 ) {
@@ -156,21 +158,7 @@ void LauncherCommand::run_the_magic(const QString& target_exe,
     if (given_option_gamemode->isChecked()) {
         arguments.emplace_front(true_command);
     }
-    if (game_type == GameInfo::ExeType::Genshin) { // Shader misgeneration workaround
-        steam_integration::get_steam_integration_instance()->proton()->try_run(
-            "reg",
-            Workaround::Handler::None,
-            {
-                "add", "\"HKCU\\Control Panel\\International\"",
-                "/v", "sDecimal",   // Value name
-                "/t", "REG_SZ",     // Type string
-                "/d", "\".\"",      // Data proper
-                "/f"                   // Force write
-            },
-            {},
-            ""
-        );
-    }
+    game->prepareEnvironment();
     steam_integration::get_steam_integration_instance()->proton()->try_run(
         target_exe.toStdString(),
         workaround,
@@ -181,6 +169,7 @@ void LauncherCommand::run_the_magic(const QString& target_exe,
 }
 
 void LauncherCommand::enlist_launch_action(
+    std::shared_ptr<AGame> aGame,
     std::string         incoming,
     QString             executable,
     Workaround::Handler workaround,
@@ -190,12 +179,12 @@ void LauncherCommand::enlist_launch_action(
     given->connect(
         action_run.get(),
         &QAction::triggered,
-        [&, executable, workaround, game_type](bool) {
+        [&, aGame, executable, workaround, game_type](bool) {
             steam_integration::get_steam_integration_instance()->proton()->select(
                 given_proton_combo->currentText().toStdString()
             );
             if (!executable.isEmpty()) {
-                run_the_magic(executable, workaround, game_type);
+                run_the_magic(aGame, executable, workaround, game_type);
             }
         }
     );
@@ -281,6 +270,7 @@ std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_run() {
      *  with a background switch
      **/
     enlist_launch_action(
+        nullptr,
         "Launcher",
         target_exec,
         Workaround::Handler::None,
@@ -289,15 +279,14 @@ std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_run() {
 //    for (auto file : *filtered_files) {
     for (auto file : *filtered_files) {
         if ( !target_exec.contains(file.second->filesystemFileName().filename().c_str()) ) {
-            //auto inc = supported_games_impl.at(file->filesystemFileName().filename().c_str());
-            //auto inc = supported_games_impl.at(file.second->filesystemFileName().filename().c_str());
-            auto inc = supported_games_impl_v2.at(file.second->filesystemFileName().filename().c_str());
+            auto inc = supported_games.at(file.second->filesystemFileName().filename().c_str());
             if (first_game_detected == QAGL::QAGL_Game::GAME_UNKNOWN) {
                 first_game_detected = convert_exetype(inc->getGameType());
                 // TODO: refactor fswatcher to run *when launching the target game*
                 create_fs_integration(inc->getGameType(), file.second);
             }
             enlist_launch_action(
+                inc,
                 inc->getLabel(),
                 QFileInfo(*file.second).absoluteFilePath(),
                 inc->getWorkaround(),
@@ -324,12 +313,15 @@ std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_wishes() {
      * Then, show either the most recent one, or a list with a copy button on the right.
      **/
     enlist_launch_action(
+        nullptr,
         "Launcher",
-        target_exec, Workaround::Handler::None, GameInfo::ExeType::Launcher);
+        target_exec, Workaround::Handler::None, GameInfo::ExeType::Launcher
+    );
     for (auto file : *filtered_files) {
         if ( !target_exec.contains(file.second->filesystemFileName().filename().c_str()) ) {
-            auto game =supported_games_impl_v2.at(file.second->filesystemFileName().filename().c_str());
+            auto game =supported_games.at(file.second->filesystemFileName().filename().c_str());
             enlist_launch_action(
+                game,
                 game->getLabel(),
                 QFileInfo(*file.second).absoluteFilePath(),
                 game->getWorkaround(),
@@ -482,9 +474,9 @@ void LauncherCommand::command_create_application(int& argc, char **argv) {
                         true
                     )
                 ) {
-                    if (supported_games_impl_v2.contains(file->filesystemFileName().filename())) {
+                    if (supported_games.contains(file->filesystemFileName().filename())) {
                         filtered_files->push_back(std::make_pair(
-                            supported_games_impl_v2.at(file->filesystemFileName().filename()),
+                            supported_games.at(file->filesystemFileName().filename()),
                             file
                         ));
                     }

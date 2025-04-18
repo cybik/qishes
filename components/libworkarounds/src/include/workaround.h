@@ -1,6 +1,6 @@
 /******************************************************************
  *
- * workarounds.h
+ * workaround.h
  *
  * \brief A brief summary of what this class intends to accomplish.
  *

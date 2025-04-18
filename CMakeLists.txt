@@ -109,7 +109,7 @@ set(
         "${PROJECT_SOURCE_DIR}/data/wishlog.cpp"
         #"${PROJECT_SOURCE_DIR}/data/gameinfo.cpp"
 
-        "${PROJECT_SOURCE_DIR}/util/log.cpp"
+        #"${PROJECT_SOURCE_DIR}/util/log.cpp"
         "${PROJECT_SOURCE_DIR}/util/Discord.cpp"
 
         "${PROJECT_SOURCE_DIR}/commands/DataCommand.cpp"
@@ -127,7 +127,7 @@ set(
         "${PROJECT_SOURCE_DIR}/include/data/wishlog.h"
         #"${PROJECT_SOURCE_DIR}/include/data/gameinfo.h"
 
-        "${PROJECT_SOURCE_DIR}/include/util/log.h"
+        #"${PROJECT_SOURCE_DIR}/include/util/log.h"
         "${PROJECT_SOURCE_DIR}/include/util/Discord.h"
 
         "${PROJECT_SOURCE_DIR}/include/commands/DataCommand.h"
@@ -172,6 +172,7 @@ target_link_libraries(
         gachagames
         httpclient
         qisheslauncher
+        common
         #discord-rpc
         #discord-game-sdk-interface
         QWKCore
@@ -214,6 +215,7 @@ list(
         "QWKCore"
         "QWKWidgets"
         "qmicroz"
+        "common"
         #"quazip"
         "SARibbonBar::SARibbonBar"
 )

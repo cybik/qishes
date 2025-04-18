@@ -8,7 +8,7 @@
  *
  ******************************************************************/
 
-#include "include/ZenlessZoneZero.h"
+#include "ZenlessZoneZero.h"
 
 
 std::string ZenlessZoneZero::getExecutableName() {

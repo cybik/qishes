@@ -1,6 +1,6 @@
 /******************************************************************
  *
- * HonkaiImpact3Rd.cpp
+ * HonkaiImpact3rd.cpp
  *
  * \brief A brief summary of what this class intends to accomplish.
  *
@@ -8,7 +8,7 @@
  *
  ******************************************************************/
 
-#include "include/HonkaiImpact3rd.h"
+#include "HonkaiImpact3rd.h"
 
 std::string HonkaiImpact3rd::getExecutableName() {
     return "BH3.exe";

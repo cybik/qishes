@@ -1,6 +1,6 @@
 /******************************************************************
  *
- * a_game.h
+ * AGame.h
  *
  * \brief A brief summary of what this class intends to accomplish.
  *
@@ -27,6 +27,7 @@ public:
     virtual GameInfo::ExeType getGameType() = 0;
     virtual Workaround::Handler getWorkaround() = 0;
     virtual std::filesystem::path getExecutablePath(std::filesystem::path searchRoot) = 0;
+    virtual void prepareEnvironment() {}
 
     GameInfo getGameInfo();
     // todo: "seek true exe from path" for Wuwa
