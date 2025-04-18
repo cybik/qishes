@@ -45,7 +45,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD 26)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(QT_VER "Qt6")
@@ -107,7 +107,7 @@ set(
         "${PROJECT_SOURCE_DIR}/qmain.cpp"
 
         "${PROJECT_SOURCE_DIR}/data/wishlog.cpp"
-        "${PROJECT_SOURCE_DIR}/data/gameinfo.cpp"
+        #"${PROJECT_SOURCE_DIR}/data/gameinfo.cpp"
 
         "${PROJECT_SOURCE_DIR}/util/log.cpp"
         "${PROJECT_SOURCE_DIR}/util/Discord.cpp"
@@ -125,7 +125,7 @@ set(
         "${PROJECT_SOURCE_DIR}/include/common.h"
 
         "${PROJECT_SOURCE_DIR}/include/data/wishlog.h"
-        "${PROJECT_SOURCE_DIR}/include/data/gameinfo.h"
+        #"${PROJECT_SOURCE_DIR}/include/data/gameinfo.h"
 
         "${PROJECT_SOURCE_DIR}/include/util/log.h"
         "${PROJECT_SOURCE_DIR}/include/util/Discord.h"
@@ -169,6 +169,7 @@ target_link_libraries(
         steamintegration
         vlvproton
         workarounds
+        gachagames
         httpclient
         qisheslauncher
         #discord-rpc
@@ -206,6 +207,7 @@ list(
         "qisheslauncher"
         "vlvproton"
         "workarounds"
+        "gachagames"
         #"discord-rpc"
         #"discord-game-sdk-interface"
         "qadwaitadecorations"

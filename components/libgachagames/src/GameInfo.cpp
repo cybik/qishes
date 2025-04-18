@@ -8,7 +8,7 @@
  *
  ******************************************************************/
 
-#include "../include/data/gameinfo.h"
+#include "include/GameInfo.h"
 
 GameInfo::ExeType GameInfo::get_exetype() {
     return target_exeType;

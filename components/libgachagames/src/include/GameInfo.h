@@ -25,6 +25,9 @@ public:
         // Jadeite
         HonkaiSR,
         Honkai3rd,
+
+        // UnrealEngine - more guesswork needed
+        UnrealEngineMeta,
         WutheringWaves,
 
         /** Unsupported for now */

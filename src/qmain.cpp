@@ -20,6 +20,9 @@
 
 #include <unistd.h>
 
+#include <exception>
+//#include <debugging>
+
 #define DEFINE_COMMAND(COMMNAME) \
     if(command.compare(COMMNAME::CommandSpecifier, Qt::CaseInsensitive) == 0) \
         return [](int argc, char** argv) { \
@@ -48,7 +51,25 @@ int detect_and_divert(int argc, char *argv[]) {
     return -1; // Base case: not being launched under Steam.
 }
 
+bool is_true(std::string env) {
+    auto env_val = std::string(
+        getenv("QAGL_WAIT_FOR_DEBUGGER")?getenv("QAGL_WAIT_FOR_DEBUGGER"):""
+    );
+    std::transform(env_val.begin(), env_val.end(), env.begin(), ::tolower);
+    if (env_val.empty()) return false;
+    for (auto compare_val: std::list<std::string>{"true", "yes", "1"}) {
+        if(env_val.compare(compare_val) == 0) return true;
+    }
+    return false;
+}
+
 int main(int argc, char *argv[]) {
+    /*
+    if (is_true("QAGL_WAIT_FOR_DEBUGGER")) {
+        while (!is_debugger_present()) { /* noop * / }
+    }
+    */
+
     setenv("QTWEBENGINE_ENABLE_LINUX_ACCESSIBILITY", "0", 1);
     setenv("QTWEBENGINE_DISABLE_SANDBOX", "1", 1);
     if(int d_a_d = detect_and_divert(argc, argv); d_a_d >= 0) {

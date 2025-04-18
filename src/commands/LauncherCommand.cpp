@@ -33,10 +33,18 @@
 
 #include <data/wishlog.h>
 
+#include <AGame.h>
+
 const QString LauncherCommand::CommandSpecifier = "launcher";
 
 std::shared_ptr<SettingsData> LauncherCommand::data = nullptr;
 std::unique_ptr<QAGL::Landing> LauncherCommand::landing = nullptr;
+
+LauncherCommand::LauncherCommand() {
+    for (std::shared_ptr<AGame> el: *AGame::getSupportedGames()) {
+        supported_games_impl_v2.insert({el->getExecutableName(), el});
+    }
+}
 
 std::shared_ptr<QAction> LauncherCommand::get_action_exit() {
     action_exit = std::make_shared<QAction>();
@@ -199,6 +207,7 @@ QAGL::QAGL_Game LauncherCommand::convert_exetype(GameInfo::ExeType target_type) 
         case GameInfo::ExeType::Genshin: return QAGL::QAGL_Game::h4ke;
         case GameInfo::ExeType::HonkaiSR: return QAGL::QAGL_Game::hkrpg;
         case GameInfo::ExeType::WutheringWaves: return QAGL::QAGL_Game::wuwa;
+        //case GameInfo::ExeType::WutheringWaves: return QAGL::QAGL_Game::wuwa;
         case GameInfo::ExeType::Honkai3rd: return QAGL::QAGL_Game::bh3;
         case GameInfo::ExeType::Nap: return QAGL::QAGL_Game::nap;
         default: return QAGL::QAGL_Game::GAME_UNKNOWN;
@@ -277,20 +286,22 @@ std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_run() {
         Workaround::Handler::None,
         GameInfo::ExeType::Launcher
     );
+//    for (auto file : *filtered_files) {
     for (auto file : *filtered_files) {
-        if ( !target_exec.contains(file->filesystemFileName().filename().c_str()) ) {
+        if ( !target_exec.contains(file.second->filesystemFileName().filename().c_str()) ) {
             //auto inc = supported_games_impl.at(file->filesystemFileName().filename().c_str());
-            auto inc = supported_games_impl.at(file->filesystemFileName().filename().c_str());
+            //auto inc = supported_games_impl.at(file.second->filesystemFileName().filename().c_str());
+            auto inc = supported_games_impl_v2.at(file.second->filesystemFileName().filename().c_str());
             if (first_game_detected == QAGL::QAGL_Game::GAME_UNKNOWN) {
-                first_game_detected = convert_exetype(inc.get_exetype());
+                first_game_detected = convert_exetype(inc->getGameType());
                 // TODO: refactor fswatcher to run *when launching the target game*
-                create_fs_integration(inc.get_exetype(), file);
+                create_fs_integration(inc->getGameType(), file.second);
             }
             enlist_launch_action(
-                inc.get_label(),
-                QFileInfo(*file).absoluteFilePath(),
-                inc.get_workaround(),
-                inc.get_exetype()
+                inc->getLabel(),
+                QFileInfo(*file.second).absoluteFilePath(),
+                inc->getWorkaround(),
+                inc->getGameType()
             );
         }
     }
@@ -316,12 +327,13 @@ std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_wishes() {
         "Launcher",
         target_exec, Workaround::Handler::None, GameInfo::ExeType::Launcher);
     for (auto file : *filtered_files) {
-        if ( !target_exec.contains(file->filesystemFileName().filename().c_str()) ) {
-            auto game =supported_games_impl.at(file->filesystemFileName().filename().c_str());
+        if ( !target_exec.contains(file.second->filesystemFileName().filename().c_str()) ) {
+            auto game =supported_games_impl_v2.at(file.second->filesystemFileName().filename().c_str());
             enlist_launch_action(
-                game.get_label(),
-                QFileInfo(*file).absoluteFilePath(),
-                game.get_workaround(), game.get_exetype()
+                game->getLabel(),
+                QFileInfo(*file.second).absoluteFilePath(),
+                game->getWorkaround(),
+                game->getGameType()
             );
         }
     }
@@ -441,7 +453,7 @@ void LauncherCommand::launcher() {
 }
 
 void LauncherCommand::command_create_application(int& argc, char **argv) {
-    filtered_files = std::make_shared<std::list<std::shared_ptr<QFile>>>();
+    filtered_files = std::make_shared<std::list<std::pair<std::shared_ptr<AGame>, std::shared_ptr<QFile>>>>();
     // Quirk: Early detection of Steam Startup environment
     if (auto clientlaunch = std::getenv("SteamClientLaunch") ;
         std::getenv("SteamUser") &&
@@ -470,8 +482,11 @@ void LauncherCommand::command_create_application(int& argc, char **argv) {
                         true
                     )
                 ) {
-                    if (supported_games_impl.contains(file->filesystemFileName().filename())) {
-                        filtered_files->push_back(file);
+                    if (supported_games_impl_v2.contains(file->filesystemFileName().filename())) {
+                        filtered_files->push_back(std::make_pair(
+                            supported_games_impl_v2.at(file->filesystemFileName().filename()),
+                            file
+                        ));
                     }
                 }
             }

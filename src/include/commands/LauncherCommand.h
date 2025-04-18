@@ -22,12 +22,13 @@
 #include <SARibbon.h>
 #include <utility>
 
-#include <data/gameinfo.h>
+#include <AGame.h>
+#include <GameInfo.h>
 
 class LauncherCommand : public AbstractCommand {
 public:
     static const QString CommandSpecifier;
-    LauncherCommand() = default;
+    LauncherCommand();// = default;
     ~LauncherCommand() = default;
 
 protected:
@@ -116,20 +117,11 @@ private:
     bool    exec_provided = false;
 
     std::map<int, std::string> target_execs_found;
-    const std::map<std::string, GameInfo> supported_games_impl = {
-        {"launcher.exe", GameInfo("launcher.exe", "Launcher", GameInfo::Launcher, Workaround::Handler::None)},
-        {"GenshinImpact.exe", GameInfo("GenshinImpact.exe", "Genshin Impact", GameInfo::Genshin, Workaround::Handler::None)},
-        {"ZenlessZoneZero.exe", GameInfo("ZenlessZoneZero.exe", "Zenless Zone Zero", GameInfo::Nap, Workaround::Handler::None)},
-        {"BH3.exe", GameInfo("BH3.exe", "Honkai: Impact 3rd", GameInfo::Honkai3rd, Workaround::Handler::None)},
-        {"StarRail.exe", GameInfo("StarRail.exe", "Honkai: Star Rail", GameInfo::HonkaiSR, Workaround::Handler::Jadeite)},
-        // TODO: figure out how to properly identify this one.
-        {"Client-Win64-Shipping.exe", GameInfo("Client-Win64-Shipping.exe", "Wuthering Waves",GameInfo::WutheringWaves, Workaround::Handler::Jadeite)},
-        // Nikki?
-        // Some other anime boobfest?
-        // Bueller?
-    };
+    std::map<std::string, std::shared_ptr<AGame>> supported_games_impl_v2;
     std::list<std::shared_ptr<QAction>> actions_execs;
-    std::shared_ptr<std::list<std::shared_ptr<QFile>>> filtered_files;
+
+    // todo: clean up filtered files, this is unsightly as HELL.
+    std::shared_ptr<std::list<std::pair<std::shared_ptr<AGame>, std::shared_ptr<QFile>>>> filtered_files;
 
     void            enlist_launch_action(std::string incoming, QString executable, Workaround::Handler, GameInfo::ExeType);
 
