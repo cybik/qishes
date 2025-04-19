@@ -80,20 +80,7 @@ void steam_proton::try_run(
     workaround_handler->obtain(get_compat_c_drive());
 
     std::vector<std::string> decorated_executable = workaround_handler->decorate();
-    /*if (!decorated_executable.empty()) {
-        true_target_executable = decorated_executable[0];
-        decorated_executable.erase(decorated_executable.begin());
-        if (!decorated_executable.empty()) {
-            for (auto element: decorated_executable) {
-                lArguments.push_back(element.c_str());
-            }
-        } else {
-            std::cout
-                << termcolor::on_bright_yellow
-                    << "Nothing else to process other than " << true_target_executable
-                << termcolor::reset << std::endl;
-        }
-    }*/
+
     // Process init
     mProcess = std::make_shared<QProcess>();
 
@@ -103,7 +90,6 @@ void steam_proton::try_run(
     mProcess->setProcessEnvironment(*mProcessEnvironment);
 
     // What we cookin'
-    // TODO: execution decorator
     if (!prefix.isEmpty()) {
         lArguments.append(mProton->get_selected_proton()->exec().c_str());
     }
@@ -114,9 +100,6 @@ void steam_proton::try_run(
             : prefix
     ); // proton
 
-    //mProcess->setWorkingDirectory();
-
-    //lArguments.append("waitforexitandrun"); // always this
     lArguments.append("run"); // always this
     if (decorated_executable.empty()) {
         lArguments.append(target_executable.c_str());
@@ -144,9 +127,9 @@ void steam_proton::try_run(
     }
     std::cout
         << termcolor::on_bright_green
-            << "Attempting to launch " << target_executable << std::endl
-            << "\tin prefix " << get_compat_dir_path() << std::endl
-            << (cwd.isEmpty()?"": "\tusing working dir ")
+            << "Attempting to launch " << target_executable  << std::endl
+            << "\t" << "in prefix " << get_compat_dir_path() << std::endl
+            << (cwd.isEmpty()? ""  : "\tusing working dir ")
             << (cwd.isEmpty()?"":cwd.toStdString())
         << termcolor::reset << std::endl;
 

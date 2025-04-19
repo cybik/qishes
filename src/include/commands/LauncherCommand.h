@@ -71,8 +71,7 @@ private:
     QAGL::QAGL_Game get_game();
     QAGL::QAGL_Game first_game_detected = QAGL::QAGL_Game::GAME_UNKNOWN;
     QAGL::QAGL_Game convert_exetype(GameInfo::ExeType target_type);
-    void            create_fs_integration(GameInfo::ExeType, std::shared_ptr<QFile> file);
-    void            create_fs_integration_(GameInfo::ExeType, std::filesystem::path filepath);
+    void            create_fs_integration(GameInfo::ExeType, std::filesystem::path filepath);
 
     // title shit
     std::shared_ptr<SARibbonMainWindow> given;
@@ -100,8 +99,10 @@ private:
     std::unique_ptr<SARibbonPannel> given_panel_game;
     std::unique_ptr<QAction> given_action_game;
 
+    /*
     std::unique_ptr<SARibbonPannel> given_panel_wishes;
     std::unique_ptr<QAction> given_action_wishes;
+    */
 
     std::unique_ptr<SARibbonPannel> given_panel_proton;
     //std::unique_ptr<QAction> given_action_proton;

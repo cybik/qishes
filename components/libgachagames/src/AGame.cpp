@@ -36,6 +36,7 @@ void AGame::setExecutablePath(std::filesystem::path executablePath) {
     this->executablePath = executablePath;
 }
 
+// Determine true exe downstream, if necessary.
 std::filesystem::path AGame::getExecutablePath() {
     return this->executablePath;
 }

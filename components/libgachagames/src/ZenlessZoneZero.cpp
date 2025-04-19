@@ -14,9 +14,11 @@
 std::string ZenlessZoneZero::getExecutableName() {
     return "ZenlessZoneZero.exe";
 }
+
 GameInfo::ExeType ZenlessZoneZero::getGameType() {
     return GameInfo::ExeType::Nap;
 }
+
 std::string ZenlessZoneZero::getLabel() {
     return "Zenless Zone Zero";
 }

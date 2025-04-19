@@ -19,9 +19,11 @@ std::string GenshinImpact::getExecutableName() {
 GameInfo::ExeType GenshinImpact::getGameType() {
     return GameInfo::ExeType::Genshin;
 }
+
 std::string GenshinImpact::getLabel() {
     return "Genshin Impact";
 }
+
 Workaround::Handler GenshinImpact::getWorkaround() {
     return Workaround::Handler::None;
 }

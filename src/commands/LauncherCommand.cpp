@@ -34,6 +34,7 @@
 #include <data/wishlog.h>
 
 #include <AGame.h>
+#include <termcolor/termcolor.hpp>
 
 const QString LauncherCommand::CommandSpecifier = "launcher";
 
@@ -146,7 +147,6 @@ void LauncherCommand::run_the_magic(
 ) {
     std::map<std::string, std::string> envs = {};
     std::list<std::string> arguments = {};
-    std::string true_command = target_exe.toStdString();
 
     if (given_option_mangohud->isChecked()) envs["MANGOHUD"] = "1";
     if (given_option_deckenv->isChecked())  envs["SteamDeck"] = "1";
@@ -156,11 +156,11 @@ void LauncherCommand::run_the_magic(
         arguments.emplace_back("CLOUD_THIRD_PARTY_PC");
     }
     if (given_option_gamemode->isChecked()) {
-        arguments.emplace_front(true_command);
+        arguments.emplace_front(game->getExecutablePath());
     }
     game->prepareEnvironment();
     steam_integration::get_steam_integration_instance()->proton()->try_run(
-        target_exe.toStdString(),
+        game->getExecutablePath(),
         workaround,
         arguments,
         envs,
@@ -203,16 +203,13 @@ QAGL::QAGL_Game LauncherCommand::convert_exetype(GameInfo::ExeType target_type) 
     }
 }
 
-void LauncherCommand::create_fs_integration_(GameInfo::ExeType inc, std::filesystem::path filepath) {
-    create_fs_integration(inc, std::make_shared<QFile>(filepath.c_str()));
-}
 /**
  * TODO:
  *  1. Run this on Game Launch
  *  2. Run this against all caches?
  *  3. Handle cache deletion cases without crashing the overlauncher
  */
-void LauncherCommand::create_fs_integration(GameInfo::ExeType inc, std::shared_ptr<QFile> file) {
+void LauncherCommand::create_fs_integration(GameInfo::ExeType inc, std::filesystem::path filepath) {
     switch(inc) {
         case(GameInfo::ExeType::WutheringWaves): abort(); /* not supported yet but coming. */
         case(GameInfo::ExeType::Genshin):
@@ -223,7 +220,7 @@ void LauncherCommand::create_fs_integration(GameInfo::ExeType inc, std::shared_p
                 // QFileSystemWatcher on all data_2 present.
                 // TODO: make it so each game itself, gets its watcher.
                 auto caches = getGameWishesCache(
-                    QString(file->filesystemFileName().parent_path().c_str())
+                    QString(filepath.parent_path().c_str())
                 );
                 if (caches->empty()) { return; } /* Don't watch since there's nothing. */
 
@@ -262,7 +259,6 @@ void LauncherCommand::create_fs_integration(GameInfo::ExeType inc, std::shared_p
             break;
         }
         default: break;
-        //case(ExeType::WutheringWaves):
     }
     std::cout << "integration set up" << std::endl;
 }
@@ -285,7 +281,7 @@ std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_run() {
             if (first_game_detected == QAGL::QAGL_Game::GAME_UNKNOWN) {
                 first_game_detected = convert_exetype(inc->getGameType());
                 // TODO: refactor fswatcher to run *when launching the target game*
-                create_fs_integration_(inc->getGameType(), file.second);
+                create_fs_integration(inc->getGameType(), file.second);
             }
             enlist_launch_action(
                 inc,

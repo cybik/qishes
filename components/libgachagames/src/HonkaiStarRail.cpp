@@ -13,9 +13,11 @@
 std::string HonkaiStarRail::getExecutableName() {
     return "StarRail.exe";
 }
+
 GameInfo::ExeType HonkaiStarRail::getGameType() {
     return GameInfo::ExeType::HonkaiSR;
 }
+
 std::string HonkaiStarRail::getLabel() {
     return "Honkai: Star Rail";
 }
