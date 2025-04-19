@@ -59,6 +59,7 @@ target_link_libraries(
         Qt6::Xml
         Qt6::Core
         httpclient
+        gachafs
         qmicroz
 )
 

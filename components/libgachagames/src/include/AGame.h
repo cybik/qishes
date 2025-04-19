@@ -12,6 +12,7 @@
 #pragma once
 #include <filesystem>
 #include <list>
+#include <map>
 
 #include "GameInfo.h"
 #include <memory>
@@ -27,8 +28,12 @@ public:
     virtual GameInfo::ExeType getGameType() = 0;
     virtual Workaround::Handler getWorkaround() = 0;
     virtual std::filesystem::path getExecutablePath();
-    virtual void prepareEnvironment() {}
+    virtual std::list<std::string> getArguments();
+    virtual std::map<std::string, std::string> getEnvironment();
     virtual void setExecutablePath(std::filesystem::path executablePath);
+
+    // inline default
+    virtual void prepareEnvironment() {}
 
     GameInfo getGameInfo();
     // todo: "seek true exe from path" for Wuwa

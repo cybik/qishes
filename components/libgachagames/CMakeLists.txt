@@ -22,6 +22,7 @@ set(
     SOURCES_CPP
         "${PROJECT_SOURCE_DIR}/AGame.cpp"
         "${PROJECT_SOURCE_DIR}/GameInfo.cpp"
+        "${PROJECT_SOURCE_DIR}/Launcher.cpp"
         "${PROJECT_SOURCE_DIR}/GenshinImpact.cpp"
         "${PROJECT_SOURCE_DIR}/HonkaiStarRail.cpp"
         "${PROJECT_SOURCE_DIR}/HonkaiImpact3rd.cpp"
@@ -34,6 +35,7 @@ set(
     SOURCES_H
         "${PROJECT_SOURCE_DIR}/include/AGame.h"
         "${PROJECT_SOURCE_DIR}/include/GameInfo.h"
+        "${PROJECT_SOURCE_DIR}/include/Launcher.h"
         "${PROJECT_SOURCE_DIR}/include/GenshinImpact.h"
         "${PROJECT_SOURCE_DIR}/include/HonkaiStarRail.h"
         "${PROJECT_SOURCE_DIR}/include/HonkaiImpact3rd.h"

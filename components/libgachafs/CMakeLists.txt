@@ -54,6 +54,7 @@ target_link_libraries(
         Qt6::Gui
         Qt6::Xml
         Qt6::Core
+        common
 )
 
 target_include_directories(

@@ -16,6 +16,8 @@
 
 #include <egachafs.h>
 
+#include <util/log.h>
+
 int gachafs::seek_depth(int level, const QStringList &stringList, const QFileInfo& fileInfo) {
     /** ** means "any bloody dir" so we don't go deeper */
 
@@ -47,10 +49,15 @@ QStringList gachafs::recursive_seek(const QString& pattern, const QString& dirna
         } else if (stringList.size() == (level + 1) ) {
             // We hit a file. Nice!
             matched_files.append(fileInfo.filePath());
-        } else if (stringList.size() <= 2 && stringList.last().startsWith("*.")) {
-            if (fileInfo.fileName().endsWith(stringList.last().last(stringList.last().size()-1))) {
-                //std::cout << fileInfo.absoluteFilePath().toStdString() << std::endl;
-                matched_files.append(fileInfo.absoluteFilePath()); // absolute f*cking trash wildcard support
+        } else if (stringList.size() <= 2) {
+            if ( stringList.last().startsWith("*.") ) {
+                if (fileInfo.fileName().endsWith(stringList.last().last(stringList.last().size()-1))) {
+                    matched_files.append(fileInfo.absoluteFilePath()); // absolute f*cking trash wildcard support
+                }
+            } else {
+                if (stringList.last().compare(fileInfo.fileName()) == 0) {
+                    matched_files.append(fileInfo.absoluteFilePath()); // absolute f*cking trash wildcard support
+                }
             }
         }
     }
@@ -94,7 +101,6 @@ std::unique_ptr<std::list<std::filesystem::path>> gachafs::getFsFiles(
     QStringList matched_files = recursive_seek(filter, game_path, 0);
     auto stdlist = std::make_unique<std::list<std::filesystem::path>>();
     if(!matched_files.empty()) {
-        //std::cout << "Caches found" << std::endl;
         for(const auto& filepath: matched_files) {
             stdlist->push_back(std::filesystem::path(filepath.toStdString()));
         }

@@ -25,6 +25,8 @@
 #include <AGame.h>
 #include <GameInfo.h>
 
+#include <Launcher.h>
+
 class LauncherCommand : public AbstractCommand {
 public:
     static const QString CommandSpecifier;
@@ -117,6 +119,7 @@ private:
 
     //
     QString target_exec;
+    std::shared_ptr<Launcher> launcher_exec;
     bool    exec_provided = false;
 
     std::map<int, std::string> target_execs_found;

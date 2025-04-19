@@ -156,11 +156,29 @@ void LauncherCommand::run_the_magic(
         arguments.emplace_back("CLOUD_THIRD_PARTY_PC");
     }
     if (given_option_gamemode->isChecked()) {
-        arguments.emplace_front(game->getExecutablePath());
+        arguments.emplace_front(
+            game_type == GameInfo::Launcher
+                ? target_exe.toStdString()
+                : game->getExecutablePath().generic_string()
+        );
     }
-    game->prepareEnvironment();
+    if (game) {
+        for (auto arg: game->getArguments()) {
+            arguments.emplace_back(arg);
+        }
+        for (auto arg: game->getEnvironment()) {
+            envs[arg.first] = arg.second;
+            Log::get_logger()->info(arg.first.c_str());
+            Log::get_logger()->info(arg.second.c_str());
+        }
+        game->prepareEnvironment();
+    }
+
     steam_integration::get_steam_integration_instance()->proton()->try_run(
-        game->getExecutablePath(),
+        (game_type == GameInfo::Launcher
+            ? target_exe.toStdString()
+            : game->getExecutablePath().generic_string()
+        ),
         workaround,
         arguments,
         envs,
@@ -211,7 +229,7 @@ QAGL::QAGL_Game LauncherCommand::convert_exetype(GameInfo::ExeType target_type) 
  */
 void LauncherCommand::create_fs_integration(GameInfo::ExeType inc, std::filesystem::path filepath) {
     switch(inc) {
-        case(GameInfo::ExeType::WutheringWaves): abort(); /* not supported yet but coming. */
+        case(GameInfo::ExeType::WutheringWaves): break; /* not supported yet but coming. */
         case(GameInfo::ExeType::Genshin):
         case(GameInfo::ExeType::HonkaiSR):
         case(GameInfo::ExeType::Nap): {
@@ -269,7 +287,7 @@ std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_run() {
      *  with a background switch
      **/
     enlist_launch_action(
-        nullptr,
+        launcher_exec,
         "Launcher",
         target_exec,
         Workaround::Handler::None,
@@ -445,7 +463,6 @@ void LauncherCommand::launcher() {
 }
 
 void LauncherCommand::command_create_application(int& argc, char **argv) {
-    //filtered_files = std::make_shared<std::list<std::pair<std::shared_ptr<AGame>, std::shared_ptr<QFile>>>>();
     filtered_files_ = std::make_shared<std::list<std::pair<std::shared_ptr<AGame>, std::filesystem::path>>>();
     // Quirk: Early detection of Steam Startup environment
     if (auto clientlaunch = std::getenv("SteamClientLaunch") ;
@@ -466,27 +483,14 @@ void LauncherCommand::command_create_application(int& argc, char **argv) {
         if (qishes_launcher->arguments().at(2).endsWith("exe") ) {
             // all right we have an exe
             target_exec = qishes_launcher->arguments().at(2);
+            if (QString(target_exec).remove("\"").endsWith("launcher.exe")) {
+                (launcher_exec = std::make_shared<Launcher>())->setExecutablePath(
+                    wine::resolve_executable(target_exec.toStdString())
+                );
+            }
             exec_provided = true;
             if (steam_integration::get_steam_integration_instance()->is_steam_env()) {
                 // TODO: fix getFiles, it REALLY ain't seeking right
-                /*
-                for (auto file : *gachafs::getFiles(
-                        "** /*.exe",
-                        QString::fromStdString(wine::resolve_executable_path(target_exec.toStdString())),
-                        true
-                    )
-                ) {
-                    if (supported_games.contains(file->filesystemFileName().filename())) {
-                        supported_games.at(file->filesystemFileName().filename())->setExecutablePath(
-                            file->filesystemFileName()
-                        );
-                        filtered_files->push_back(std::make_pair(
-                            supported_games.at(file->filesystemFileName().filename()),
-                            file
-                        ));
-                    }
-                }
-                */
                 for (auto file : *gachafs::getFsFiles(
                         "**/*.exe",
                         QString::fromStdString(wine::resolve_executable_path(target_exec.toStdString())),

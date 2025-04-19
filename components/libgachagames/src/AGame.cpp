@@ -13,6 +13,7 @@
 // All supported games for now.
 // TODO: a class registry
 #include <WutheringWaves.h>
+#include <Launcher.h>
 #include <GenshinImpact.h>
 #include <HonkaiImpact3rd.h>
 #include <HonkaiStarRail.h>
@@ -20,6 +21,7 @@
 
 std::shared_ptr<std::list<std::shared_ptr<AGame>>> AGame::getSupportedGames() {
     std::shared_ptr<std::list<std::shared_ptr<AGame>>> ret = std::make_shared<std::list<std::shared_ptr<AGame>>>();
+    ret->push_back(std::move(std::make_shared<Launcher>()));
     ret->push_back(std::move(std::make_shared<WutheringWaves>()));
     ret->push_back(std::move(std::make_shared<GenshinImpact>()));
     ret->push_back(std::move(std::make_shared<HonkaiImpact3rd>()));
@@ -40,3 +42,12 @@ void AGame::setExecutablePath(std::filesystem::path executablePath) {
 std::filesystem::path AGame::getExecutablePath() {
     return this->executablePath;
 }
+
+std::list<std::string> AGame::getArguments() {
+    return {};
+}
+
+std::map<std::string, std::string> AGame::getEnvironment() {
+    return { };
+}
+
