@@ -26,10 +26,12 @@ public:
     virtual std::string getLabel() = 0;
     virtual GameInfo::ExeType getGameType() = 0;
     virtual Workaround::Handler getWorkaround() = 0;
-    virtual std::filesystem::path getExecutablePath(std::filesystem::path searchRoot) = 0;
+    virtual std::filesystem::path getExecutablePath();
     virtual void prepareEnvironment() {}
+    virtual void setExecutablePath(std::filesystem::path executablePath);
 
     GameInfo getGameInfo();
     // todo: "seek true exe from path" for Wuwa
     // todo: "get background for launcher ay"
+    std::filesystem::path executablePath;
 };

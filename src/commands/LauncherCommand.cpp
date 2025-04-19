@@ -203,6 +203,9 @@ QAGL::QAGL_Game LauncherCommand::convert_exetype(GameInfo::ExeType target_type) 
     }
 }
 
+void LauncherCommand::create_fs_integration_(GameInfo::ExeType inc, std::filesystem::path filepath) {
+    create_fs_integration(inc, std::make_shared<QFile>(filepath.c_str()));
+}
 /**
  * TODO:
  *  1. Run this on Game Launch
@@ -276,19 +279,18 @@ std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_run() {
         Workaround::Handler::None,
         GameInfo::ExeType::Launcher
     );
-//    for (auto file : *filtered_files) {
-    for (auto file : *filtered_files) {
-        if ( !target_exec.contains(file.second->filesystemFileName().filename().c_str()) ) {
-            auto inc = supported_games.at(file.second->filesystemFileName().filename().c_str());
+    for (auto file : *filtered_files_) {
+        if ( !target_exec.contains(file.second.filename().c_str()) ) {
+            auto inc = supported_games.at(file.second.filename().c_str());
             if (first_game_detected == QAGL::QAGL_Game::GAME_UNKNOWN) {
                 first_game_detected = convert_exetype(inc->getGameType());
                 // TODO: refactor fswatcher to run *when launching the target game*
-                create_fs_integration(inc->getGameType(), file.second);
+                create_fs_integration_(inc->getGameType(), file.second);
             }
             enlist_launch_action(
                 inc,
                 inc->getLabel(),
-                QFileInfo(*file.second).absoluteFilePath(),
+                file.second.c_str(),
                 inc->getWorkaround(),
                 inc->getGameType()
             );
@@ -302,6 +304,7 @@ std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_run() {
 }
 
 // Does nothing yet.
+/*
 std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_wishes() {
     DWishes wishes = DWishes(nullptr);
     wishes.show();
@@ -311,7 +314,7 @@ std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_wishes() {
      * Then, ask the user to select which one to look into.
      * Then, get all the URLs from it.
      * Then, show either the most recent one, or a list with a copy button on the right.
-     **/
+     ** /
     enlist_launch_action(
         nullptr,
         "Launcher",
@@ -335,6 +338,7 @@ std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_wishes() {
     }
     return std::move(panel_run);
 }
+*/
 
 std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_game() {
     given_action_game = std::make_unique<QAction>("Select Launch Executable");
@@ -382,8 +386,8 @@ std::shared_ptr<SARibbonCategory> LauncherCommand::getLauncherCat() {
         given_panel_options = std::move(get_panel_options());
     if (!given_panel_run)
         given_panel_run = std::move(get_panel_run());
-    if (!given_panel_wishes)
-        given_panel_wishes = std::move(get_panel_wishes());
+    //if (!given_panel_wishes)
+    //    given_panel_wishes = std::move(get_panel_wishes());
 
     if (!given_cat) {
         given_cat = std::make_shared<SARibbonCategory>();
@@ -445,7 +449,8 @@ void LauncherCommand::launcher() {
 }
 
 void LauncherCommand::command_create_application(int& argc, char **argv) {
-    filtered_files = std::make_shared<std::list<std::pair<std::shared_ptr<AGame>, std::shared_ptr<QFile>>>>();
+    //filtered_files = std::make_shared<std::list<std::pair<std::shared_ptr<AGame>, std::shared_ptr<QFile>>>>();
+    filtered_files_ = std::make_shared<std::list<std::pair<std::shared_ptr<AGame>, std::filesystem::path>>>();
     // Quirk: Early detection of Steam Startup environment
     if (auto clientlaunch = std::getenv("SteamClientLaunch") ;
         std::getenv("SteamUser") &&
@@ -468,15 +473,36 @@ void LauncherCommand::command_create_application(int& argc, char **argv) {
             exec_provided = true;
             if (steam_integration::get_steam_integration_instance()->is_steam_env()) {
                 // TODO: fix getFiles, it REALLY ain't seeking right
-                for (std::shared_ptr<QFile> file : *gachafs::getFiles(
-                        "**/*.exe",
+                /*
+                for (auto file : *gachafs::getFiles(
+                        "** /*.exe",
                         QString::fromStdString(wine::resolve_executable_path(target_exec.toStdString())),
                         true
                     )
                 ) {
                     if (supported_games.contains(file->filesystemFileName().filename())) {
+                        supported_games.at(file->filesystemFileName().filename())->setExecutablePath(
+                            file->filesystemFileName()
+                        );
                         filtered_files->push_back(std::make_pair(
                             supported_games.at(file->filesystemFileName().filename()),
+                            file
+                        ));
+                    }
+                }
+                */
+                for (auto file : *gachafs::getFsFiles(
+                        "**/*.exe",
+                        QString::fromStdString(wine::resolve_executable_path(target_exec.toStdString())),
+                        true
+                    )
+                ) {
+                    if (supported_games.contains(file.filename())) {
+                        supported_games.at(file.filename())->setExecutablePath(
+                            file
+                        );
+                        filtered_files_->push_back(std::make_pair(
+                            supported_games.at(file.filename()),
                             file
                         ));
                     }
@@ -491,43 +517,57 @@ void LauncherCommand::command_create_application(int& argc, char **argv) {
     QApplication::connect(
         qishes_launcher.get(), &QApplication::aboutToQuit,
         [&]() {
-
-            icon.reset();
-            action_exit.reset();
-            action_launch.reset();
-
-            actions_execs.clear();
-            filtered_files->clear();
-            filtered_files.reset();
-
-            given_option_cloudpc.reset();
-            given_option_deckenv.reset();
-            given_option_obsvk.reset();
-            given_option_mangohud.reset();
-            given_option_discord.reset();
-            given_option_auto_open_wishlog.reset();
-
-            // Panel yeets
-            if (given_proton_combo) given_proton_combo.reset();
-            remove_panel_and_action(socials_cat, std::move(given_panel_socials), nullptr);
-            remove_panel_and_action(given_cat, std::move(given_panel_proton), nullptr);
-            remove_panel_and_action(given_cat, std::move(given_panel_game), std::move(given_action_game));
-            remove_panel_and_action(given_cat, std::move(given_panel_run), std::move(given_action_run));
-            remove_panel_and_action(given_cat, std::move(given_panel_options), nullptr);
-
-            // Ribbon reset
-            given_cat.reset();
-            socials_cat.reset();
-
-            // Landing window yeet
-            landing.reset();
-            tray.reset();
-            tray_menu.reset();
-
-            // last call
-            given.reset();
+            //quit();
         }
     );
+}
+
+void LauncherCommand::quit() {
+    icon.reset();
+    action_exit.reset();
+    action_launch.reset();
+
+    actions_execs.clear();
+
+    if (filtered_files) {
+        filtered_files->clear();
+        filtered_files.reset();
+    }
+    if (filtered_files_) {
+        filtered_files_->clear();
+        filtered_files_.reset();
+    }
+
+    given_option_cloudpc.reset();
+    given_option_deckenv.reset();
+    given_option_obsvk.reset();
+    given_option_mangohud.reset();
+    given_option_discord.reset();
+    given_option_auto_open_wishlog.reset();
+
+    // Panel yeets
+    if (given_proton_combo) given_proton_combo.reset();
+    remove_panel_and_action(socials_cat, std::move(given_panel_socials), nullptr);
+    remove_panel_and_action(given_cat, std::move(given_panel_proton), nullptr);
+    remove_panel_and_action(given_cat, std::move(given_panel_game), std::move(given_action_game));
+    remove_panel_and_action(given_cat, std::move(given_panel_run), std::move(given_action_run));
+    remove_panel_and_action(given_cat, std::move(given_panel_options), nullptr);
+
+    // Ribbon reset
+    given_cat.reset();
+    socials_cat.reset();
+
+    // Landing window yeet
+    landing.reset();
+    tray.reset();
+    tray_menu.reset();
+
+    // last call
+    given.reset();
+}
+
+LauncherCommand::~LauncherCommand() {
+    quit();
 }
 
 void LauncherCommand::remove_panel_and_action(

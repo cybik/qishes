@@ -20,6 +20,9 @@ class gachafs {
 public:
     static std::unique_ptr<std::list<std::shared_ptr<QFile>>> getFiles(
         const QString& filter, const QString& game_path, bool fail_ok = false
+        );
+    static std::unique_ptr<std::list<std::filesystem::path>> getFsFiles(
+        const QString& filter, const QString& game_path, bool fail_ok = false
     );
 protected:
 private:

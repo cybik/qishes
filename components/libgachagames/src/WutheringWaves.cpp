@@ -26,6 +26,6 @@ Workaround::Handler WutheringWaves::getWorkaround() {
     return Workaround::Handler::Jadeite;
 }
 
-std::filesystem::path WutheringWaves::getExecutablePath(std::filesystem::path searchRoot) {
+std::filesystem::path WutheringWaves::getExecutablePath() {
     abort();
 }

@@ -22,7 +22,3 @@ std::string HonkaiImpact3rd::getLabel() {
 Workaround::Handler HonkaiImpact3rd::getWorkaround() {
     return Workaround::Handler::Jadeite;
 }
-
-std::filesystem::path HonkaiImpact3rd::getExecutablePath(std::filesystem::path searchRoot) {
-    abort();
-}

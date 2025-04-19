@@ -31,3 +31,11 @@ std::shared_ptr<std::list<std::shared_ptr<AGame>>> AGame::getSupportedGames() {
 GameInfo AGame::getGameInfo() {
     return GameInfo(getExecutableName(), getLabel(), getGameType(), getWorkaround());
 }
+
+void AGame::setExecutablePath(std::filesystem::path executablePath) {
+    this->executablePath = executablePath;
+}
+
+std::filesystem::path AGame::getExecutablePath() {
+    return this->executablePath;
+}

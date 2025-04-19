@@ -23,7 +23,3 @@ std::string HonkaiStarRail::getLabel() {
 Workaround::Handler HonkaiStarRail::getWorkaround() {
     return Workaround::Handler::Jadeite;
 }
-
-std::filesystem::path HonkaiStarRail::getExecutablePath(std::filesystem::path searchRoot) {
-    abort();
-}

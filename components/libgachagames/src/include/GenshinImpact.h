@@ -20,5 +20,4 @@ public:
     std::string getLabel() override;
     Workaround::Handler getWorkaround() override;
     void prepareEnvironment() override;
-    std::filesystem::path getExecutablePath(std::filesystem::path searchRoot) override;
 };

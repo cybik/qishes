@@ -19,5 +19,5 @@ public:
     GameInfo::ExeType getGameType() override;
     std::string getLabel() override;
     Workaround::Handler getWorkaround() override;
-    std::filesystem::path getExecutablePath(std::filesystem::path searchRoot) override;
+    std::filesystem::path getExecutablePath() override;
 };

@@ -80,3 +80,27 @@ std::unique_ptr<std::list<std::shared_ptr<QFile>>> gachafs::getFiles(
     }
     return std::move(stdlist);
 }
+
+std::unique_ptr<std::list<std::filesystem::path>> gachafs::getFsFiles(
+    const QString& filter, const QString& game_path, bool fail_ok
+) {
+    std::cout << filter.toStdString() << " :: " << game_path.toStdString() << std::endl;
+    /**
+     * Generalized(ish) file finder to get a given file following an ant-styled file filter descriptor.
+     * This is unlikely to be truly functional. It's a bit of a hack.
+     *
+     * https://stackoverflow.com/a/27643657 adapted for deep directory traversal and ant filter approach
+     **/
+    QStringList matched_files = recursive_seek(filter, game_path, 0);
+    auto stdlist = std::make_unique<std::list<std::filesystem::path>>();
+    if(!matched_files.empty()) {
+        //std::cout << "Caches found" << std::endl;
+        for(const auto& filepath: matched_files) {
+            stdlist->push_back(std::filesystem::path(filepath.toStdString()));
+        }
+    }
+    if(stdlist->empty()) {
+        if (!fail_ok) throw EGachaFS_Exception("No files found");
+    }
+    return std::move(stdlist);
+}

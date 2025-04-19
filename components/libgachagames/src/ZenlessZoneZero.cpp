@@ -24,7 +24,3 @@ std::string ZenlessZoneZero::getLabel() {
 Workaround::Handler ZenlessZoneZero::getWorkaround() {
     return Workaround::Handler::None;
 }
-
-std::filesystem::path ZenlessZoneZero::getExecutablePath(std::filesystem::path searchRoot) {
-    abort();
-}

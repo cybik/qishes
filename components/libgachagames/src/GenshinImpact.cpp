@@ -26,9 +26,6 @@ Workaround::Handler GenshinImpact::getWorkaround() {
     return Workaround::Handler::None;
 }
 
-std::filesystem::path GenshinImpact::getExecutablePath(std::filesystem::path searchRoot) {
-    abort();
-}
 
 void GenshinImpact::prepareEnvironment() {
     // Genshin Impact shader mis-generation workaround

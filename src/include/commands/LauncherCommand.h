@@ -29,7 +29,7 @@ class LauncherCommand : public AbstractCommand {
 public:
     static const QString CommandSpecifier;
     LauncherCommand();// = default;
-    ~LauncherCommand() = default;
+    ~LauncherCommand();
 
 protected:
     void launcher();
@@ -38,6 +38,7 @@ protected:
     void command_process_parser() override;
     int  command_run() override;
 private:
+    void quit();
     void run_the_magic(std::shared_ptr<AGame>, const QString& target_exec, Workaround::Handler, GameInfo::ExeType);
 
     std::shared_ptr<QApplication> qishes_launcher = nullptr;
@@ -71,6 +72,7 @@ private:
     QAGL::QAGL_Game first_game_detected = QAGL::QAGL_Game::GAME_UNKNOWN;
     QAGL::QAGL_Game convert_exetype(GameInfo::ExeType target_type);
     void            create_fs_integration(GameInfo::ExeType, std::shared_ptr<QFile> file);
+    void            create_fs_integration_(GameInfo::ExeType, std::filesystem::path filepath);
 
     // title shit
     std::shared_ptr<SARibbonMainWindow> given;
@@ -122,6 +124,7 @@ private:
 
     // todo: clean up filtered files, this is unsightly as HELL.
     std::shared_ptr<std::list<std::pair<std::shared_ptr<AGame>, std::shared_ptr<QFile>>>> filtered_files;
+    std::shared_ptr<std::list<std::pair<std::shared_ptr<AGame>, std::filesystem::path>>> filtered_files_;
 
     void            enlist_launch_action(
             std::shared_ptr<AGame> aGame, std::string incoming, QString executable, Workaround::Handler, GameInfo::ExeType
