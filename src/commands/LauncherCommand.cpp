@@ -29,8 +29,6 @@
 #include <wine.h>
 #include <sys/socket.h>
 
-#include <ui/dwishes.h>
-
 #include <data/wishlog.h>
 
 #include <AGame.h>
@@ -150,19 +148,11 @@ void LauncherCommand::run_the_magic(std::shared_ptr<AGame> game) {
         arguments.emplace_back("and");
     }
     if (given_option_gamemode->isChecked()) {
-        arguments.emplace_front(
-            game->getExecutablePath().generic_string()
-        );
+        arguments.emplace_front( game->getExecutablePath().generic_string() );
     }
     if (game) {
-        for (auto arg: game->getArguments()) {
-            arguments.emplace_back(arg);
-        }
-        for (auto arg: game->getEnvironment()) {
-            envs[arg.first] = arg.second;
-            Log::get_logger()->info(arg.first.c_str());
-            Log::get_logger()->info(arg.second.c_str());
-        }
+        for (auto arg: game->getArguments()) arguments.emplace_back(arg);
+        for (auto arg: game->getEnvironment()) envs[arg.first] = arg.second;
         game->prepareEnvironment();
     }
 
@@ -197,7 +187,6 @@ QAGL::QAGL_Game LauncherCommand::convert_exetype(GameInfo::ExeType target_type) 
         case GameInfo::ExeType::Genshin: return QAGL::QAGL_Game::h4ke;
         case GameInfo::ExeType::HonkaiSR: return QAGL::QAGL_Game::hkrpg;
         case GameInfo::ExeType::WutheringWaves: return QAGL::QAGL_Game::wuwa;
-        //case GameInfo::ExeType::WutheringWaves: return QAGL::QAGL_Game::wuwa;
         case GameInfo::ExeType::Honkai3rd: return QAGL::QAGL_Game::bh3;
         case GameInfo::ExeType::Nap: return QAGL::QAGL_Game::nap;
         default: return QAGL::QAGL_Game::GAME_UNKNOWN;
@@ -218,7 +207,6 @@ void LauncherCommand::create_fs_integration(GameInfo::ExeType inc, std::filesyst
         case(GameInfo::ExeType::Nap): {
             // Initial FS watcher. DO NOT RE-CREATE.
             if (!qfsw) {
-                // QFileSystemWatcher on all data_2 present.
                 // TODO: make it so each game itself, gets its watcher.
                 auto caches = getGameWishesCache(
                     QString(filepath.parent_path().c_str())
