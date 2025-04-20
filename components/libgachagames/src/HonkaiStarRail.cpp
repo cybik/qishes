@@ -25,3 +25,7 @@ std::string HonkaiStarRail::getLabel() {
 Workaround::Handler HonkaiStarRail::getWorkaround() {
     return Workaround::Handler::Jadeite;
 }
+
+void HonkaiStarRail::prefetchBackground() {
+    AHoyoGame::prefetchBackground();
+}

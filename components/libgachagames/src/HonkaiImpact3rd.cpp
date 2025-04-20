@@ -25,3 +25,8 @@ std::string HonkaiImpact3rd::getLabel() {
 Workaround::Handler HonkaiImpact3rd::getWorkaround() {
     return Workaround::Handler::Jadeite;
 }
+
+
+void HonkaiImpact3rd::prefetchBackground() {
+    AHoyoGame::prefetchBackground();
+}

@@ -38,6 +38,20 @@ void AGame::setExecutablePath(std::filesystem::path executablePath) {
     this->executablePath = executablePath;
 }
 
+std::shared_ptr<AGame> AGame::identify(std::string checkName) {
+    std::filesystem::path check_path = checkName;
+    for (std::shared_ptr<AGame> game: *getSupportedGames()) {
+        if (game->getExecutableName().compare(check_path.filename()) == 0) {
+            // Identified and isn't a launcher.
+            if (game->getGameType() != GameInfo::ExeType::Launcher) {
+                game->setExecutablePath(check_path);
+                return game;
+            }
+        }
+    }
+    return nullptr;
+}
+
 // Determine true exe downstream, if necessary.
 std::filesystem::path AGame::getExecutablePath() {
     return this->executablePath;

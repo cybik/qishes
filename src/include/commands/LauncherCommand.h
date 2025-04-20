@@ -41,7 +41,7 @@ protected:
     int  command_run() override;
 private:
     void quit();
-    void run_the_magic(std::shared_ptr<AGame>, const QString& target_exec, Workaround::Handler, GameInfo::ExeType);
+    void run_the_magic(std::shared_ptr<AGame>);
 
     std::shared_ptr<QApplication> qishes_launcher = nullptr;
     std::shared_ptr<QMenu> generate_menu();
@@ -98,8 +98,8 @@ private:
     std::unique_ptr<SARibbonPannel> given_panel_run;
     std::unique_ptr<QAction> given_action_run;
 
-    std::unique_ptr<SARibbonPannel> given_panel_game;
-    std::unique_ptr<QAction> given_action_game;
+    //std::unique_ptr<SARibbonPannel> given_panel_game;
+    //std::unique_ptr<QAction> given_action_game;
 
     /*
     std::unique_ptr<SARibbonPannel> given_panel_wishes;
@@ -118,8 +118,8 @@ private:
     void checkDiscord();
 
     //
-    QString target_exec;
-    std::shared_ptr<Launcher> launcher_exec;
+    //QString target_exec;
+    std::shared_ptr<AGame> main_exec;
     bool    exec_provided = false;
 
     std::map<int, std::string> target_execs_found;
@@ -130,9 +130,7 @@ private:
     std::shared_ptr<std::list<std::pair<std::shared_ptr<AGame>, std::shared_ptr<QFile>>>> filtered_files;
     std::shared_ptr<std::list<std::pair<std::shared_ptr<AGame>, std::filesystem::path>>> filtered_files_;
 
-    void            enlist_launch_action(
-            std::shared_ptr<AGame> aGame, std::string incoming, QString executable, Workaround::Handler, GameInfo::ExeType
-    );
+    void            enlist_launch_action(std::shared_ptr<AGame> aGame);
 
     bool command_offline;
     std::shared_ptr<QCommandLineOption> offline;

@@ -11,13 +11,14 @@
 
 #pragma once
 
-#import "AGame.h"
+#import "AHoyoGame.h"
 
-class GenshinImpact : public AGame {
+class GenshinImpact : public AHoyoGame {
 public:
     std::string getExecutableName() override;
     GameInfo::ExeType getGameType() override;
     std::string getLabel() override;
     Workaround::Handler getWorkaround() override;
     void prepareEnvironment() override;
+    void prefetchBackground() override;
 };

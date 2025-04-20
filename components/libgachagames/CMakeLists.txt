@@ -21,6 +21,8 @@ set(PROJECT_SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/src")
 set(
     SOURCES_CPP
         "${PROJECT_SOURCE_DIR}/AGame.cpp"
+        "${PROJECT_SOURCE_DIR}/AHoyoGame.cpp"
+
         "${PROJECT_SOURCE_DIR}/GameInfo.cpp"
         "${PROJECT_SOURCE_DIR}/Launcher.cpp"
         "${PROJECT_SOURCE_DIR}/GenshinImpact.cpp"
@@ -34,6 +36,8 @@ set(
 set(
     SOURCES_H
         "${PROJECT_SOURCE_DIR}/include/AGame.h"
+        "${PROJECT_SOURCE_DIR}/include/AHoyoGame.h"
+
         "${PROJECT_SOURCE_DIR}/include/GameInfo.h"
         "${PROJECT_SOURCE_DIR}/include/Launcher.h"
         "${PROJECT_SOURCE_DIR}/include/GenshinImpact.h"

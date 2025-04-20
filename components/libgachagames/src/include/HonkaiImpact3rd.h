@@ -11,12 +11,13 @@
 
 #pragma once
 
-#import "AGame.h"
+#import "AHoyoGame.h"
 
-class HonkaiImpact3rd : public AGame {
+class HonkaiImpact3rd : public AHoyoGame {
 public:
     std::string getExecutableName() override;
     GameInfo::ExeType getGameType() override;
     std::string getLabel() override;
     Workaround::Handler getWorkaround() override;
+    void prefetchBackground() override;
 };

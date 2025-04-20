@@ -13,6 +13,7 @@
 
 #include <gachafs.h>
 
+// Known Wuthering Waves Steam GameID
 const std::string GAME_ID = "3513350";
 
 std::string WutheringWaves::getExecutableName() {
@@ -58,5 +59,9 @@ std::filesystem::path WutheringWaves::getExecutablePath() {
         return file;
     }
     // should not reach this, actually.
+    abort();
+}
+
+void WutheringWaves::prefetchBackground() {
     abort();
 }

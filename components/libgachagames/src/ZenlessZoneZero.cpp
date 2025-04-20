@@ -26,3 +26,7 @@ std::string ZenlessZoneZero::getLabel() {
 Workaround::Handler ZenlessZoneZero::getWorkaround() {
     return Workaround::Handler::None;
 }
+
+void ZenlessZoneZero::prefetchBackground() {
+    AHoyoGame::prefetchBackground();
+}

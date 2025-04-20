@@ -139,12 +139,7 @@ std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_proton() {
 }
 
 // TODO: run a reg setter to set [HKEY_CURRENT_USER\Control Panel\International] -> sDecimal to '.' to fix shader issues
-void LauncherCommand::run_the_magic(
-    std::shared_ptr<AGame> game,
-    const QString&      target_exe,
-    Workaround::Handler workaround,
-    GameInfo::ExeType game_type
-) {
+void LauncherCommand::run_the_magic(std::shared_ptr<AGame> game) {
     std::map<std::string, std::string> envs = {};
     std::list<std::string> arguments = {};
 
@@ -152,14 +147,11 @@ void LauncherCommand::run_the_magic(
     if (given_option_deckenv->isChecked())  envs["SteamDeck"] = "1";
     if (given_option_obsvk->isChecked())    envs["OBS_VKCAPTURE"] = "1";
     if (given_option_cloudpc->isChecked()) {
-        arguments.emplace_back("-platform_type");
-        arguments.emplace_back("CLOUD_THIRD_PARTY_PC");
+        arguments.emplace_back("and");
     }
     if (given_option_gamemode->isChecked()) {
         arguments.emplace_front(
-            game_type == GameInfo::Launcher
-                ? target_exe.toStdString()
-                : game->getExecutablePath().generic_string()
+            game->getExecutablePath().generic_string()
         );
     }
     if (game) {
@@ -175,34 +167,25 @@ void LauncherCommand::run_the_magic(
     }
 
     steam_integration::get_steam_integration_instance()->proton()->try_run(
-        (game_type == GameInfo::Launcher
-            ? target_exe.toStdString()
-            : game->getExecutablePath().generic_string()
-        ),
-        workaround,
+        game->getExecutablePath().generic_string(),
+        game->getWorkaround(),
         arguments,
         envs,
         (given_option_gamemode->isChecked()?"gamemoderun":"")
     );
 }
 
-void LauncherCommand::enlist_launch_action(
-    std::shared_ptr<AGame> aGame,
-    std::string         incoming,
-    QString             executable,
-    Workaround::Handler workaround,
-    GameInfo::ExeType   game_type
-) {
-    std::shared_ptr<QAction> action_run = std::make_unique<QAction>(incoming.c_str());
+void LauncherCommand::enlist_launch_action(std::shared_ptr<AGame> aGame) {
+    std::shared_ptr<QAction> action_run = std::make_unique<QAction>( aGame->getLabel().c_str());
     given->connect(
         action_run.get(),
         &QAction::triggered,
-        [&, aGame, executable, workaround, game_type](bool) {
+        [&, aGame](bool) {
             steam_integration::get_steam_integration_instance()->proton()->select(
                 given_proton_combo->currentText().toStdString()
             );
-            if (!executable.isEmpty()) {
-                run_the_magic(aGame, executable, workaround, game_type);
+            if (aGame) {
+                run_the_magic(aGame);
             }
         }
     );
@@ -286,28 +269,16 @@ std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_run() {
      * Always the Launcher, pretty much. Keep this out so I can refactor into game-dedicated panels
      *  with a background switch
      **/
-    enlist_launch_action(
-        launcher_exec,
-        "Launcher",
-        target_exec,
-        Workaround::Handler::None,
-        GameInfo::ExeType::Launcher
-    );
+    enlist_launch_action(main_exec);
     for (auto file : *filtered_files_) {
-        if ( !target_exec.contains(file.second.filename().c_str()) ) {
+        if ( !main_exec->getExecutableName().contains(file.second.filename().c_str()) ) {
             auto inc = supported_games.at(file.second.filename().c_str());
             if (first_game_detected == QAGL::QAGL_Game::GAME_UNKNOWN) {
                 first_game_detected = convert_exetype(inc->getGameType());
                 // TODO: refactor fswatcher to run *when launching the target game*
                 create_fs_integration(inc->getGameType(), file.second);
             }
-            enlist_launch_action(
-                inc,
-                inc->getLabel(),
-                file.second.c_str(),
-                inc->getWorkaround(),
-                inc->getGameType()
-            );
+            enlist_launch_action(inc);
         }
     }
     std::unique_ptr<SARibbonPannel> panel_run = std::make_unique<SARibbonPannel>("Run game");
@@ -354,6 +325,8 @@ std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_wishes() {
 }
 */
 
+// Disable "launcher of all things" for now
+/*
 std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_game() {
     given_action_game = std::make_unique<QAction>("Select Launch Executable");
     given->connect(
@@ -374,6 +347,7 @@ std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_game() {
 
     return std::move(panel_game);
 }
+*/
 
 std::shared_ptr<SARibbonCategory> LauncherCommand::getSocialsCat() {
     if (!given_panel_socials)
@@ -392,8 +366,10 @@ std::shared_ptr<SARibbonCategory> LauncherCommand::getSocialsCat() {
 void LauncherCommand::show_wishes_getter() {}
 
 std::shared_ptr<SARibbonCategory> LauncherCommand::getLauncherCat() {
+    /*
     if (!given_panel_game)
         given_panel_game = std::move(get_panel_game());
+    */
     if (!given_panel_proton)
         given_panel_proton = std::move(get_panel_proton());
     if (!given_panel_options)
@@ -410,8 +386,8 @@ std::shared_ptr<SARibbonCategory> LauncherCommand::getLauncherCat() {
 
         if (exec_provided)
             show_wishes_getter();
-        else
-            given_cat->addPannel(given_panel_game.get()); // launch sig?
+        //else
+        //    given_cat->addPannel(given_panel_game.get()); // launch sig?
         given_cat->addPannel(given_panel_proton.get());
         given_cat->addPannel(given_panel_options.get());
         given_cat->addPannel(given_panel_run.get());
@@ -482,25 +458,27 @@ void LauncherCommand::command_create_application(int& argc, char **argv) {
         // we can assume we have a 3rd argument. Use that as the execution target.
         if (qishes_launcher->arguments().at(2).endsWith("exe") ) {
             // all right we have an exe
-            target_exec = qishes_launcher->arguments().at(2);
-            if (QString(target_exec).remove("\"").endsWith("launcher.exe")) {
-                (launcher_exec = std::make_shared<Launcher>())->setExecutablePath(
-                    wine::resolve_executable(target_exec.toStdString())
-                );
+            auto main_argument = qishes_launcher->arguments().at(2).toStdString();
+            main_exec = AGame::identify(qishes_launcher->arguments().at(2).toStdString());
+            if (!main_exec) {
+                if (main_argument.ends_with("launcher.exe") || main_argument.ends_with("launcher.exe\"")) {
+                    main_exec = std::make_shared<Launcher>();
+                    main_exec->setExecutablePath(
+                        wine::resolve_executable(main_argument)
+                    );
+                }
             }
             exec_provided = true;
             if (steam_integration::get_steam_integration_instance()->is_steam_env()) {
                 // TODO: fix getFiles, it REALLY ain't seeking right
                 for (auto file : *gachafs::getFsFiles(
                         "**/*.exe",
-                        QString::fromStdString(wine::resolve_executable_path(target_exec.toStdString())),
+                        QString::fromStdString(wine::resolve_executable_path(main_argument)),
                         true
                     )
                 ) {
                     if (supported_games.contains(file.filename())) {
-                        supported_games.at(file.filename())->setExecutablePath(
-                            file
-                        );
+                        supported_games.at(file.filename())->setExecutablePath(file);
                         filtered_files_->push_back(std::make_pair(
                             supported_games.at(file.filename()),
                             file
@@ -549,7 +527,7 @@ void LauncherCommand::quit() {
     if (given_proton_combo) given_proton_combo.reset();
     remove_panel_and_action(socials_cat, std::move(given_panel_socials), nullptr);
     remove_panel_and_action(given_cat, std::move(given_panel_proton), nullptr);
-    remove_panel_and_action(given_cat, std::move(given_panel_game), std::move(given_action_game));
+    //remove_panel_and_action(given_cat, std::move(given_panel_game), std::move(given_action_game));
     remove_panel_and_action(given_cat, std::move(given_panel_run), std::move(given_action_run));
     remove_panel_and_action(given_cat, std::move(given_panel_options), nullptr);
 

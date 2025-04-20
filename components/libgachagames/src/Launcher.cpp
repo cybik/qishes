@@ -27,4 +27,3 @@ std::string Launcher::getLabel() {
 Workaround::Handler Launcher::getWorkaround() {
     return Workaround::Handler::None;
 }
-
