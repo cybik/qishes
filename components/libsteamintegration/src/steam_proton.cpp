@@ -27,7 +27,10 @@ std::shared_ptr<steam_proton> steam_proton::getInstance() {
 }
 
 steam_proton::steam_proton() {
-    mProton = vlvproton::getInstance(SteamEnvironment::get_steam_environment_instance()->getSteamBaseFolder());
+    mProton = vlvproton::getInstance(
+        SteamEnvironment::get_steam_environment_instance()->get_all_library_folders()
+        //{SteamEnvironment::get_steam_environment_instance()->getSteamBaseFolder()}
+    );
     //mArguments = std::make_shared<QStringList>();
     mProcessEnvironment = std::make_shared<QProcessEnvironment>(QProcessEnvironment::systemEnvironment());
     try_setup();

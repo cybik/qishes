@@ -18,11 +18,12 @@
 
 std::shared_ptr<vlvproton> vlvproton::mInstance = nullptr;
 
-std::shared_ptr<vlvproton> vlvproton::getInstance(const std::filesystem::path& base_dir) {
+std::shared_ptr<vlvproton> vlvproton::getInstance(std::list<std::filesystem::path> base_dirs) {
     if (!mInstance)
-        mInstance = std::shared_ptr<vlvproton>(new vlvproton(base_dir));
+        mInstance = std::shared_ptr<vlvproton>(new vlvproton(base_dirs));
     return mInstance;
 }
+
 std::shared_ptr<vlvproton> vlvproton::getInstance() {
     if (!mInstance)
         abort(); // literally shouldn't get here. failure by design.
@@ -57,14 +58,21 @@ void vlvproton::identify_installs() {
 }
 
 
-vlvproton::vlvproton(const std::filesystem::path& base_dir) {
-    m_baseDir = base_dir.empty()
-        ? std::filesystem::path(std::getenv("HOME")) / ".steam/root" // this is a backup edge case
-        : base_dir;
-    for (const auto& rootdir : {
-        (m_baseDir / "compatibilitytools.d"), (m_baseDir / "steamapps" / "common")
-    } ) {
-        identify( std::filesystem::directory_iterator(rootdir));
+vlvproton::vlvproton(std::list<std::filesystem::path> base_dirs) {
+    if (base_dirs.empty()) {
+        abort(); // handle this at some point
+    }
+    for (auto path: base_dirs) {
+        for (const auto& rootdir : {
+            (path / "compatibilitytools.d"),
+            (path / "steamapps" / "common")
+        } ) {
+            try {
+                identify( std::filesystem::directory_iterator(rootdir));
+            } catch (std::filesystem::filesystem_error const& ex) {
+                // just skip lol
+            }
+        }
     }
     //identify_installs();
 }

@@ -21,7 +21,7 @@
 
 class vlvproton {
 public:
-    static std::shared_ptr<vlvproton> getInstance(const std::filesystem::path& base_dir);
+    static std::shared_ptr<vlvproton> getInstance(std::list<std::filesystem::path> base_dirs);
     static std::shared_ptr<vlvproton> getInstance();
     std::vector<std::string> get_available_protons();
     void select(const std::string& key);
@@ -31,7 +31,7 @@ public:
 protected:
 private:
     void identify(const std::filesystem::directory_iterator& path);
-    vlvproton(const std::filesystem::path& base_dir);
+    vlvproton(std::list<std::filesystem::path> base_dirs);
     bool                              is_dir_a_proton(std::filesystem::directory_entry);
     static std::shared_ptr<vlvproton> mInstance;
     std::filesystem::path             m_baseDir;

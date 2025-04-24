@@ -21,6 +21,7 @@ set(PROJECT_SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/src")
 set(
     SOURCES_CPP
         "${PROJECT_SOURCE_DIR}/AGame.cpp"
+        "${PROJECT_SOURCE_DIR}/util/HoyoMetadata.cpp"
         "${PROJECT_SOURCE_DIR}/AHoyoGame.cpp"
 
         "${PROJECT_SOURCE_DIR}/GameInfo.cpp"
@@ -37,6 +38,8 @@ set(
     SOURCES_H
         "${PROJECT_SOURCE_DIR}/include/AGame.h"
         "${PROJECT_SOURCE_DIR}/include/AHoyoGame.h"
+        "${PROJECT_SOURCE_DIR}/include/util/HoyoMetadata.h"
+        "${PROJECT_SOURCE_DIR}/include/util/HoyoConstants.h"
 
         "${PROJECT_SOURCE_DIR}/include/GameInfo.h"
         "${PROJECT_SOURCE_DIR}/include/Launcher.h"
@@ -58,6 +61,8 @@ target_link_libraries(
     ${MY_PROJECT_NAME}
     PUBLIC
         common
+        httpclient
+        cppcodec
         workarounds
         steamintegration
 )

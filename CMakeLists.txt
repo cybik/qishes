@@ -179,6 +179,7 @@ target_link_libraries(
         QWKWidgets
         #quazip
         qmicroz
+        ValveFileVDF
 
         SARibbonBar::SARibbonBar
 

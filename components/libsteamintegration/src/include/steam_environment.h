@@ -10,6 +10,7 @@
 #include <memory>
 
 #include <filesystem>
+#include <list>
 
 class SteamEnvironment {
 public:
@@ -18,6 +19,8 @@ public:
     bool                                        is_steam_env();
     bool                                        launched_from_steam_client();
     std::filesystem::path                       getSteamBaseFolder();
+    std::list<std::filesystem::path> get_all_library_folders();
+
 protected:
 private:
     SteamEnvironment() = default;

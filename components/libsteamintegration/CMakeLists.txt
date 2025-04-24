@@ -65,6 +65,7 @@ target_link_libraries(
     PUBLIC
         vlvproton
         workarounds
+        ValveFileVDF
         ${QT_VER}::Core
 )
 

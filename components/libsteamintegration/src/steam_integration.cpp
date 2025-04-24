@@ -48,12 +48,11 @@ bool steam_integration::launched_as_steam_application() {
     //  "cybik is playing with the API", really. This is an unofficial Launcher of Launcher,
     //  and is quite literally worlds apart from any official experience.
     if ( !SteamClient()
-      || !SteamUser()
-      || !SteamUser()->BLoggedOn()
-      || !SteamUserStats()
+            || !SteamUser()
+            || !SteamUser()->BLoggedOn()
+            || !SteamUserStats()
     )
         return false;
-
     return true;
 }
 

@@ -24,6 +24,7 @@ public:
     bool                                        running_under_steam();
     std::shared_ptr<steam_proton>               proton();
     void                                        set_the_dumb_achievement();
+    std::list<std::string> get_all_library_folders();
 protected:
 private:
     /*CTOR*/                                    steam_integration();
