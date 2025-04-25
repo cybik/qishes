@@ -77,6 +77,7 @@ Q_OBJECT
             std::shared_ptr<QMainWindow> given_window = nullptr
         );
         void show(const QApplication &app);
+        void setBackground(std::string);
 
     signals:
         void bg_loaded();

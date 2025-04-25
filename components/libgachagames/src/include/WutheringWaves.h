@@ -23,5 +23,8 @@ public:
     std::map<std::string, std::string> getEnvironment() override;
 
     std::list<std::string> getArguments() override;
-    void prefetchBackground() override;
+    void prepare() override {}
+    std::string getBackground() override { return ""; }
+
+    //void prefetchBackground() override;
 };

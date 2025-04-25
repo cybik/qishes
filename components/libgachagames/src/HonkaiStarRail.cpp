@@ -26,6 +26,6 @@ Workaround::Handler HonkaiStarRail::getWorkaround() {
     return Workaround::Handler::Jadeite;
 }
 
-void HonkaiStarRail::prefetchBackground() {
-    AHoyoGame::prefetchBackground();
+void HonkaiStarRail::prepare() {
+    AHoyoGame::prefetchData(HoyoConstants::loc_bhsr);
 }

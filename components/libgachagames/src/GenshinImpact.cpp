@@ -46,8 +46,9 @@ void GenshinImpact::prepareEnvironment() {
         ""
     );
 }
-void GenshinImpact::prefetchBackground() {
-    AHoyoGame::prefetchBackground();
+
+void GenshinImpact::prepare() {
+    AHoyoGame::prefetchData(HoyoConstants::loc_hk4e);
 }
 
 

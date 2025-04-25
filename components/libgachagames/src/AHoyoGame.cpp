@@ -10,7 +10,12 @@
 
 #include "AHoyoGame.h"
 
-void AHoyoGame::prefetchBackground() {
-    abort();
+#include <iostream>
+
+void AHoyoGame::prefetchData(HoyoConstants::HoyoServerKey key) {
+    mBackground = HoyoMetadata::get_instance()->getBackground(key);
 }
 
+std::string AHoyoGame::getBackground() {
+    return mBackground;
+}

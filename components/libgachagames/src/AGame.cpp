@@ -45,6 +45,7 @@ std::shared_ptr<AGame> AGame::identify(std::string checkName) {
             // Identified and isn't a launcher.
             if (game->getGameType() != GameInfo::ExeType::Launcher) {
                 game->setExecutablePath(check_path);
+                game->prepare();
                 return game;
             }
         }

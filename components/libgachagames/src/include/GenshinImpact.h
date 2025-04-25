@@ -20,5 +20,5 @@ public:
     std::string getLabel() override;
     Workaround::Handler getWorkaround() override;
     void prepareEnvironment() override;
-    void prefetchBackground() override;
+    void prepare() override;
 };

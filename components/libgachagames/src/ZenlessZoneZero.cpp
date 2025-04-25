@@ -27,6 +27,6 @@ Workaround::Handler ZenlessZoneZero::getWorkaround() {
     return Workaround::Handler::None;
 }
 
-void ZenlessZoneZero::prefetchBackground() {
-    AHoyoGame::prefetchBackground();
+void ZenlessZoneZero::prepare() {
+    AHoyoGame::prefetchData(HoyoConstants::loc_nap);
 }

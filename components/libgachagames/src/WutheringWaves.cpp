@@ -62,6 +62,3 @@ std::filesystem::path WutheringWaves::getExecutablePath() {
     abort();
 }
 
-void WutheringWaves::prefetchBackground() {
-    abort();
-}

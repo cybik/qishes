@@ -13,6 +13,18 @@
 
 // Constants for Hoyoverse properties at large.
 namespace HoyoConstants {
+    typedef enum {
+        loc_3rd_gen_glb,    // 5TIVvvcwtM
+        loc_3rd_jp_glb,     // g0mMIvshDb
+        loc_3rd_kr_glb,     // uxB4MC7nzC
+        loc_3rd_en_sea_glb, // bxPTXSET5t
+        loc_3rd_cn_glb,      // wkE5P5WsIf,
+        loc_nap,
+        loc_hk4e,
+        loc_bhsr,
+        //[...]
+        loc_void
+    } HoyoServerKey;
     namespace placeholders {
         namespace uppercase
         {

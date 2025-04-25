@@ -27,11 +27,14 @@ public:
     virtual std::string getLabel() = 0;
     virtual GameInfo::ExeType getGameType() = 0;
     virtual Workaround::Handler getWorkaround() = 0;
-    virtual void prefetchBackground() = 0;
+    //virtual void prefetchBackground(HoyoConstants::HoyoServerKey) = 0;
+    virtual void prepare() = 0;
     virtual std::filesystem::path getExecutablePath();
     virtual std::list<std::string> getArguments();
     virtual std::map<std::string, std::string> getEnvironment();
     virtual void setExecutablePath(std::filesystem::path executablePath);
+
+    virtual std::string getBackground() = 0;
 
     // inline default
     virtual void prepareEnvironment() {}

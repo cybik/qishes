@@ -16,6 +16,14 @@ include_directories(
         "${CMAKE_CURRENT_LIST_DIR}/src/include"
 )
 
+find_package(
+    Qt6
+    REQUIRED
+    COMPONENTS
+        Core
+        Xml
+)
+
 set(PROJECT_SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/src")
 
 set(
@@ -60,6 +68,8 @@ add_library(
 target_link_libraries(
     ${MY_PROJECT_NAME}
     PUBLIC
+        Qt6::Xml
+        Qt6::Core
         common
         httpclient
         cppcodec

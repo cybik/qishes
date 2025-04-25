@@ -12,7 +12,13 @@
 
 #include "AGame.h"
 
+#include "util/HoyoMetadata.h"
+
 class AHoyoGame : public AGame {
 public:
-    void prefetchBackground() override;
+    void prefetchData(HoyoConstants::HoyoServerKey);
+
+    std::string getBackground() override;
+private:
+    std::string  mBackground;
 };

@@ -19,5 +19,5 @@ public:
     GameInfo::ExeType getGameType() override;
     std::string getLabel() override;
     Workaround::Handler getWorkaround() override;
-    void prefetchBackground() override;
+    void prepare() override;
 };

@@ -74,7 +74,8 @@ namespace QAGL {
                             );
                         }
                     );
-                    networkRequest.reset();
+                    if (networkRequest)
+                        networkRequest.reset();
                     everythingHasLoaded();
                 }
             );
@@ -170,7 +171,8 @@ namespace QAGL {
     void Landing::loaded(bool is) {
         std::cout << "loaded flow" << std::endl;
         if(is) {
-            runBackground(this);
+            if (cached_bg_uri.isEmpty()) runBackground(this);
+            else emit bg_loaded();
             // fuck was i doing with this?
             if (networkLink_data == nullptr) {
                 networkLink_data = std::make_shared<QNetworkAccessManager>();
@@ -358,6 +360,10 @@ namespace QAGL {
             everythingHasLoaded();
         else
             launcher_WebEngine->load(QUrl(generate_url()));
+    }
+
+    void Landing::setBackground(std::string bg) {
+        cached_bg_uri = bg.c_str();
     }
 
     QWebEnginePage * LandingWebEnginePage::createWindow(WebWindowType type) {

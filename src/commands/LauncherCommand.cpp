@@ -34,6 +34,8 @@
 #include <AGame.h>
 #include <termcolor/termcolor.hpp>
 
+#include "util/HoyoMetadata.h"
+
 const QString LauncherCommand::CommandSpecifier = "launcher";
 
 std::shared_ptr<SettingsData> LauncherCommand::data = nullptr;
@@ -423,6 +425,9 @@ void LauncherCommand::launcher() {
 
     landing->setOfflineMode(this->command_offline);
 
+    if (main_exec)
+        landing->setBackground(main_exec->getBackground());
+
     landing->show(*qishes_launcher);
 }
 
@@ -441,6 +446,8 @@ void LauncherCommand::command_create_application(int& argc, char **argv) {
     qishes_launcher = std::make_shared<QApplication>(argc, argv);
     QApplication::setApplicationName(APPNAME_GEN(.launcher));
     QApplication::setApplicationVersion(APP_VERSION);
+
+    HoyoMetadata::get_instance()->bootstrap();
 
     if (qishes_launcher->arguments().size() > 2) {
         // we can assume we have a 3rd argument. Use that as the execution target.

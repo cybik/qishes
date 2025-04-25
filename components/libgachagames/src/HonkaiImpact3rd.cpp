@@ -26,7 +26,6 @@ Workaround::Handler HonkaiImpact3rd::getWorkaround() {
     return Workaround::Handler::Jadeite;
 }
 
-
-void HonkaiImpact3rd::prefetchBackground() {
-    AHoyoGame::prefetchBackground();
+void HonkaiImpact3rd::prepare() {
+    AHoyoGame::prefetchData(HoyoConstants::loc_3rd_gen_glb);
 }

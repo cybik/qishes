@@ -56,6 +56,10 @@ void JadeiteImpl::obtain(std::string c_drive_dir) {
         QJsonDocument qjson = QJsonDocument::fromJson(versions);
         version = qjson["jadeite"]["version"].toString();
         http_client->resetGlobalTimeout();
+
+        if (version.isEmpty()) {
+            throw NetworkException(500, "Issue with codeberg?");
+        }
     } catch ( const NetworkException& e ) {
         std::cout
             << termcolor::on_bright_red
@@ -130,6 +134,8 @@ void JadeiteImpl::obtain(std::string c_drive_dir) {
             absolute(jadeite_archive.filesystemFileName()).c_str(),
             jadeite_unpack.absolutePath()
         );
+        jadeite_latest.open(QIODeviceBase::WriteOnly|QIODeviceBase::Truncate);
+        jadeite_latest.write(version.toLocal8Bit());
     } catch ( const NetworkException& e ) {
         std::cout
             << termcolor::on_bright_red
