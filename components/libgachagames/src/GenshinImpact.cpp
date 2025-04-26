@@ -51,4 +51,15 @@ void GenshinImpact::prepare() {
     AHoyoGame::prefetchData(HoyoConstants::loc_hk4e);
 }
 
-
+std::list<std::string> GenshinImpact::processArguments(LaunchOptions lo) {
+    switch (lo) {
+        case LaunchOptions::CloudOverride: {
+            return std::list<std::string> {
+                {
+                    "-platform_type",
+                    "CLOUD_THIRD_PARTY_PC"
+                }
+            };
+        }
+    }
+}

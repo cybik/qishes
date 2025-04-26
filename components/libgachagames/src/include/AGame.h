@@ -21,6 +21,9 @@
 class AGame {
 public:
     virtual ~AGame() = default;
+    typedef enum {
+        CloudOverride
+    } LaunchOptions;
 
     static std::shared_ptr<std::list<std::shared_ptr<AGame>>> getSupportedGames();
     virtual std::string getExecutableName() = 0;
@@ -40,6 +43,8 @@ public:
     virtual void prepareEnvironment() {}
 
     static std::shared_ptr<AGame> identify(std::string checkName);
+
+    virtual std::list<std::string> processArguments(LaunchOptions);
 
     GameInfo getGameInfo();
     // todo: "seek true exe from path" for Wuwa

@@ -147,11 +147,15 @@ void LauncherCommand::run_the_magic(std::shared_ptr<AGame> game) {
     if (given_option_deckenv->isChecked())  envs["SteamDeck"] = "1";
     if (given_option_obsvk->isChecked())    envs["OBS_VKCAPTURE"] = "1";
     if (given_option_cloudpc->isChecked()) {
-        arguments.emplace_back("and");
+        for (auto el: game->processArguments(AGame::LaunchOptions::CloudOverride)) {
+            arguments.emplace_back(el);
+        }
+        //arguments.emplace_back("-platform_type");
+        //arguments.emplace_back("CLOUD_THIRD_PARTY_PC");
     }
-    if (given_option_gamemode->isChecked()) {
+    /*if (given_option_gamemode->isChecked()) {
         arguments.emplace_front( game->getExecutablePath().generic_string() );
-    }
+    }*/
     if (game) {
         for (auto arg: game->getArguments()) arguments.emplace_back(arg);
         for (auto arg: game->getEnvironment()) envs[arg.first] = arg.second;
@@ -403,7 +407,6 @@ void LauncherCommand::launcher() {
     if (!data) data = SettingsData::getSettingsData(); // todo: refresh
     if (!landing) {
         given = std::make_shared<SARibbonMainWindow>();
-
         given->window()->setAttribute(Qt::WA_TranslucentBackground);
         given->ribbonBar()->setStyleSheet("QMenuBar { border-top-left-radius:20px; border-top-right-radius:20px; }");
         given->windowButtonBar()->closeButton()->setStyleSheet("QToolButton {border-top-right-radius:20px;};");

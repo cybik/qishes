@@ -21,4 +21,6 @@ public:
     Workaround::Handler getWorkaround() override;
     void prepareEnvironment() override;
     void prepare() override;
+
+    std::list<std::string> processArguments(LaunchOptions) override;
 };

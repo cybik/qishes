@@ -21,6 +21,7 @@ project(
 set(USE_QT6 ON)
 
 set(LOC_QT_VER "6.7.2")
+#set(LOC_QT_VER "6.9.0")
 
 option(ASAN "Check memory" OFF)
 
@@ -189,10 +190,10 @@ target_link_libraries(
         "${PROJECT_3RDPARTY_DIR}/steamworks/redistributable_bin/linux64/libsteam_api.so"
 )
 
-add_dependencies(
-    ${MY_PROJECT_NAME}
-        qadwaitadecorations
-)
+#add_dependencies(
+#    ${MY_PROJECT_NAME}
+#        #qadwaitadecorations
+#)
 
 add_custom_command(
     TARGET ${PROJECT_NAME}
@@ -210,17 +211,15 @@ list(
         "vlvproton"
         "workarounds"
         "gachagames"
-        #"discord-rpc"
-        #"discord-game-sdk-interface"
-        "qadwaitadecorations"
+#        "qadwaitadecorations"
         "QWKCore"
         "QWKWidgets"
         "qmicroz"
         "common"
-        #"quazip"
         "SARibbonBar::SARibbonBar"
 )
 
+#CopyAllQtLibsFuckThis("${MY_PROJECT_NAME}" "${LOC_QT_VER}")
 AutoconfigureApplicationRpath("${MY_PROJECT_NAME}" "${APP_DEPENDENCIES}")
 
 install(

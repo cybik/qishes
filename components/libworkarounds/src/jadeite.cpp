@@ -30,7 +30,7 @@
 std::vector<std::string> JadeiteImpl::decorate() {
     // TODO: get decorated call to actual game exe
     if (jadeite_active) {
-        return { calculated_jadeite_path.toStdString(), target_executable };
+        return { calculated_jadeite_path.toStdString(), target_executable, "--"};
     }
     return {target_executable};
 }

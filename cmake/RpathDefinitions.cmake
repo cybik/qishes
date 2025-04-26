@@ -85,6 +85,19 @@ macro (RestoreSONames targetproj)
     )
 endmacro()
 
+function(CopyAllQtLibsFuckThis targetproj qtver)
+    set(COPY_TO_FUCK_THIS "${OUTDIR_FINAL_ASSEMBLAGE_BASE}/lib/${CMAKE_LIBRARY_ARCHITECTURE}/")
+    add_custom_command(
+        TARGET
+            ${targetproj}
+        POST_BUILD
+        COMMAND
+            echo "Oh fuck this" &&
+                mkdir -p "${COPY_TO_FUCK_THIS}" &&
+                cp -a "${PROJECT_3RDPARTY_DIR}/qt-precompiled/${qtver}/gcc_64/lib/*.so*" "${COPY_TO_FUCK_THIS}"
+    )
+endfunction()
+
 function(AutoconfigureApplicationRpath targetproj dependencies)
     add_custom_command(
         TARGET

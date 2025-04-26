@@ -63,6 +63,10 @@ std::list<std::string> AGame::getArguments() {
 }
 
 std::map<std::string, std::string> AGame::getEnvironment() {
-    return { };
+    return {};
+}
+
+std::list<std::string> AGame::processArguments(LaunchOptions) {
+    return {};
 }
 

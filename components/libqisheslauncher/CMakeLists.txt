@@ -29,6 +29,8 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_CXX_STANDARD 26)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+set(LOC_QT_VER "6.7.2")
+#set(LOC_QT_VER "6.9.0")
 set(QT_VER "Qt6")
 
 option(ASAN "Check memory" OFF)
