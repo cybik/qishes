@@ -55,10 +55,8 @@ std::list<std::string> GenshinImpact::processArguments(LaunchOptions lo) {
     switch (lo) {
         case LaunchOptions::CloudOverride: {
             return std::list<std::string> {
-                {
-                    "-platform_type",
-                    "CLOUD_THIRD_PARTY_PC"
-                }
+                "-platform_type",
+                "CLOUD_THIRD_PARTY_PC",
             };
         }
     }
