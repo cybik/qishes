@@ -20,7 +20,7 @@ include_directories(
         "${PROJECT_3RDPARTY_DIR}/steamworks/public"
 )
 
-set(LOC_QT_VER "6.7.2")
+#set(LOC_QT_VER "6.7.2")
 #set(LOC_QT_VER "6.9.0")
 find_package(Qt6 REQUIRED COMPONENTS Core)
 qt_standard_project_setup()

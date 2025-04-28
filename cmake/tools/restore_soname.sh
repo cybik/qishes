@@ -18,7 +18,6 @@ if [ ! -f ".processed" ]; then
                 [ -n "$extn" ]
           do
               shortlib=$(basename $shortlib $extn)
-              [ -f "$shortlib" ] && { echo "oof $shortlib"; }
               ln -sf $basename $shortlib
               basename=$shortlib
           done

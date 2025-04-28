@@ -66,10 +66,16 @@ bool is_true(std::string env) {
 int main(int argc, char *argv[]) {
     /*
     if (is_true("QAGL_WAIT_FOR_DEBUGGER")) {
-        while (!is_debugger_present()) { /* noop * / }
+        while (!is_debugger_present()) { / * noop * / }
     }
     */
+    auto identified_path = std::filesystem::canonical("/proc/self/exe");
+    std::cout << (identified_path.parent_path() / "plugins") << std::endl;
 
+    setenv("QT_PLUGIN_PATH",
+        (identified_path.parent_path() / "plugins").c_str(),
+        1
+    );
     setenv("QTWEBENGINE_ENABLE_LINUX_ACCESSIBILITY", "0", 1);
     setenv("QTWEBENGINE_DISABLE_SANDBOX", "1", 1);
     if(int d_a_d = detect_and_divert(argc, argv); d_a_d >= 0) {

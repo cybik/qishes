@@ -9,7 +9,7 @@ set(CMAKE_CXX_STANDARD 26)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(USE_QT6 ON)
-set(LOC_QT_VER "6.7.2")
+#set(LOC_QT_VER "6.7.2")
 #set(LOC_QT_VER "6.9.0")
 find_package(Qt6
     REQUIRED

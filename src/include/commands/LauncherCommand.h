@@ -27,6 +27,8 @@
 
 #include <Launcher.h>
 
+#include "httpclient/httpclient.h"
+
 class LauncherCommand : public AbstractCommand {
 public:
     static const QString CommandSpecifier;
@@ -43,12 +45,13 @@ private:
     void quit();
     void run_the_magic(std::shared_ptr<AGame>);
 
-    std::shared_ptr<QApplication> qishes_launcher = nullptr;
-    std::shared_ptr<QMenu> generate_menu();
+    std::shared_ptr<QApplication>    qishes_launcher = nullptr;
+    std::shared_ptr<HttpClient>                              mHttpClient;
+    std::shared_ptr<QMenu>           generate_menu();
     std::shared_ptr<QSystemTrayIcon> generate_tray_icon();
 
     std::shared_ptr<QAction> get_action_exit();
-    void                     setupRibbonWindow();
+    void                     setupRibbonWindow(std::shared_ptr<SARibbonMainWindow> target);
     std::shared_ptr<QAction> get_action_launcher_test();
     std::shared_ptr<SARibbonCategory> getLauncherCat();
     std::shared_ptr<SARibbonCategory> getSocialsCat();
@@ -77,6 +80,10 @@ private:
 
     // title shit
     std::shared_ptr<SARibbonMainWindow> given;
+    std::shared_ptr<SARibbonMainWindow> given2;
+    void setupAuxiliary();
+
+    std::shared_ptr<QPixmap> loadBackdrop();
 
     std::shared_ptr<SARibbonCategory> given_cat;
     std::shared_ptr<SARibbonCategory> socials_cat;
@@ -120,6 +127,7 @@ private:
     //
     //QString target_exec;
     std::shared_ptr<AGame> main_exec;
+    std::shared_ptr<AGame> first_game;
     bool    exec_provided = false;
 
     std::map<int, std::string> target_execs_found;

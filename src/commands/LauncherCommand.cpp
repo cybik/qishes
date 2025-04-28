@@ -150,12 +150,8 @@ void LauncherCommand::run_the_magic(std::shared_ptr<AGame> game) {
         for (auto el: game->processArguments(AGame::LaunchOptions::CloudOverride)) {
             arguments.emplace_back(el);
         }
-        //arguments.emplace_back("-platform_type");
-        //arguments.emplace_back("CLOUD_THIRD_PARTY_PC");
     }
-    /*if (given_option_gamemode->isChecked()) {
-        arguments.emplace_front( game->getExecutablePath().generic_string() );
-    }*/
+
     if (game) {
         for (auto arg: game->getArguments()) arguments.emplace_back(arg);
         for (auto arg: game->getEnvironment()) envs[arg.first] = arg.second;
@@ -389,19 +385,61 @@ std::shared_ptr<SARibbonCategory> LauncherCommand::getLauncherCat() {
     return given_cat;
 }
 
-void LauncherCommand::setupRibbonWindow() {
+void LauncherCommand::setupRibbonWindow(std::shared_ptr<SARibbonMainWindow> target) {
     // Cool thing?
-    given->setRibbonTheme(SARibbonTheme::RibbonThemeDark2);
-    given->ribbonBar()->setRibbonStyle(SARibbonBar::RibbonStyleCompactThreeRow);
-    given->ribbonBar()->setWindowTitleTextColor(QColorConstants::LightGray);
-    given->ribbonBar()->setMinimumMode(true);
-    given->ribbonBar()->setTabOnTitle(true);
-    given->ribbonBar()->setApplicationButton(nullptr);
-    given->ribbonBar()->addCategoryPage(getLauncherCat().get());
-    given->ribbonBar()->addCategoryPage(getSocialsCat().get());
+    target->setRibbonTheme(SARibbonTheme::RibbonThemeDark2);
+    target->ribbonBar()->setRibbonStyle(SARibbonBar::RibbonStyleCompactThreeRow);
+    target->ribbonBar()->setWindowTitleTextColor(QColorConstants::LightGray);
+    target->ribbonBar()->setMinimumMode(true);
+    target->ribbonBar()->setTabOnTitle(true);
+    target->ribbonBar()->setApplicationButton(nullptr);
+    target->ribbonBar()->addCategoryPage(getLauncherCat().get());
+    target->ribbonBar()->addCategoryPage(getSocialsCat().get());
 
-    given->windowButtonBar()->setupMaximizeButton(false);
+    target->windowButtonBar()->setupMaximizeButton(false);
 }
+
+void LauncherCommand::setupAuxiliary() {
+    given2 = std::make_shared<SARibbonMainWindow>();
+    given2->ribbonBar()->setAttribute(Qt::WA_TranslucentBackground);
+
+    setupRibbonWindow(given2);
+    given2->setRibbonTheme(SARibbonTheme::RibbonThemeWindows7);
+
+    given2->ribbonBar()->setStyleSheet("QMenuBar { border-top-left-radius:20px; border-top-right-radius:20px; }");
+    given2->windowButtonBar()->closeButton()->setStyleSheet("QToolButton {border-top-right-radius:20px;};");
+    given2->setFixedSize(1280, 720);
+
+    auto backdrop = loadBackdrop();
+
+    QPalette back;
+    back.setBrush(QPalette::Window, backdrop->scaledToWidth(1280).scaledToHeight(720));
+    given2->window()->setPalette(back);
+    given2->show();
+}
+
+std::shared_ptr<QPixmap> LauncherCommand::loadBackdrop() {
+    if (!main_exec && !first_game) {
+        return nullptr;
+    }
+    try {
+        std::string targetUrl;
+        if (main_exec->getGameType() == GameInfo::ExeType::Launcher && first_game) {
+            targetUrl = first_game->getBackground();
+        } else if (main_exec->getGameType() != GameInfo::ExeType::Launcher && first_game->getBackground().size()>0) {
+            targetUrl = main_exec->getBackground();
+        }
+        if (targetUrl.size()>0) {
+            std::shared_ptr<QPixmap> ret = std::make_shared<QPixmap>();
+            ret->loadFromData(mHttpClient->get_sync(targetUrl.c_str()));
+            return ret;
+        }
+    } catch (const std::exception &e) {
+        // noop
+    }
+    return nullptr;
+}
+
 
 void LauncherCommand::launcher() {
     if (!data) data = SettingsData::getSettingsData(); // todo: refresh
@@ -411,7 +449,7 @@ void LauncherCommand::launcher() {
         given->ribbonBar()->setStyleSheet("QMenuBar { border-top-left-radius:20px; border-top-right-radius:20px; }");
         given->windowButtonBar()->closeButton()->setStyleSheet("QToolButton {border-top-right-radius:20px;};");
 
-        setupRibbonWindow();
+        setupRibbonWindow(given);
         landing = std::make_unique<QAGL::Landing>(
             *qishes_launcher,
             std::move(data),
@@ -431,7 +469,7 @@ void LauncherCommand::launcher() {
     if (main_exec)
         landing->setBackground(main_exec->getBackground());
 
-    landing->show(*qishes_launcher);
+    //landing->show(*qishes_launcher);
 }
 
 void LauncherCommand::command_create_application(int& argc, char **argv) {
@@ -443,6 +481,9 @@ void LauncherCommand::command_create_application(int& argc, char **argv) {
     ) {
         exit(0);
     }
+
+    mHttpClient = std::make_shared<HttpClient>();
+    mHttpClient->setGlobalTimeout(std::chrono::milliseconds(5000));
 
     QApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
     QApplication::setAttribute(Qt::AA_DontCreateNativeWidgetSiblings); // QWindowKit
@@ -481,6 +522,12 @@ void LauncherCommand::command_create_application(int& argc, char **argv) {
                             supported_games.at(file.filename()),
                             file
                         ));
+                        if (!first_game
+                            && supported_games.at(file.filename())->getGameType() != GameInfo::ExeType::Launcher
+                        ) {
+                            first_game = supported_games.at(file.filename());
+                            first_game->prepare();
+                        }
                     }
                 }
             }
@@ -520,6 +567,7 @@ void LauncherCommand::quit() {
     given_option_mangohud.reset();
     given_option_discord.reset();
     given_option_auto_open_wishlog.reset();
+    given_option_gamemode.reset();
 
     // Panel yeets
     if (given_proton_combo) given_proton_combo.reset();
@@ -602,9 +650,13 @@ int LauncherCommand::command_run() {
     this->discord_report("qishes loading");
     vlvproton::getInstance()->identify_installs();
 
+    qishes_launcher->setWindowIcon(*icon);
+
     generate_tray_icon()->show();
 
     launcher();
+    setupAuxiliary();
+    loadBackdrop();
 
     return qishes_launcher->exec();
 }

@@ -20,8 +20,8 @@ project(
 )
 set(USE_QT6 ON)
 
-set(LOC_QT_VER "6.7.2")
-#set(LOC_QT_VER "6.9.0")
+#set(LOC_QT_VER "6.7.2")
+set(LOC_QT_VER "6.9.0" CACHE STRING "Exported" FORCE)
 
 option(ASAN "Check memory" OFF)
 
@@ -147,7 +147,8 @@ add_executable(
 set_target_properties(
     ${MY_PROJECT_NAME}
     PROPERTIES
-        INSTALL_RPATH "\$ORIGIN/lib/${CMAKE_LIBRARY_ARCHITECTURE}"
+        INSTALL_RPATH "\$ORIGIN/lib"
+#        INSTALL_RPATH "\$ORIGIN/lib/${CMAKE_LIBRARY_ARCHITECTURE}"
 )
 
 target_link_libraries(
@@ -199,7 +200,8 @@ add_custom_command(
     TARGET ${PROJECT_NAME}
     POST_BUILD
     COMMAND
-        mkdir -p "${OUTDIR_FINAL_ASSEMBLAGE_BASE}/lib/${CMAKE_LIBRARY_ARCHITECTURE}/"
+        mkdir -p "${OUTDIR_FINAL_ASSEMBLAGE_BASE}/lib/"
+#        mkdir -p "${OUTDIR_FINAL_ASSEMBLAGE_BASE}/lib/${CMAKE_LIBRARY_ARCHITECTURE}/"
 )
 
 list(
@@ -219,7 +221,13 @@ list(
         "SARibbonBar::SARibbonBar"
 )
 
-#CopyAllQtLibsFuckThis("${MY_PROJECT_NAME}" "${LOC_QT_VER}")
+# if(false)
+CopyAllQtLibsFuckThis("${MY_PROJECT_NAME}" "${LOC_QT_VER}")
+CopyAllQtLibexecFuckThis("${MY_PROJECT_NAME}" "${LOC_QT_VER}")
+CopyAllQtPluginsFuckThis("${MY_PROJECT_NAME}" "${LOC_QT_VER}")
+CopyAllQtResourcesFuckThis("${MY_PROJECT_NAME}" "${LOC_QT_VER}")
+CopyAllQtTranslationsFuckThis("${MY_PROJECT_NAME}" "${LOC_QT_VER}")
+#endif()
 AutoconfigureApplicationRpath("${MY_PROJECT_NAME}" "${APP_DEPENDENCIES}")
 
 install(

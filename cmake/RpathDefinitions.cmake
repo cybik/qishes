@@ -6,7 +6,8 @@ macro(PreconfigureApplicationRpath)
     # Bringing in past experience / knowledge
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
     set(OUTDIR_FINAL_ASSEMBLAGE_BASE "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
-    set(OUTDIR_FINAL_ASSEMBLAGE "${OUTDIR_FINAL_ASSEMBLAGE_BASE}/lib/${CMAKE_LIBRARY_ARCHITECTURE}/")
+    set(OUTDIR_FINAL_ASSEMBLAGE "${OUTDIR_FINAL_ASSEMBLAGE_BASE}/lib/")
+#    set(OUTDIR_FINAL_ASSEMBLAGE "${OUTDIR_FINAL_ASSEMBLAGE_BASE}/lib/${CMAKE_LIBRARY_ARCHITECTURE}/")
 
     # hi https://dev.my-gate.net/2021/08/04/understanding-rpath-with-cmake/
     # use, i.e. don't skip the full RPATH for the build tree
@@ -86,7 +87,8 @@ macro (RestoreSONames targetproj)
 endmacro()
 
 function(CopyAllQtLibsFuckThis targetproj qtver)
-    set(COPY_TO_FUCK_THIS "${OUTDIR_FINAL_ASSEMBLAGE_BASE}/lib/${CMAKE_LIBRARY_ARCHITECTURE}/")
+    #set(COPY_TO_FUCK_THIS "${OUTDIR_FINAL_ASSEMBLAGE_BASE}/lib/${CMAKE_LIBRARY_ARCHITECTURE}/")
+    set(COPY_TO_FUCK_THIS "${OUTDIR_FINAL_ASSEMBLAGE_BASE}/lib/")
     add_custom_command(
         TARGET
             ${targetproj}
@@ -98,13 +100,64 @@ function(CopyAllQtLibsFuckThis targetproj qtver)
     )
 endfunction()
 
+function(CopyAllQtPluginsFuckThis targetproj qtver)
+    set(COPY_TO_PLUGINS_FUCK_THIS "${OUTDIR_FINAL_ASSEMBLAGE_BASE}/plugins/")
+    add_custom_command(
+        TARGET
+            ${targetproj}
+        POST_BUILD
+        COMMAND
+            echo "Oh fuck this 2" &&
+                mkdir -p "${COPY_TO_PLUGINS_FUCK_THIS}" &&
+                cp -a "${PROJECT_3RDPARTY_DIR}/qt-precompiled/${qtver}/gcc_64/plugins/*" "${COPY_TO_PLUGINS_FUCK_THIS}"
+    )
+endfunction()
+
+function(CopyAllQtLibexecFuckThis targetproj qtver)
+    set(COPY_TO_LE_FUCK_THIS "${OUTDIR_FINAL_ASSEMBLAGE_BASE}/libexec/")
+    add_custom_command(
+            TARGET
+            ${targetproj}
+            POST_BUILD
+            COMMAND
+            echo "Oh fuck this 3" &&
+                mkdir -p "${COPY_TO_LE_FUCK_THIS}" &&
+                cp -a "${PROJECT_3RDPARTY_DIR}/qt-precompiled/${qtver}/gcc_64/libexec/*" "${COPY_TO_LE_FUCK_THIS}"
+    )
+endfunction()
+function(CopyAllQtResourcesFuckThis targetproj qtver)
+    set(COPY_TO_RES_FUCK_THIS "${OUTDIR_FINAL_ASSEMBLAGE_BASE}/resources/")
+    add_custom_command(
+        TARGET
+            ${targetproj}
+        POST_BUILD
+        COMMAND
+            echo "Oh fuck this 4" &&
+                mkdir -p "${COPY_TO_RES_FUCK_THIS}" &&
+                cp -a "${PROJECT_3RDPARTY_DIR}/qt-precompiled/${qtver}/gcc_64/resources/*" "${COPY_TO_RES_FUCK_THIS}"
+    )
+endfunction()
+function(CopyAllQtTranslationsFuckThis targetproj qtver)
+    set(COPY_TO_TR_FUCK_THIS "${OUTDIR_FINAL_ASSEMBLAGE_BASE}/translations/")
+    add_custom_command(
+        TARGET
+            ${targetproj}
+        POST_BUILD
+        COMMAND
+            echo "Oh fuck this 5" &&
+                mkdir -p "${COPY_TO_TR_FUCK_THIS}" &&
+                cp -a "${PROJECT_3RDPARTY_DIR}/qt-precompiled/${qtver}/gcc_64/translations/*" "${COPY_TO_TR_FUCK_THIS}"
+    )
+endfunction()
+
 function(AutoconfigureApplicationRpath targetproj dependencies)
     add_custom_command(
         TARGET
             ${targetproj}
         POST_BUILD
         COMMAND
-            mkdir -p "${OUTDIR_FINAL_ASSEMBLAGE_BASE}/lib/${CMAKE_LIBRARY_ARCHITECTURE}/"
+            mkdir -p "${OUTDIR_FINAL_ASSEMBLAGE_BASE}/lib/"
+            #mkdir -p "${OUTDIR_FINAL_ASSEMBLAGE_BASE}/lib/${CMAKE_LIBRARY_ARCHITECTURE}/"
     )
 
     foreach(PROJECT_TO_INSTALL IN ITEMS ${dependencies})
