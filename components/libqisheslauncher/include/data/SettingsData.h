@@ -14,14 +14,15 @@
 
 class SettingsData {
 public:
-    static std::shared_ptr<SettingsData> getSettingsData();
-    explicit SettingsData(std::filesystem::path);
+    static std::shared_ptr<SettingsData> getSettingsData(std::string gameSpecificSettings = "");
+    explicit SettingsData(std::filesystem::path, std::string);
 
     std::shared_ptr<Settings> getSettings();
     void update();
     void saveSettings();
 private:
     SettingsData() = delete;
+    std::string gameSpecific = "";
 
     std::filesystem::path _path;
     std::filesystem::path _file;

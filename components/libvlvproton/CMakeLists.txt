@@ -53,11 +53,12 @@ add_library(
         ${SOURCES_H}
 )
 
-#target_link_libraries(
-#    ${MY_PROJECT_NAME}
-#    PUBLIC
+target_link_libraries(
+    ${MY_PROJECT_NAME}
+    PUBLIC
+        ValveFileVDF
 #        ${QT_VER}::Core
-#)
+)
 
 target_include_directories(
     ${MY_PROJECT_NAME}

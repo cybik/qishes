@@ -46,6 +46,8 @@ public:
 
     virtual std::list<std::string> processArguments(LaunchOptions);
 
+    virtual std::string getGameShorthand();
+
     GameInfo getGameInfo();
     // todo: "seek true exe from path" for Wuwa
     // todo: "get background for launcher ay"

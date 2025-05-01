@@ -20,8 +20,8 @@ project(
 )
 set(USE_QT6 ON)
 
-#set(LOC_QT_VER "6.7.2")
-set(LOC_QT_VER "6.9.0" CACHE STRING "Exported" FORCE)
+set(LOC_QT_VER "6.7.2" CACHE STRING "Exported" FORCE)
+#set(LOC_QT_VER "6.9.0" CACHE STRING "Exported" FORCE)
 
 option(ASAN "Check memory" OFF)
 
@@ -33,7 +33,8 @@ include("${CMAKE_SOURCE_DIR}/cmake/RpathDefinitions.cmake")
 set(CMAKE_PREFIX_PATH "${PROJECT_3RDPARTY_DIR}/qt-precompiled/${LOC_QT_VER}/gcc_64/lib/cmake" CACHE STRING "Exported" FORCE)
 set(Qt6_DIR "${PROJECT_3RDPARTY_DIR}/qt-precompiled/${LOC_QT_VER}/gcc_64/lib/cmake/Qt6" CACHE STRING "Exported" FORCE)
 
-find_package(Qt6
+find_package(
+    Qt6
     REQUIRED
     COMPONENTS
         Core
@@ -222,11 +223,11 @@ list(
 )
 
 # if(false)
-CopyAllQtLibsFuckThis("${MY_PROJECT_NAME}" "${LOC_QT_VER}")
-CopyAllQtLibexecFuckThis("${MY_PROJECT_NAME}" "${LOC_QT_VER}")
-CopyAllQtPluginsFuckThis("${MY_PROJECT_NAME}" "${LOC_QT_VER}")
-CopyAllQtResourcesFuckThis("${MY_PROJECT_NAME}" "${LOC_QT_VER}")
-CopyAllQtTranslationsFuckThis("${MY_PROJECT_NAME}" "${LOC_QT_VER}")
+#CopyAllQtLibsFuckThis("${MY_PROJECT_NAME}" "${LOC_QT_VER}")
+#CopyAllQtLibexecFuckThis("${MY_PROJECT_NAME}" "${LOC_QT_VER}")
+#CopyAllQtPluginsFuckThis("${MY_PROJECT_NAME}" "${LOC_QT_VER}")
+#CopyAllQtResourcesFuckThis("${MY_PROJECT_NAME}" "${LOC_QT_VER}")
+#CopyAllQtTranslationsFuckThis("${MY_PROJECT_NAME}" "${LOC_QT_VER}")
 #endif()
 AutoconfigureApplicationRpath("${MY_PROJECT_NAME}" "${APP_DEPENDENCIES}")
 

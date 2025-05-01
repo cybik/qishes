@@ -27,4 +27,5 @@ public:
     std::string getBackground() override { return ""; }
 
     //void prefetchBackground() override;
+    std::string getGameShorthand() override;
 };

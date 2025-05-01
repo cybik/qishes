@@ -48,5 +48,6 @@ std::unique_ptr<YAML::Node> Settings::generate() {
 
 void Settings::update() {
     // do updates here
+    abort();
 }
 

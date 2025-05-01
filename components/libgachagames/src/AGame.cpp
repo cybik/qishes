@@ -70,3 +70,6 @@ std::list<std::string> AGame::processArguments(LaunchOptions) {
     return {};
 }
 
+std::string AGame::getGameShorthand() {
+    return "";
+}

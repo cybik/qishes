@@ -124,6 +124,13 @@ std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_socials() {
     return std::move(panel_socials);
 }
 
+void LauncherCommand::updateConfig() {
+    if (data && data->getSettings()) {
+        data->getSettings()->runner = given_proton_combo->currentText().toStdString();
+        data->saveSettings();
+    }
+}
+
 std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_proton() {
     given_proton_combo = std::make_unique<SARibbonComboBox>();
     given_proton_combo->setWindowTitle("ProtonSelect");
@@ -134,7 +141,16 @@ std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_proton() {
     panel_proton->setPannelName("Proton Runtime");
     for (auto str: vlvproton::getInstance()->get_available_protons()) {
         given_proton_combo->addItem(QString(str.c_str()));
+        if (data && data->getSettings() && str == data->getSettings()->runner) {
+            given_proton_combo->setCurrentIndex(given_proton_combo->count() - 1);
+        }
     }
+    QObject::connect(
+        given_proton_combo.get(), &QComboBox::currentIndexChanged,
+        [this](int index) {
+            updateConfig();
+        }
+    );
     return std::move(panel_proton);
 }
 
@@ -442,7 +458,9 @@ std::shared_ptr<QPixmap> LauncherCommand::loadBackdrop() {
 
 
 void LauncherCommand::launcher() {
-    if (!data) data = SettingsData::getSettingsData(); // todo: refresh
+    if (!data) {
+        data = SettingsData::getSettingsData(first_game?first_game->getGameShorthand():"");
+    }
     if (!landing) {
         given = std::make_shared<SARibbonMainWindow>();
         given->window()->setAttribute(Qt::WA_TranslucentBackground);
@@ -452,7 +470,7 @@ void LauncherCommand::launcher() {
         setupRibbonWindow(given);
         landing = std::make_unique<QAGL::Landing>(
             *qishes_launcher,
-            std::move(data),
+            data,
             QAGL::QAGL_App_Style::Normal,
             first_game_detected,     // TODO: autoselect "only exe detected"
             QAGL::QAGL_Region::global, // Global
@@ -655,7 +673,11 @@ int LauncherCommand::command_run() {
     generate_tray_icon()->show();
 
     launcher();
-    setupAuxiliary();
+    if (first_game && first_game->getGameType() != GameInfo::ExeType::WutheringWaves) {
+        setupAuxiliary();
+    } else {
+        landing->show(*qishes_launcher);
+    }
     loadBackdrop();
 
     return qishes_launcher->exec();

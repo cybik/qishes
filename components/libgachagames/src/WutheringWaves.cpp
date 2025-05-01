@@ -34,15 +34,16 @@ Workaround::Handler WutheringWaves::getWorkaround() {
 
 std::map<std::string, std::string> WutheringWaves::getEnvironment() {
     return {
-        { "WINEDLLOVERRIDES", "KRSDKExternal.exe=d;winegstreamer=;mfplat=d" },
-        { "PROTON_DISABLE_NVAPI","1" },
-        { "SteamGameId", GAME_ID }
+        //{ "WINEDLLOVERRIDES", "KRSDKExternal.exe=d;winegstreamer=;mfplat=d" },
+        //{ "PROTON_DISABLE_NVAPI","1" },
+        //{ "SteamGameId", GAME_ID }
+        { "WINEDLLOVERRIDES", "KRSDKExternal.exe=d" },
     };
 }
 
 // Proton arg: dx11 for Proton9. 10 is needed for both nVidia and AMD to run DX12 / VKD3D
 std::list<std::string> WutheringWaves::getArguments() {
-    return {"--", "-dx11"}; // -- after Jadeite, then dx11
+    return {"--", "-dx12"}; // -- after Jadeite, then dx11
 }
 
 // export WINEDLLOVERRIDES="KRSDKExternal.exe=d"
@@ -60,5 +61,9 @@ std::filesystem::path WutheringWaves::getExecutablePath() {
     }
     // should not reach this, actually.
     abort();
+}
+
+std::string WutheringWaves::getGameShorthand() {
+    return "wuwa";
 }
 

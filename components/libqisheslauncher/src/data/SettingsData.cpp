@@ -17,7 +17,7 @@
 #include <QStandardPaths>
 
 std::shared_ptr<SettingsData> SettingsData::_settingsData = nullptr;
-std::shared_ptr<SettingsData> SettingsData::getSettingsData() {
+std::shared_ptr<SettingsData> SettingsData::getSettingsData(std::string gameSpecificSettings) {
     if(!_settingsData) {
         QDir config_dir = QDir(
             QStandardPaths::standardLocations(QStandardPaths::GenericDataLocation)[0]
@@ -25,7 +25,7 @@ std::shared_ptr<SettingsData> SettingsData::getSettingsData() {
                 + ANIME_PATH
         );
         if (!config_dir.exists()) create_directories(config_dir.filesystemPath());
-        _settingsData = std::make_shared<SettingsData>(config_dir.filesystemPath());
+        _settingsData = std::make_shared<SettingsData>(config_dir.filesystemPath(), gameSpecificSettings);
     }
     return _settingsData;
 }
@@ -34,8 +34,13 @@ std::shared_ptr<Settings> SettingsData::getSettings() {
     return _settings;
 }
 
-SettingsData::SettingsData(std::filesystem::path path) {
-    _file = ((_path = path).string() + "/config.yaml");
+SettingsData::SettingsData(std::filesystem::path path, std::string extra) {
+    gameSpecific = extra;
+    std::string filename = std::format(
+        "config{}.yaml", (gameSpecific.empty()?"":std::format(".{}", gameSpecific))
+    );
+
+    _file = ((_path = path).string() + "/" + filename);
 
     if(!is_regular_file(_file)) {
         _settings = std::make_shared<Settings>();
