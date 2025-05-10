@@ -11,7 +11,7 @@
 
 #pragma once
 
-#import "AGame.h"
+#include "AGame.h"
 
 class WutheringWaves : public AGame {
 public:
@@ -25,6 +25,8 @@ public:
     std::list<std::string> getArguments() override;
     void prepare() override {}
     std::string getBackground() override { return ""; }
+
+    void registerEffectors() override;
 
     //void prefetchBackground() override;
     std::string getGameShorthand() override;

@@ -11,7 +11,7 @@
 
 #pragma once
 
-#import "AHoyoGame.h"
+#include "AHoyoGame.h"
 
 class ZenlessZoneZero : public AHoyoGame {
 public:

@@ -42,6 +42,9 @@ public:
     // inline default
     virtual void prepareEnvironment() {}
 
+    // option effectors
+    virtual void registerEffectors() {}
+
     static std::shared_ptr<AGame> identify(std::string checkName);
 
     virtual std::list<std::string> processArguments(LaunchOptions);
@@ -52,4 +55,19 @@ public:
     // todo: "seek true exe from path" for Wuwa
     // todo: "get background for launcher ay"
     std::filesystem::path executablePath;
+
+    /*
+     * Option types
+     * - Boolean
+     * - Choice
+     * - Commandline Option
+     *
+     * Effect Types
+     * - Environment Variable
+     * - Command Line Argument
+     *
+     * Callbacks?
+     */
+
+
 };

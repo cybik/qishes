@@ -11,7 +11,7 @@
 
 #pragma once
 
-#import "AGame.h"
+#include "AGame.h"
 
 class Launcher : public AGame {
 public:

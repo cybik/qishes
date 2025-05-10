@@ -32,6 +32,11 @@ Workaround::Handler WutheringWaves::getWorkaround() {
     return Workaround::Handler::Jadeite;
 }
 
+void WutheringWaves::registerEffectors() {
+
+}
+
+
 std::map<std::string, std::string> WutheringWaves::getEnvironment() {
     return {
         //{ "WINEDLLOVERRIDES", "KRSDKExternal.exe=d;winegstreamer=;mfplat=d" },
