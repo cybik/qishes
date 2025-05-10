@@ -36,8 +36,9 @@ std::map<std::string, std::string> WutheringWaves::getEnvironment() {
     return {
         //{ "WINEDLLOVERRIDES", "KRSDKExternal.exe=d;winegstreamer=;mfplat=d" },
         //{ "PROTON_DISABLE_NVAPI","1" },
-        //{ "SteamGameId", GAME_ID }
+        //{ "SteamGameId", GAME_ID },
         { "WINEDLLOVERRIDES", "KRSDKExternal.exe=d" },
+        { "RADV_PERFTEST", "rt" }
     };
 }
 

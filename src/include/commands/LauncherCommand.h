@@ -27,7 +27,7 @@
 
 #include <Launcher.h>
 
-#include "httpclient/httpclient.h"
+#include <httpclient/httpclient.hpp>
 
 class LauncherCommand : public AbstractCommand {
 public:

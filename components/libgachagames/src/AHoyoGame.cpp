@@ -16,6 +16,12 @@ void AHoyoGame::prefetchData(HoyoConstants::HoyoServerKey key) {
     mBackground = HoyoMetadata::get_instance()->getBackground(key);
 }
 
+std::map<std::string, std::string> AHoyoGame::getEnvironment() {
+    return {
+        { "RADV_PERFTEST", "rt" }
+    };
+}
+
 std::string AHoyoGame::getBackground() {
     return mBackground;
 }

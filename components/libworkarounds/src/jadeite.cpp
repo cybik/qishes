@@ -16,7 +16,7 @@
  *    -H 'accept: application/json' | jq ".assets[0].browser_download_url"
  **/
 
-#include <httpclient/httpclient.h>
+#include <httpclient/httpclient.hpp>
 
 #include <QJsonDocument>
 #include <QByteArray>
@@ -41,10 +41,14 @@ const QString jadeite_versions_url = "https://codeberg.org/mkrsym1/jadeite/raw/b
 
 // 	"https://codeberg.org/mkrsym1/jadeite/releases/download/v5.0.1/v5.0.1.zip"
 
+#define GENERATE_USER_AGENT \
+    "QAGL Project/1.0 (POSIX) (cURL) Qt Desktop"
+
 void JadeiteImpl::obtain(std::string c_drive_dir) {
     // TODO: get jadeite from remote, install into drive_c
     if (!http_client) {
         http_client = std::make_shared<HttpClient>();
+        http_client->setGlobalUserAgent(GENERATE_USER_AGENT);
     }
     QDir fs_jadeite_dir = QDir((c_drive_dir + "/Jadeite").c_str());
     fs_jadeite_dir.mkpath((c_drive_dir + "/Jadeite").c_str());

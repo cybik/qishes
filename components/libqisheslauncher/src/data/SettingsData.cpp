@@ -17,7 +17,7 @@
 #include <QStandardPaths>
 
 std::shared_ptr<SettingsData> SettingsData::_settingsData = nullptr;
-std::shared_ptr<SettingsData> SettingsData::getSettingsData(std::string gameSpecificSettings) {
+std::shared_ptr<SettingsData> SettingsData::getSettingsData(const char* gameSpecificSettings) {
     if(!_settingsData) {
         QDir config_dir = QDir(
             QStandardPaths::standardLocations(QStandardPaths::GenericDataLocation)[0]

@@ -102,14 +102,21 @@ int DataCommand::command_run() {
         (*caches).emplace_front(std::make_shared<QFile>(QFileInfo(command_file_path).absoluteFilePath()));
     } else if(!this->command_game_path.isEmpty()) {
         caches = this->getGameWishesCache();
+    } else if (!this->command_known_url.isEmpty()) {
+        this->processing_url = true;
     } else {
         warnHelp(5, "No good source of information was provided to extract a history URL from.");
     }
 
-    if(caches->empty()) warnHelp(3, "No URL was found in the detected cache.");
-    printSingleFilePath((*caches).begin()->get()->fileName());
+    if (!processing_url) {
+        if(caches->empty()) warnHelp(3, "No URL was found in the detected cache.");
+        printSingleFilePath((*caches).begin()->get()->fileName());
+        started();
+    } else {
+        url_wishlog = std::move(std::make_unique<WishLog>(this->command_known_url, WishLog::Data));
+        run_data_sync(*url_wishlog);
+    }
 
-    started();
     return 0;
 }
 

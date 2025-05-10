@@ -13,7 +13,7 @@
 
 #include <memory>
 
-#include <httpclient/httpclient.h>
+#include <httpclient/httpclient.hpp>
 #include "HoyoConstants.h"
 
 class HoyoMetadata {

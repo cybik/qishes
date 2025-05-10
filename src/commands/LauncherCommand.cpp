@@ -428,9 +428,11 @@ void LauncherCommand::setupAuxiliary() {
 
     auto backdrop = loadBackdrop();
 
-    QPalette back;
-    back.setBrush(QPalette::Window, backdrop->scaledToWidth(1280).scaledToHeight(720));
-    given2->window()->setPalette(back);
+    if (backdrop) {
+        QPalette back;
+        back.setBrush(QPalette::Window, backdrop->scaledToWidth(1280).scaledToHeight(720));
+        given2->window()->setPalette(back);
+    }
     given2->show();
 }
 
@@ -459,7 +461,7 @@ std::shared_ptr<QPixmap> LauncherCommand::loadBackdrop() {
 
 void LauncherCommand::launcher() {
     if (!data) {
-        data = SettingsData::getSettingsData(first_game?first_game->getGameShorthand():"");
+        data = SettingsData::getSettingsData(first_game?first_game->getGameShorthand().c_str():"");
     }
     if (!landing) {
         given = std::make_shared<SARibbonMainWindow>();
@@ -673,7 +675,7 @@ int LauncherCommand::command_run() {
     generate_tray_icon()->show();
 
     launcher();
-    if (first_game && first_game->getGameType() != GameInfo::ExeType::WutheringWaves) {
+    if (first_game) {
         setupAuxiliary();
     } else {
         landing->show(*qishes_launcher);

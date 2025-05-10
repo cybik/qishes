@@ -19,7 +19,7 @@
 #include <tuple>
 
 #include <QJsonDocument>
-#include <httpclient/httpclient.h>
+#include <httpclient/httpclient.hpp>
 
 
 class DataCommand : public QObject, public AbstractCommand {
@@ -43,6 +43,8 @@ private:
     QString     command_known_url;
     bool        command_all_targets;
     bool        command_verbose;
+    bool         processing_url = false;
+    std::unique_ptr<WishLog> url_wishlog;
 
     void run_data_sync(WishLog& log);
     void start_sync_process(WishLog& log, QByteArray result);

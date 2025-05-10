@@ -13,7 +13,7 @@ set(PROJECT_HOMEPAGE_URL https://discord.com/developers/docs/game-sdk/)
 ## Global variables
 
 # Request C++-11
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 file(GLOB

@@ -14,7 +14,7 @@
 
 class SettingsData {
 public:
-    static std::shared_ptr<SettingsData> getSettingsData(std::string gameSpecificSettings = "");
+    static std::shared_ptr<SettingsData> getSettingsData(const char*);
     explicit SettingsData(std::filesystem::path, std::string);
 
     std::shared_ptr<Settings> getSettings();

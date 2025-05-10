@@ -18,6 +18,8 @@ class AHoyoGame : public AGame {
 public:
     void prefetchData(HoyoConstants::HoyoServerKey);
 
+    std::map<std::string, std::string> getEnvironment() override;
+
     std::string getBackground() override;
 private:
     std::string  mBackground;

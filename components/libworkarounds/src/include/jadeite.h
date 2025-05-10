@@ -18,7 +18,7 @@
 
 #include "workaround.h"
 
-#include <httpclient/httpclient.h>
+#include <httpclient/httpclient.hpp>
 
 class JadeiteImpl : public AWorkaround {
 public:
