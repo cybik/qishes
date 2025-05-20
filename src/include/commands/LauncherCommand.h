@@ -29,6 +29,8 @@
 
 #include <httpclient/httpclient.hpp>
 
+#include <commands/controls/LauncherControlCb.h>
+
 class LauncherCommand : public AbstractCommand {
 public:
     static const QString CommandSpecifier;
@@ -67,6 +69,7 @@ private:
     static std::unique_ptr<QAGL::Landing> landing;
 
     std::unique_ptr<SARibbonPannel> get_panel_run();
+    std::unique_ptr<SARibbonPannel> get_panel_wine();
     std::unique_ptr<SARibbonPannel> get_panel_game();
     std::unique_ptr<SARibbonPannel> get_panel_wishes();
     std::unique_ptr<SARibbonPannel> get_panel_proton();
@@ -91,10 +94,13 @@ private:
     std::shared_ptr<SARibbonCategory> socials_cat;
 
     std::unique_ptr<SARibbonPannel> given_panel_options;
-    std::unique_ptr<SARibbonCheckBox> given_option_obsvk;
-    std::unique_ptr<SARibbonCheckBox> given_option_deckenv;
+
+    std::unique_ptr<LauncherControlCb> given_option_mangohud_;
+    std::unique_ptr<LauncherControlCb> given_option_obsvk_;
+    std::unique_ptr<LauncherControlCb> given_option_deckenv_;
+    std::unique_ptr<LauncherControlCb> given_option_wayland;
+
     std::unique_ptr<SARibbonCheckBox> given_option_cloudpc;
-    std::unique_ptr<SARibbonCheckBox> given_option_mangohud;
     std::unique_ptr<SARibbonCheckBox> given_option_gamemode;
     std::unique_ptr<SARibbonCheckBox> given_option_auto_open_wishlog;
 
@@ -106,6 +112,8 @@ private:
 
     std::unique_ptr<SARibbonPannel> given_panel_run;
     std::unique_ptr<QAction> given_action_run;
+
+    std::unique_ptr<SARibbonPannel> given_panel_wine;
 
     //std::unique_ptr<SARibbonPannel> given_panel_game;
     //std::unique_ptr<QAction> given_action_game;
@@ -134,13 +142,15 @@ private:
 
     std::map<int, std::string> target_execs_found;
     std::map<std::string, std::shared_ptr<AGame>> supported_games;
-    std::list<std::shared_ptr<QAction>> actions_execs;
+    std::list<std::shared_ptr<QAction>> actions_execs; // ?? custom and game?
+    std::list<std::shared_ptr<QAction>> wine_execs; // ?? custom and game?
 
     // todo: clean up filtered files, this is unsightly as HELL.
     std::shared_ptr<std::list<std::pair<std::shared_ptr<AGame>, std::shared_ptr<QFile>>>> filtered_files;
     std::shared_ptr<std::list<std::pair<std::shared_ptr<AGame>, std::filesystem::path>>> filtered_files_;
 
     void            enlist_launch_action(std::shared_ptr<AGame> aGame);
+    void            enlist_custom_action(QString, QString, std::list<std::shared_ptr<QAction>>*);
 
     bool command_offline;
     std::shared_ptr<QCommandLineOption> offline;

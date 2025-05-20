@@ -117,8 +117,10 @@ set(
         "${PROJECT_SOURCE_DIR}/commands/DataCommand.cpp"
         "${PROJECT_SOURCE_DIR}/commands/DaemonCommand.cpp"
         "${PROJECT_SOURCE_DIR}/commands/HistoryCommand.cpp"
-        "${PROJECT_SOURCE_DIR}/commands/LauncherCommand.cpp"
         "${PROJECT_SOURCE_DIR}/commands/AbstractCommand.cpp"
+
+        "${PROJECT_SOURCE_DIR}/commands/LauncherCommand.cpp"
+        "${PROJECT_SOURCE_DIR}/commands/controls/LauncherControlCb.cpp"
 )
 
 # For AutoMOC
@@ -135,8 +137,10 @@ set(
         "${PROJECT_SOURCE_DIR}/include/commands/DataCommand.h"
         "${PROJECT_SOURCE_DIR}/include/commands/AbstractCommand.h"
         "${PROJECT_SOURCE_DIR}/include/commands/HistoryCommand.h"
-        "${PROJECT_SOURCE_DIR}/include/commands/LauncherCommand.h"
         "${PROJECT_SOURCE_DIR}/include/commands/DaemonCommand.h"
+
+        "${PROJECT_SOURCE_DIR}/include/commands/LauncherCommand.h"
+        "${PROJECT_SOURCE_DIR}/include/commands/controls/LauncherControlCb.h"
 )
 
 add_executable(

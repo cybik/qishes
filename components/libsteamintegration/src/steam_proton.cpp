@@ -121,9 +121,13 @@ void steam_proton::try_run(
         cwd = cwd.sliced(0, cwd.lastIndexOf('/'));
         std::cout << "Using windows-style guesswork :: " << cwd.toStdString() << std::endl;
     } else {
-        // unix style. Don't set working dir for now since idgaf yet
-        cwd = QString::fromStdString(target_executable.substr(0, target_executable.find_last_of("/")));
-        std::cout << "Using unix-style guesswork :: " << cwd.toStdString() << std::endl;
+        if (target_executable.contains("/")) {
+            // unix style. Don't set working dir for now since idgaf yet
+            cwd = QString::fromStdString(target_executable.substr(0, target_executable.find_last_of("/")));
+            std::cout << "Using unix-style guesswork :: " << cwd.toStdString() << std::endl;
+        } else {
+            std::cout << "No cwd to guess." << std::endl;
+        }
     }
     if (target_executable.starts_with("reg")) {
         cwd = ""; // Special case: reg workaround.

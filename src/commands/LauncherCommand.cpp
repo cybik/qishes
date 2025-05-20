@@ -70,32 +70,42 @@ std::unique_ptr<SARibbonCheckBox> LauncherCommand::get_checkbox(QString title, Q
 }
 
 std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_options() {
-    given_option_mangohud = std::move(get_checkbox(
-        "MangoHUD", "cbMango", true)
+    /*
+     * Envs
+     */
+    given_option_mangohud_ = std::move(LauncherControlCb::make_me(
+        "MangoHUD", "lcbMango", true, "1", "0")
     );
-    given_option_deckenv = std::move(get_checkbox(
-        "Fakeout Deck", "cbDeckMode", true)
+    given_option_deckenv_ = std::move(LauncherControlCb::make_me(
+        "Fakeout Deck", "lcbDeckMode", true, "1", "0")
     );
-    given_option_obsvk = std::move(get_checkbox(
-        "OBS VkCapture Mode", "cbVkCap", true)
+    given_option_obsvk_ = std::move(LauncherControlCb::make_me(
+        "OBS VkCapture Mode", "lcbVkCap", true, "1", "0")
     );
+    given_option_wayland = std::move(LauncherControlCb::make_me(
+        "Use Wayland through Proton", "lcbWayland", false, "1", "0")
+    );
+    // Args
     given_option_cloudpc = std::move(get_checkbox(
         "Cloud Masquerade", "cbImpersonateCloud", true)
     );
+    // Wrap
     given_option_gamemode = std::move(get_checkbox(
         "GameModeRun", "cbGameMode", true)
-        );
+    );
+    //Actions
     given_option_auto_open_wishlog = std::move(get_checkbox(
         "Auto-Open new Wish Log Entries", "cbWishlog", true)
     );
 
     std::unique_ptr<SARibbonPannel> panel_opt = std::make_unique<SARibbonPannel>();
-    panel_opt->addSmallWidget(given_option_mangohud.get());
-    panel_opt->addSmallWidget(given_option_deckenv.get());
-    panel_opt->addSmallWidget(given_option_obsvk.get());
+    panel_opt->addSmallWidget(given_option_mangohud_->getCbControl());
+    panel_opt->addSmallWidget(given_option_deckenv_->getCbControl());
+    panel_opt->addSmallWidget(given_option_obsvk_->getCbControl());
     panel_opt->addSmallWidget(given_option_cloudpc.get());
     panel_opt->addSmallWidget(given_option_gamemode.get());
     panel_opt->addSmallWidget(given_option_auto_open_wishlog.get());
+    panel_opt->addSmallWidget(given_option_wayland->getCbControl());
     panel_opt->setPannelName("Options");
     return std::move(panel_opt);
 }
@@ -159,9 +169,16 @@ void LauncherCommand::run_the_magic(std::shared_ptr<AGame> game) {
     std::map<std::string, std::string> envs = {};
     std::list<std::string> arguments = {};
 
-    if (given_option_mangohud->isChecked()) envs["MANGOHUD"] = "1";
-    if (given_option_deckenv->isChecked())  envs["SteamDeck"] = "1";
-    if (given_option_obsvk->isChecked())    envs["OBS_VKCAPTURE"] = "1";
+    if (given_option_mangohud_) { envs["MANGOHUD"] = given_option_mangohud_->getValue(); }
+    if (given_option_deckenv_) { envs["SteamDeck"] = given_option_deckenv_->getValue(); }
+    if (given_option_obsvk_) { envs["OBS_VKCAPTURE"] = given_option_obsvk_->getValue(); }
+    if (given_option_wayland) {
+        if (given_option_wayland->isChecked()) {
+            envs["PROTON_ENABLE_WAYLAND"] = given_option_wayland->getValue();
+        } else {
+            envs.erase("PROTON_ENABLE_WAYLAND");
+        }
+    }
     if (given_option_cloudpc->isChecked()) {
         for (auto el: game->processArguments(AGame::LaunchOptions::CloudOverride)) {
             arguments.emplace_back(el);
@@ -199,6 +216,29 @@ void LauncherCommand::enlist_launch_action(std::shared_ptr<AGame> aGame) {
     );
     actions_execs.emplace_back(action_run);
 }
+
+void LauncherCommand::enlist_custom_action(
+    QString label, QString run_exec, std::list<std::shared_ptr<QAction>>* acts
+) {
+    if (!run_exec.isEmpty()) {
+        std::shared_ptr<QAction> action_run = std::make_unique<QAction>( label );
+        given->connect(
+            action_run.get(),
+            &QAction::triggered,
+            [=](bool) {
+                steam_integration::get_steam_integration_instance()->proton()->select(
+                    given_proton_combo->currentText().toStdString()
+                );
+                steam_integration::get_steam_integration_instance()->proton()->try_run(
+                    run_exec.toStdString(),
+                    Workaround::None
+                );
+            }
+        );
+        acts->emplace_back(action_run);
+    }
+}
+
 
 QAGL::QAGL_Game LauncherCommand::convert_exetype(GameInfo::ExeType target_type) {
     switch (target_type) {
@@ -293,6 +333,18 @@ std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_run() {
     }
     return std::move(panel_run);
 }
+std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_wine() {
+    /**
+     * Always the Launcher, pretty much. Keep this out so I can refactor into game-dedicated panels
+     *  with a background switch
+     **/
+    enlist_custom_action("WineCFG", "winecfg", &wine_execs);
+    std::unique_ptr<SARibbonPannel> panel_wine = std::make_unique<SARibbonPannel>("Wine Tools");
+    for (std::shared_ptr<QAction> action: wine_execs) {
+        panel_wine->addLargeAction(action.get());
+    }
+    return std::move(panel_wine);
+}
 
 // Does nothing yet.
 /*
@@ -300,7 +352,7 @@ std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_wishes() {
     DWishes wishes = DWishes(nullptr);
     wishes.show();
     return nullptr;
-    /**
+    / **
      * First, get the data_2 files.
      * Then, ask the user to select which one to look into.
      * Then, get all the URLs from it.
@@ -382,6 +434,8 @@ std::shared_ptr<SARibbonCategory> LauncherCommand::getLauncherCat() {
         given_panel_options = std::move(get_panel_options());
     if (!given_panel_run)
         given_panel_run = std::move(get_panel_run());
+    if (!given_panel_wine)
+        given_panel_wine = std::move(get_panel_wine());
     //if (!given_panel_wishes)
     //    given_panel_wishes = std::move(get_panel_wishes());
 
@@ -397,6 +451,7 @@ std::shared_ptr<SARibbonCategory> LauncherCommand::getLauncherCat() {
         given_cat->addPannel(given_panel_proton.get());
         given_cat->addPannel(given_panel_options.get());
         given_cat->addPannel(given_panel_run.get());
+        given_cat->addPannel(given_panel_wine.get());
     }
     return given_cat;
 }
@@ -571,6 +626,7 @@ void LauncherCommand::quit() {
     action_launch.reset();
 
     actions_execs.clear();
+    wine_execs.clear();
 
     if (filtered_files) {
         filtered_files->clear();
@@ -582,9 +638,6 @@ void LauncherCommand::quit() {
     }
 
     given_option_cloudpc.reset();
-    given_option_deckenv.reset();
-    given_option_obsvk.reset();
-    given_option_mangohud.reset();
     given_option_discord.reset();
     given_option_auto_open_wishlog.reset();
     given_option_gamemode.reset();
@@ -595,6 +648,7 @@ void LauncherCommand::quit() {
     remove_panel_and_action(given_cat, std::move(given_panel_proton), nullptr);
     //remove_panel_and_action(given_cat, std::move(given_panel_game), std::move(given_action_game));
     remove_panel_and_action(given_cat, std::move(given_panel_run), std::move(given_action_run));
+    remove_panel_and_action(given_cat, std::move(given_panel_wine), nullptr);
     remove_panel_and_action(given_cat, std::move(given_panel_options), nullptr);
 
     // Ribbon reset
