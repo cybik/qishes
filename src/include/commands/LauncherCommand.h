@@ -95,9 +95,9 @@ private:
 
     std::unique_ptr<SARibbonPannel> given_panel_options;
 
-    std::unique_ptr<LauncherControlCb> given_option_mangohud_;
-    std::unique_ptr<LauncherControlCb> given_option_obsvk_;
-    std::unique_ptr<LauncherControlCb> given_option_deckenv_;
+    std::unique_ptr<LauncherControlCb> given_option_mangohud;
+    std::unique_ptr<LauncherControlCb> given_option_obsvk;
+    std::unique_ptr<LauncherControlCb> given_option_deckenv;
     std::unique_ptr<LauncherControlCb> given_option_wayland;
     std::unique_ptr<LauncherControlCb> given_option_no_deco;
 

@@ -26,10 +26,14 @@ public:
     void                        parse(const YAML::Node& file) override;
     std::unique_ptr<YAML::Node> generate() override;
     std::string                 runner; // enum?
-    std::string                 hud;    // enum?
+    bool                        hud;    // enum?
+    bool                        vkcap;  // enum?
     bool                        gamemode;
     void*                       env;          // map
     bool                        use_terminal;
+    bool                        wayland;
+    bool                        nowmdeco;
+    bool                        deckenv;
     std::string                 to_string();
 
     void update() override;

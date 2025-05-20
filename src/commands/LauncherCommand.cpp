@@ -73,21 +73,43 @@ std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_options() {
     /*
      * Envs
      */
-    given_option_mangohud_ = std::move(LauncherControlCb::make_me(
-        "MangoHUD", "lcbMango", "MANGOHUD", true,  "1", "0")
+    given_option_mangohud = std::move(
+        LauncherControlCb::make_me(
+            "MangoHUD", "lcbMango", "MANGOHUD", true,  "1", "0",
+            [&](Qt::CheckState) { updateConfig(); }
+        )
     );
-    given_option_deckenv_ = std::move(LauncherControlCb::make_me(
-        "Fakeout Deck", "lcbDeckMode", "SteamDeck", true, "1", "0")
+    given_option_deckenv = std::move(
+        LauncherControlCb::make_me(
+            "Fakeout Deck", "lcbDeckMode", "SteamDeck", true, "1", "0",
+            [&](Qt::CheckState) { updateConfig(); }
+        )
     );
-    given_option_obsvk_ = std::move(LauncherControlCb::make_me(
-        "OBS VkCapture Mode", "lcbVkCap", "OBS_VKCAPTURE", true, "1", "0")
+    given_option_obsvk = std::move(
+        LauncherControlCb::make_me(
+            "OBS VkCapture Mode", "lcbVkCap", "OBS_VKCAPTURE", true, "1", "0",
+            [&](Qt::CheckState) { updateConfig(); }
+        )
     );
-    given_option_wayland = std::move(LauncherControlCb::make_me(
-        "Use Wayland through Proton", "lcbWayland", "PROTON_ENABLE_WAYLAND", false, "1", "0")
+    given_option_wayland = std::move(
+        LauncherControlCb::make_me(
+            "Use Wayland through Proton", "lcbWayland", "PROTON_ENABLE_WAYLAND", false, "1", "0",
+            [&](Qt::CheckState) { updateConfig(); }
+        )
     );
-    given_option_no_deco = std::move(LauncherControlCb::make_me(
-        "No WM deco", "lcbDeco", "PROTON_NO_WM_DECORATION", false, "1", "0")
+    given_option_no_deco = std::move(
+        LauncherControlCb::make_me(
+            "No WM deco", "lcbDeco", "PROTON_NO_WM_DECORATION", false, "1", "0",
+            [&](Qt::CheckState) { updateConfig(); }
+        )
     );
+    if (data && data->getSettings()) {
+        given_option_mangohud->getCbControl()->setChecked(data->getSettings()->hud);
+        given_option_deckenv->getCbControl()->setChecked(data->getSettings()->deckenv);
+        given_option_obsvk->getCbControl()->setChecked(data->getSettings()->vkcap);
+        given_option_wayland->getCbControl()->setChecked(data->getSettings()->wayland);
+        given_option_no_deco->getCbControl()->setChecked(data->getSettings()->nowmdeco);
+    }
     // Args
     given_option_cloudpc = std::move(get_checkbox(
         "Cloud Masquerade", "cbImpersonateCloud", true)
@@ -102,9 +124,9 @@ std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_options() {
     );
 
     std::unique_ptr<SARibbonPannel> panel_opt = std::make_unique<SARibbonPannel>();
-    panel_opt->addSmallWidget(given_option_mangohud_->getCbControl());
-    panel_opt->addSmallWidget(given_option_deckenv_->getCbControl());
-    panel_opt->addSmallWidget(given_option_obsvk_->getCbControl());
+    panel_opt->addSmallWidget(given_option_mangohud->getCbControl());
+    panel_opt->addSmallWidget(given_option_deckenv->getCbControl());
+    panel_opt->addSmallWidget(given_option_obsvk->getCbControl());
     panel_opt->addSmallWidget(given_option_cloudpc.get());
     panel_opt->addSmallWidget(given_option_gamemode.get());
     panel_opt->addSmallWidget(given_option_auto_open_wishlog.get());
@@ -141,6 +163,12 @@ std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_socials() {
 void LauncherCommand::updateConfig() {
     if (data && data->getSettings()) {
         data->getSettings()->runner = given_proton_combo->currentText().toStdString();
+        //data->getSettings()->gamemode = given_option_gamemode->isChecked();
+        data->getSettings()->hud = given_option_mangohud->isChecked();
+        data->getSettings()->vkcap = given_option_obsvk->isChecked();
+        data->getSettings()->wayland = given_option_wayland->isChecked();
+        data->getSettings()->deckenv = given_option_deckenv->isChecked();
+        data->getSettings()->nowmdeco = given_option_no_deco->isChecked();
         data->saveSettings();
     }
 }
@@ -179,9 +207,9 @@ void LauncherCommand::run_the_magic(std::shared_ptr<AGame> game) {
     std::map<std::string, std::string> envs = {};
     std::list<std::string> arguments = {};
 
-    process_env_cb(envs, given_option_mangohud_);
-    process_env_cb(envs, given_option_deckenv_);
-    process_env_cb(envs, given_option_obsvk_);
+    process_env_cb(envs, given_option_mangohud);
+    process_env_cb(envs, given_option_deckenv);
+    process_env_cb(envs, given_option_obsvk);
     process_env_cb(envs, given_option_no_deco);
     if (given_option_wayland) {
         if (given_option_wayland->isChecked()) {

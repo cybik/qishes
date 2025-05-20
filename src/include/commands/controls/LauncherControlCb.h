@@ -13,8 +13,10 @@
 
 class LauncherControlCb {
 public:
-    static std::unique_ptr<LauncherControlCb> make_me(QString, QString, QString, bool, QString, QString);
-    LauncherControlCb(QString title, QString objname, QString env_name, bool defaultVal, QString val_true, QString val_false);
+    static std::unique_ptr<LauncherControlCb> make_me(
+        QString, QString, QString, bool, QString, QString, std::function<void(Qt::CheckState)> = nullptr
+    );
+    LauncherControlCb(QString, QString, QString, bool, QString, QString, std::function<void(Qt::CheckState)> = nullptr);
     SARibbonCheckBox* getCbControl();
     std::string getValue();
     std::string getEnvName();

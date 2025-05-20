@@ -20,7 +20,11 @@ std::string getStringFromNode(const YAML::Node &file, const char* key) {
 
 void Settings::parse(const YAML::Node &file) {
     runner = getStringFromNode(file, "runner");
-    hud = getStringFromNode(file, "hud");
+    hud = getBoolFromNode(file, "hud");
+    vkcap = getBoolFromNode(file, "vkcap");
+    wayland = getBoolFromNode(file, "wayland");
+    nowmdeco = getBoolFromNode(file, "nowmdeco");
+    deckenv = getBoolFromNode(file, "deckenv");
     gamemode = getBoolFromNode(file, "gamemode");
     env = nullptr;
     use_terminal = getBoolFromNode(file, "use_terminal");
@@ -40,6 +44,10 @@ std::unique_ptr<YAML::Node> Settings::generate() {
     auto out           = std::make_unique<YAML::Node>();
     (*out)["runner"]   = runner;
     (*out)["hud"]      = hud;
+    (*out)["vkcap"]    = vkcap;
+    (*out)["wayland"]  = wayland;
+    (*out)["nowmdeco"] = nowmdeco;
+    (*out)["deckenv"]  = deckenv;
     (*out)["gamemode"] = gamemode;
     (*out)["env"]      = std::list<std::string>();
     (*out)["use_terminal"] = use_terminal;
