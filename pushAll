@@ -1,3 +1,6 @@
 #! /bin/bash
 
-for REMOTE in github gitlab origin; do git push --recurse-submodule=no $REMOTE HEAD:feat/launcherwindow; done
+for REMOTE in github gitlab origin; do
+	echo "Pushing to $REMOTE"
+	git push $1 --recurse-submodule=no $REMOTE HEAD:feat/launcherwindow
+done

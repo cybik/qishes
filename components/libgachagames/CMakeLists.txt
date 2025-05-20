@@ -56,8 +56,8 @@ set(
         "${PROJECT_SOURCE_DIR}/include/HonkaiImpact3rd.h"
         "${PROJECT_SOURCE_DIR}/include/WutheringWaves.h"
         "${PROJECT_SOURCE_DIR}/include/ZenlessZoneZero.h"
-        "${PROJECT_SOURCE_DIR}/include/util/effectors/IEffector.h"
-        "${PROJECT_SOURCE_DIR}/include/util/effectors/EnvEffector.h"
+        #"${PROJECT_SOURCE_DIR}/include/util/effectors/IEffector.h"
+        #"${PROJECT_SOURCE_DIR}/include/util/effectors/EnvEffector.h"
 )
 
 add_library(

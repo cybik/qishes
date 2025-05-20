@@ -99,6 +99,7 @@ private:
     std::unique_ptr<LauncherControlCb> given_option_obsvk_;
     std::unique_ptr<LauncherControlCb> given_option_deckenv_;
     std::unique_ptr<LauncherControlCb> given_option_wayland;
+    std::unique_ptr<LauncherControlCb> given_option_no_deco;
 
     std::unique_ptr<SARibbonCheckBox> given_option_cloudpc;
     std::unique_ptr<SARibbonCheckBox> given_option_gamemode;
@@ -134,6 +135,7 @@ private:
     void show_wishes_getter();
     void checkDiscord();
 
+    void process_env_cb(std::map<std::string, std::string>&, std::unique_ptr<LauncherControlCb>& cb);
     //
     //QString target_exec;
     std::shared_ptr<AGame> main_exec;

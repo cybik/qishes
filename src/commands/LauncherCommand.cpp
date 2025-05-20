@@ -74,16 +74,19 @@ std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_options() {
      * Envs
      */
     given_option_mangohud_ = std::move(LauncherControlCb::make_me(
-        "MangoHUD", "lcbMango", true, "1", "0")
+        "MangoHUD", "lcbMango", "MANGOHUD", true,  "1", "0")
     );
     given_option_deckenv_ = std::move(LauncherControlCb::make_me(
-        "Fakeout Deck", "lcbDeckMode", true, "1", "0")
+        "Fakeout Deck", "lcbDeckMode", "SteamDeck", true, "1", "0")
     );
     given_option_obsvk_ = std::move(LauncherControlCb::make_me(
-        "OBS VkCapture Mode", "lcbVkCap", true, "1", "0")
+        "OBS VkCapture Mode", "lcbVkCap", "OBS_VKCAPTURE", true, "1", "0")
     );
     given_option_wayland = std::move(LauncherControlCb::make_me(
-        "Use Wayland through Proton", "lcbWayland", false, "1", "0")
+        "Use Wayland through Proton", "lcbWayland", "PROTON_ENABLE_WAYLAND", false, "1", "0")
+    );
+    given_option_no_deco = std::move(LauncherControlCb::make_me(
+        "No WM deco", "lcbDeco", "PROTON_NO_WM_DECORATION", false, "1", "0")
     );
     // Args
     given_option_cloudpc = std::move(get_checkbox(
@@ -106,6 +109,7 @@ std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_options() {
     panel_opt->addSmallWidget(given_option_gamemode.get());
     panel_opt->addSmallWidget(given_option_auto_open_wishlog.get());
     panel_opt->addSmallWidget(given_option_wayland->getCbControl());
+    panel_opt->addSmallWidget(given_option_no_deco->getCbControl());
     panel_opt->setPannelName("Options");
     return std::move(panel_opt);
 }
@@ -164,14 +168,21 @@ std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_proton() {
     return std::move(panel_proton);
 }
 
+void LauncherCommand::process_env_cb(std::map<std::string, std::string>& envs, std::unique_ptr<LauncherControlCb>& cb) {
+    if (cb) {
+        envs[cb->getEnvName()] = cb->getValue();
+    }
+}
+
 // TODO: run a reg setter to set [HKEY_CURRENT_USER\Control Panel\International] -> sDecimal to '.' to fix shader issues
 void LauncherCommand::run_the_magic(std::shared_ptr<AGame> game) {
     std::map<std::string, std::string> envs = {};
     std::list<std::string> arguments = {};
 
-    if (given_option_mangohud_) { envs["MANGOHUD"] = given_option_mangohud_->getValue(); }
-    if (given_option_deckenv_) { envs["SteamDeck"] = given_option_deckenv_->getValue(); }
-    if (given_option_obsvk_) { envs["OBS_VKCAPTURE"] = given_option_obsvk_->getValue(); }
+    process_env_cb(envs, given_option_mangohud_);
+    process_env_cb(envs, given_option_deckenv_);
+    process_env_cb(envs, given_option_obsvk_);
+    process_env_cb(envs, given_option_no_deco);
     if (given_option_wayland) {
         if (given_option_wayland->isChecked()) {
             envs["PROTON_ENABLE_WAYLAND"] = given_option_wayland->getValue();

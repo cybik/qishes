@@ -11,9 +11,9 @@
 #include <commands/controls/LauncherControlCb.h>
 
 std::unique_ptr<LauncherControlCb> LauncherControlCb::make_me(
-    QString title, QString objname, bool defaultVal, QString val_true, QString val_false
+    QString title, QString objname, QString name, bool defaultVal, QString val_true, QString val_false
 ) {
-    return std::move(std::make_unique<LauncherControlCb>(title, objname, defaultVal, val_true, val_false));
+    return std::move(std::make_unique<LauncherControlCb>(title, objname, name, defaultVal, val_true, val_false));
 }
 
 std::string LauncherControlCb::getValue() {
@@ -32,13 +32,19 @@ LauncherControlCb::~LauncherControlCb() {
     _cb.reset();
 }
 
+std::string LauncherControlCb::getEnvName() {
+    return env_name.toStdString();
+}
+
+
 LauncherControlCb::LauncherControlCb(
-    QString title, QString objname, bool defaultVal, QString val_true, QString val_false
+    QString title, QString objname, QString name, bool defaultVal, QString val_true, QString val_false
 ) {
     _cb = std::make_unique<SARibbonCheckBox>();
     _cb->setText(title);
     _cb->setObjectName(objname);
     _cb->setChecked(defaultVal);
+    env_name = name;
     ret_true = val_true;
     ret_false = val_false;
 }
