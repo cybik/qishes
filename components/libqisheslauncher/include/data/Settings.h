@@ -29,6 +29,7 @@ public:
     bool                        hud;    // enum?
     bool                        vkcap;  // enum?
     bool                        gamemode;
+    bool xalia;
     void*                       env;          // map
     bool                        use_terminal;
     bool                        wayland;

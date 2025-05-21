@@ -21,6 +21,8 @@ public:
     std::string getValue();
     std::string getEnvName();
     bool isChecked();
+    bool needsCbValueAnyway();
+    void setNeedCbValue(bool);
     ~LauncherControlCb();
 protected:
 private:
@@ -28,4 +30,5 @@ private:
     QString ret_true;
     QString ret_false;
     QString env_name;
+    bool forceProcessValue = false;
 };

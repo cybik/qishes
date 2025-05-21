@@ -103,12 +103,20 @@ std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_options() {
             [&](Qt::CheckState) { updateConfig(); }
         )
     );
+    given_option_xalia = std::move(
+        LauncherControlCb::make_me(
+            "Use Xalia audio core", "lcbXalia", "PROTON_USE_XALIA", false, "1", "0",
+            [&](Qt::CheckState) { updateConfig(); }
+        )
+    );
+    given_option_xalia->setNeedCbValue(true);
     if (data && data->getSettings()) {
         given_option_mangohud->getCbControl()->setChecked(data->getSettings()->hud);
         given_option_deckenv->getCbControl()->setChecked(data->getSettings()->deckenv);
         given_option_obsvk->getCbControl()->setChecked(data->getSettings()->vkcap);
         given_option_wayland->getCbControl()->setChecked(data->getSettings()->wayland);
         given_option_no_deco->getCbControl()->setChecked(data->getSettings()->nowmdeco);
+        given_option_xalia->getCbControl()->setChecked(data->getSettings()->xalia);
     }
     // Args
     given_option_cloudpc = std::move(get_checkbox(
@@ -132,6 +140,7 @@ std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_options() {
     panel_opt->addSmallWidget(given_option_auto_open_wishlog.get());
     panel_opt->addSmallWidget(given_option_wayland->getCbControl());
     panel_opt->addSmallWidget(given_option_no_deco->getCbControl());
+    panel_opt->addSmallWidget(given_option_xalia->getCbControl());
     panel_opt->setPannelName("Options");
     return std::move(panel_opt);
 }
@@ -169,6 +178,7 @@ void LauncherCommand::updateConfig() {
         data->getSettings()->wayland = given_option_wayland->isChecked();
         data->getSettings()->deckenv = given_option_deckenv->isChecked();
         data->getSettings()->nowmdeco = given_option_no_deco->isChecked();
+        data->getSettings()->xalia = given_option_xalia->isChecked();
         data->saveSettings();
     }
 }
@@ -198,7 +208,11 @@ std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_proton() {
 
 void LauncherCommand::process_env_cb(std::map<std::string, std::string>& envs, std::unique_ptr<LauncherControlCb>& cb) {
     if (cb) {
-        envs[cb->getEnvName()] = cb->getValue();
+        if (cb->isChecked() || cb->needsCbValueAnyway()) {
+            envs[cb->getEnvName()] = cb->getValue();
+        } else {
+            envs.erase(cb->getEnvName());
+        }
     }
 }
 
@@ -211,13 +225,8 @@ void LauncherCommand::run_the_magic(std::shared_ptr<AGame> game) {
     process_env_cb(envs, given_option_deckenv);
     process_env_cb(envs, given_option_obsvk);
     process_env_cb(envs, given_option_no_deco);
-    if (given_option_wayland) {
-        if (given_option_wayland->isChecked()) {
-            envs["PROTON_ENABLE_WAYLAND"] = given_option_wayland->getValue();
-        } else {
-            envs.erase("PROTON_ENABLE_WAYLAND");
-        }
-    }
+    process_env_cb(envs, given_option_wayland);
+    process_env_cb(envs, given_option_xalia);
     if (given_option_cloudpc->isChecked()) {
         for (auto el: game->processArguments(AGame::LaunchOptions::CloudOverride)) {
             arguments.emplace_back(el);
@@ -225,8 +234,8 @@ void LauncherCommand::run_the_magic(std::shared_ptr<AGame> game) {
     }
 
     if (game) {
-        for (auto arg: game->getArguments()) arguments.emplace_back(arg);
-        for (auto arg: game->getEnvironment()) envs[arg.first] = arg.second;
+        for (const auto& arg: game->getArguments()) arguments.emplace_back(arg);
+        for (auto [first, second]: game->getEnvironment()) envs[first] = second;
         game->prepareEnvironment();
     }
 
@@ -372,6 +381,7 @@ std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_run() {
     }
     return std::move(panel_run);
 }
+
 std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_wine() {
     /**
      * Always the Launcher, pretty much. Keep this out so I can refactor into game-dedicated panels

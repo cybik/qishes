@@ -100,6 +100,7 @@ private:
     std::unique_ptr<LauncherControlCb> given_option_deckenv;
     std::unique_ptr<LauncherControlCb> given_option_wayland;
     std::unique_ptr<LauncherControlCb> given_option_no_deco;
+    std::unique_ptr<LauncherControlCb> given_option_xalia;
 
     std::unique_ptr<SARibbonCheckBox> given_option_cloudpc;
     std::unique_ptr<SARibbonCheckBox> given_option_gamemode;

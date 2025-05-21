@@ -29,6 +29,14 @@ bool LauncherControlCb::isChecked() {
     return _cb->isChecked();
 }
 
+void LauncherControlCb::setNeedCbValue(bool vForceProcessValue) {
+    forceProcessValue = vForceProcessValue;
+}
+
+bool LauncherControlCb::needsCbValueAnyway() {
+    return forceProcessValue;
+}
+
 SARibbonCheckBox* LauncherControlCb::getCbControl() {
     return _cb.get();
 }
