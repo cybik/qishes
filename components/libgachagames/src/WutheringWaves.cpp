@@ -32,16 +32,13 @@ Workaround::Handler WutheringWaves::getWorkaround() {
     return Workaround::Handler::Jadeite;
 }
 
-void WutheringWaves::registerEffectors() {
-
-}
-
 
 std::map<std::string, std::string> WutheringWaves::getEnvironment() {
     return {
         //{ "WINEDLLOVERRIDES", "KRSDKExternal.exe=d;winegstreamer=;mfplat=d" },
         //{ "PROTON_DISABLE_NVAPI","1" },
         //{ "SteamGameId", GAME_ID },
+        { "FSR4_UPGRADE", "1"},
         { "WINEDLLOVERRIDES", "KRSDKExternal.exe=d" },
         { "RADV_PERFTEST", "rt" }
     };
@@ -55,7 +52,6 @@ std::list<std::string> WutheringWaves::getArguments() {
 // export WINEDLLOVERRIDES="KRSDKExternal.exe=d"
 
 std::filesystem::path WutheringWaves::getExecutablePath() {
-    Log::get_logger()->critical("Honq");
     for (auto file : *gachafs::getFsFiles(
         "**/Client-Win64-Shipping.exe",
         QString::fromStdString(AGame::getExecutablePath().parent_path().c_str()),
@@ -71,5 +67,9 @@ std::filesystem::path WutheringWaves::getExecutablePath() {
 
 std::string WutheringWaves::getGameShorthand() {
     return "wuwa";
+}
+
+std::list<int> WutheringWaves::getSteamIdentifiers() {
+    return {3513350};
 }
 

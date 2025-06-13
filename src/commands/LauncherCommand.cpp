@@ -105,7 +105,7 @@ std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_options() {
     );
     given_option_xalia = std::move(
         LauncherControlCb::make_me(
-            "Use Xalia audio core", "lcbXalia", "PROTON_USE_XALIA", false, "1", "0",
+            "Enable Xalia glyphs", "lcbXalia", "PROTON_USE_XALIA", false, "1", "0",
             [&](Qt::CheckState) { updateConfig(); }
         )
     );
@@ -388,6 +388,7 @@ std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_wine() {
      *  with a background switch
      **/
     enlist_custom_action("WineCFG", "winecfg", &wine_execs);
+    enlist_custom_action("Registry", "regedit", &wine_execs);
     std::unique_ptr<SARibbonPannel> panel_wine = std::make_unique<SARibbonPannel>("Wine Tools");
     for (std::shared_ptr<QAction> action: wine_execs) {
         panel_wine->addLargeAction(action.get());
@@ -524,7 +525,9 @@ void LauncherCommand::setupAuxiliary() {
     given2->ribbonBar()->setAttribute(Qt::WA_TranslucentBackground);
 
     setupRibbonWindow(given2);
-    given2->setRibbonTheme(SARibbonTheme::RibbonThemeWindows7);
+    given2->setRibbonTheme(SARibbonTheme::RibbonThemeDark2);
+    given2->ribbonBar()->setRibbonStyle(SARibbonBar::RibbonStyleCompactThreeRow);
+    given2->ribbonBar()->setWindowTitleTextColor(QColorConstants::LightGray);
 
     given2->ribbonBar()->setStyleSheet("QMenuBar { border-top-left-radius:20px; border-top-right-radius:20px; }");
     given2->windowButtonBar()->closeButton()->setStyleSheet("QToolButton {border-top-right-radius:20px;};");

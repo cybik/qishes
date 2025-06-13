@@ -29,3 +29,7 @@ Workaround::Handler HonkaiImpact3rd::getWorkaround() {
 void HonkaiImpact3rd::prepare() {
     AHoyoGame::prefetchData(HoyoConstants::loc_3rd_gen_glb);
 }
+
+std::list<int> HonkaiImpact3rd::getSteamIdentifiers() {
+    return {1671200, 1672740};
+}

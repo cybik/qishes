@@ -37,6 +37,7 @@ set(
         "${PROJECT_SOURCE_DIR}/GenshinImpact.cpp"
         "${PROJECT_SOURCE_DIR}/HonkaiStarRail.cpp"
         "${PROJECT_SOURCE_DIR}/HonkaiImpact3rd.cpp"
+        "${PROJECT_SOURCE_DIR}/Strinova.cpp"
         "${PROJECT_SOURCE_DIR}/WutheringWaves.cpp"
         "${PROJECT_SOURCE_DIR}/ZenlessZoneZero.cpp"
 )
@@ -54,6 +55,7 @@ set(
         "${PROJECT_SOURCE_DIR}/include/GenshinImpact.h"
         "${PROJECT_SOURCE_DIR}/include/HonkaiStarRail.h"
         "${PROJECT_SOURCE_DIR}/include/HonkaiImpact3rd.h"
+        "${PROJECT_SOURCE_DIR}/include/Strinova.h"
         "${PROJECT_SOURCE_DIR}/include/WutheringWaves.h"
         "${PROJECT_SOURCE_DIR}/include/ZenlessZoneZero.h"
         #"${PROJECT_SOURCE_DIR}/include/util/effectors/IEffector.h"

@@ -17,12 +17,14 @@
 #include <GenshinImpact.h>
 #include <HonkaiImpact3rd.h>
 #include <HonkaiStarRail.h>
+#include <Strinova.h>
 #include <ZenlessZoneZero.h>
 
 std::shared_ptr<std::list<std::shared_ptr<AGame>>> AGame::getSupportedGames() {
     std::shared_ptr<std::list<std::shared_ptr<AGame>>> ret = std::make_shared<std::list<std::shared_ptr<AGame>>>();
     ret->push_back(std::move(std::make_shared<Launcher>()));
     ret->push_back(std::move(std::make_shared<WutheringWaves>()));
+    ret->push_back(std::move(std::make_shared<Strinova>()));
     ret->push_back(std::move(std::make_shared<GenshinImpact>()));
     ret->push_back(std::move(std::make_shared<HonkaiImpact3rd>()));
     ret->push_back(std::move(std::make_shared<HonkaiStarRail>()));
@@ -68,6 +70,10 @@ std::map<std::string, std::string> AGame::getEnvironment() {
 
 std::list<std::string> AGame::processArguments(LaunchOptions) {
     return {};
+}
+
+std::list<int> AGame::getSteamIdentifiers() {
+    return {-1};
 }
 
 std::string AGame::getGameShorthand() {

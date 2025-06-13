@@ -26,8 +26,7 @@ public:
     void prepare() override {}
     std::string getBackground() override { return ""; }
 
-    void registerEffectors() override;
-
     //void prefetchBackground() override;
     std::string getGameShorthand() override;
+    std::list<int> getSteamIdentifiers() override;
 };

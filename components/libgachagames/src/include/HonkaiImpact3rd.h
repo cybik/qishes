@@ -20,4 +20,5 @@ public:
     std::string getLabel() override;
     Workaround::Handler getWorkaround() override;
     void prepare() override;
+    std::list<int> getSteamIdentifiers() override;
 };

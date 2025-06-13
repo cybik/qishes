@@ -30,9 +30,11 @@ public:
         UnrealEngineMeta,
         WutheringWaves,
 
+        // reg fix
+        Strinova,
+
         /** Unsupported for now */
         InfinityNikki,
-        Strinova,
 
         Unknown         /** NYANEEEEEEEEEEEEEEH */
     } ExeType;

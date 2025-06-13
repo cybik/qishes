@@ -37,13 +37,12 @@ public:
     virtual std::map<std::string, std::string> getEnvironment();
     virtual void setExecutablePath(std::filesystem::path executablePath);
 
+    virtual std::list<int> getSteamIdentifiers();
+
     virtual std::string getBackground() = 0;
 
     // inline default
     virtual void prepareEnvironment() {}
-
-    // option effectors
-    virtual void registerEffectors() {}
 
     static std::shared_ptr<AGame> identify(std::string checkName);
 

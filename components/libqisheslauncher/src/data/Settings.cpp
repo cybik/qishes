@@ -6,6 +6,8 @@
 #include <data/remote/runners/Wine.h>
 #include <data/remote/runners/Proton.h>
 
+// TODO: default values when the key isn't in the file. right now it crashes.
+
 bool getBoolFromNode(const YAML::Node &file, const char* key) {
     return file[key].IsDefined() && file[key].as<bool>();
 }
