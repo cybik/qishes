@@ -27,6 +27,7 @@ void Settings::parse(const YAML::Node &file) {
     wayland = getBoolFromNode(file, "wayland");
     nowmdeco = getBoolFromNode(file, "nowmdeco");
     deckenv = getBoolFromNode(file, "deckenv");
+    steamosenv = getBoolFromNode(file, "steamosenv");
     gamemode = getBoolFromNode(file, "gamemode");
     xalia = getBoolFromNode(file, "xalia");
     env = nullptr;
@@ -51,6 +52,7 @@ std::unique_ptr<YAML::Node> Settings::generate() {
     (*out)["wayland"]  = wayland;
     (*out)["nowmdeco"] = nowmdeco;
     (*out)["deckenv"]  = deckenv;
+    (*out)["steamosenv"]  = steamosenv;
     (*out)["xalia"]    = xalia;
     (*out)["gamemode"] = gamemode;
     (*out)["env"]      = std::list<std::string>();

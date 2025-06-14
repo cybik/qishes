@@ -35,6 +35,7 @@ public:
     bool                        wayland;
     bool                        nowmdeco;
     bool                        deckenv;
+    bool                        steamosenv;
     std::string                 to_string();
 
     void update() override;

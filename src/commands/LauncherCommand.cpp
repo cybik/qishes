@@ -85,6 +85,12 @@ std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_options() {
             [&](Qt::CheckState) { updateConfig(); }
         )
     );
+    given_option_steamosenv = std::move(
+        LauncherControlCb::make_me(
+            "Fakeout SteamOS", "lcbSteamOSMode", "SteamOS", true, "1", "0",
+            [&](Qt::CheckState) { updateConfig(); }
+        )
+    );
     given_option_obsvk = std::move(
         LauncherControlCb::make_me(
             "OBS VkCapture Mode", "lcbVkCap", "OBS_VKCAPTURE", true, "1", "0",
@@ -113,6 +119,7 @@ std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_options() {
     if (data && data->getSettings()) {
         given_option_mangohud->getCbControl()->setChecked(data->getSettings()->hud);
         given_option_deckenv->getCbControl()->setChecked(data->getSettings()->deckenv);
+        given_option_steamosenv->getCbControl()->setChecked(data->getSettings()->steamosenv);
         given_option_obsvk->getCbControl()->setChecked(data->getSettings()->vkcap);
         given_option_wayland->getCbControl()->setChecked(data->getSettings()->wayland);
         given_option_no_deco->getCbControl()->setChecked(data->getSettings()->nowmdeco);
@@ -134,6 +141,7 @@ std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_options() {
     std::unique_ptr<SARibbonPannel> panel_opt = std::make_unique<SARibbonPannel>();
     panel_opt->addSmallWidget(given_option_mangohud->getCbControl());
     panel_opt->addSmallWidget(given_option_deckenv->getCbControl());
+    panel_opt->addSmallWidget(given_option_steamosenv->getCbControl());
     panel_opt->addSmallWidget(given_option_obsvk->getCbControl());
     panel_opt->addSmallWidget(given_option_cloudpc.get());
     panel_opt->addSmallWidget(given_option_gamemode.get());
@@ -177,6 +185,7 @@ void LauncherCommand::updateConfig() {
         data->getSettings()->vkcap = given_option_obsvk->isChecked();
         data->getSettings()->wayland = given_option_wayland->isChecked();
         data->getSettings()->deckenv = given_option_deckenv->isChecked();
+        data->getSettings()->steamosenv = given_option_steamosenv->isChecked();
         data->getSettings()->nowmdeco = given_option_no_deco->isChecked();
         data->getSettings()->xalia = given_option_xalia->isChecked();
         data->saveSettings();
@@ -223,6 +232,7 @@ void LauncherCommand::run_the_magic(std::shared_ptr<AGame> game) {
 
     process_env_cb(envs, given_option_mangohud);
     process_env_cb(envs, given_option_deckenv);
+    process_env_cb(envs, given_option_steamosenv);
     process_env_cb(envs, given_option_obsvk);
     process_env_cb(envs, given_option_no_deco);
     process_env_cb(envs, given_option_wayland);
