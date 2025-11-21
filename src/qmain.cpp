@@ -22,6 +22,7 @@
 
 #include <exception>
 //#include <debugging>
+#include <filesystem>
 
 #define DEFINE_COMMAND(COMMNAME) \
     if(command.compare(COMMNAME::CommandSpecifier, Qt::CaseInsensitive) == 0) \
@@ -63,12 +64,15 @@ bool is_true(std::string env) {
     return false;
 }
 
+bool is_debugger_present() {
+    return std::filesystem::exists(std::filesystem::path("/tmp/qagl_go"));
+}
+
 int main(int argc, char *argv[]) {
-    /*
     if (is_true("QAGL_WAIT_FOR_DEBUGGER")) {
-        while (!is_debugger_present()) { / * noop * / }
+        while (!is_debugger_present()) { /* noop */ }
     }
-    */
+
     auto identified_path = std::filesystem::canonical("/proc/self/exe");
     std::cout << (identified_path.parent_path() / "plugins") << std::endl;
 

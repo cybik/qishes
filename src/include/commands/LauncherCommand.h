@@ -106,6 +106,7 @@ private:
     std::unique_ptr<SARibbonCheckBox> given_option_cloudpc;
     std::unique_ptr<SARibbonCheckBox> given_option_gamemode;
     std::unique_ptr<SARibbonCheckBox> given_option_auto_open_wishlog;
+    std::unique_ptr<SARibbonCheckBox> given_option_steamwrap;
 
     std::unique_ptr<SARibbonPannel> given_panel_socials;
     std::unique_ptr<SARibbonCheckBox> given_option_discord;
@@ -138,6 +139,8 @@ private:
     void checkDiscord();
 
     void process_env_cb(std::map<std::string, std::string>&, std::unique_ptr<LauncherControlCb>& cb);
+    void process_steam_launchwrap(std::unique_ptr<SARibbonCheckBox>& cb);
+
     //
     //QString target_exec;
     std::shared_ptr<AGame> main_exec;
