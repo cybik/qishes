@@ -18,6 +18,7 @@
 #include <termcolor/termcolor.hpp>
 #include <cctype>
 
+#include <QtEnvironmentVariables>
 std::shared_ptr<steam_proton> steam_proton::mInstance = nullptr;
 
 std::shared_ptr<steam_proton> steam_proton::getInstance() {
@@ -66,6 +67,7 @@ std::string steam_proton::get_compat_c_drive() {
 }
 
 // TODO: pwd/cwd to eval the ini properly
+// ASSUME: This is ALWAYS running under steam.
 void steam_proton::try_run(
     const std::string& target_executable,
     const Workaround::Handler workaround,
@@ -73,7 +75,6 @@ void steam_proton::try_run(
     const std::map<std::string, std::string>& env_overrides,
     const QString prefix
 ) {
-    QStringList lArguments = QStringList();
 
     // instant decorate
     std::string true_target_executable = target_executable;
@@ -92,18 +93,38 @@ void steam_proton::try_run(
         mProcessEnvironment->insert(QString(key.c_str()), QString(value.c_str()));
     mProcess->setProcessEnvironment(*mProcessEnvironment);
 
-    // What we cookin'
-    if (!prefix.isEmpty()) {
-        lArguments.append(mProton->get_selected_proton()->exec().c_str());
-    }
 
+    // Super Rewrite of Dhewm.
+#if 0
     mProcess->setProgram(
         prefix.isEmpty()
             ? mProton->get_selected_proton()->exec().c_str()
             : prefix
     ); // proton
+    if (!prefix.isEmpty()) {
+        lArguments.append(prefix);
+    }
+#endif
+    QString _steam_base_folder = QString(qgetenv("STEAM_BASE_FOLDER"));
+    mProcess->setProgram(_steam_base_folder+"/ubuntu12_32/steam-launch-wrapper");
 
-    lArguments.append("run"); // always this
+    // What we cookin'
+    QStringList lArguments = QStringList();
+    QString selected_verb = "waitforexitandrun";
+    lArguments.append(QStringList({
+        "--",
+        _steam_base_folder + "/ubuntu12_32/reaper",
+        "SteamLaunch",
+        "AppId="+qgetenv("SteamGameId"),
+        "--",
+        _steam_base_folder+"/steamapps/common/SteamLinuxRuntime_sniper/_v2-entry-point",
+        "--verb="+selected_verb,
+        "--"
+    }));
+
+    lArguments.append(mProton->get_selected_proton()->exec().c_str());
+
+    lArguments.append(selected_verb); // always this
     if (decorated_executable.empty()) {
         lArguments.append(target_executable.c_str());
     } else {
