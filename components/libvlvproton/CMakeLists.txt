@@ -34,6 +34,7 @@ set(PROJECT_SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/src")
 set(
     SOURCES_CPP
         "${PROJECT_SOURCE_DIR}/proton.cpp"
+        "${PROJECT_SOURCE_DIR}/steamrt.cpp"
         "${PROJECT_SOURCE_DIR}/vlvproton.cpp"
         "${PROJECT_SOURCE_DIR}/wine.cpp"
 )
@@ -42,6 +43,7 @@ set(
 set(
     SOURCES_H
         "${PROJECT_SOURCE_DIR}/include/proton.h"
+        "${PROJECT_SOURCE_DIR}/include/steamrt.h"
         "${PROJECT_SOURCE_DIR}/include/vlvproton.h"
         "${PROJECT_SOURCE_DIR}/include/wine.h"
 )

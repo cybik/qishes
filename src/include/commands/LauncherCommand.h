@@ -57,6 +57,7 @@ private:
     std::shared_ptr<QAction> get_action_launcher_test();
     std::shared_ptr<SARibbonCategory> getLauncherCat();
     std::shared_ptr<SARibbonCategory> getSocialsCat();
+    std::shared_ptr<SARibbonCategory> getToolsCat();
 
     std::shared_ptr<QMenu> tray_menu;
     std::shared_ptr<QAction> action_exit;
@@ -73,6 +74,7 @@ private:
     std::unique_ptr<SARibbonPannel> get_panel_game();
     std::unique_ptr<SARibbonPannel> get_panel_wishes();
     std::unique_ptr<SARibbonPannel> get_panel_proton();
+    std::unique_ptr<SARibbonPannel> get_panel_steamrt();
     std::unique_ptr<SARibbonPannel> get_panel_options();
     std::unique_ptr<SARibbonPannel> get_panel_socials();
 
@@ -92,6 +94,7 @@ private:
 
     std::shared_ptr<SARibbonCategory> given_cat;
     std::shared_ptr<SARibbonCategory> socials_cat;
+    std::shared_ptr<SARibbonCategory> tools_cat;
 
     std::unique_ptr<SARibbonPannel> given_panel_options;
 
@@ -130,6 +133,8 @@ private:
     std::unique_ptr<SARibbonPannel> given_panel_proton;
     //std::unique_ptr<QAction> given_action_proton;
     std::unique_ptr<SARibbonComboBox> given_proton_combo;
+    std::unique_ptr<SARibbonPannel> given_panel_steamrt;
+    std::unique_ptr<SARibbonComboBox> given_steamrt_combo;
 
     void remove_panel_and_action(   std::shared_ptr<SARibbonCategory>,
                                     std::unique_ptr<SARibbonPannel>,

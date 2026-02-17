@@ -41,6 +41,10 @@ void steam_proton::select(const std::string& key) {
     mProton->select(key);
 }
 
+void steam_proton::select_steamrt(const std::string& key) {
+    mSteamRt->select(key);
+}
+
 void steam_proton::try_setup() {
     if (!std::getenv("STEAM_COMPAT_APP_ID")) {
         mProcessEnvironment->insert("STEAM_COMPAT_APP_ID", "0");

@@ -180,6 +180,7 @@ std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_socials() {
 void LauncherCommand::updateConfig() {
     if (data && data->getSettings()) {
         data->getSettings()->runner = given_proton_combo->currentText().toStdString();
+        data->getSettings()->steamrt = given_steamrt_combo->currentText().toStdString();
         //data->getSettings()->gamemode = given_option_gamemode->isChecked();
         data->getSettings()->hud = given_option_mangohud->isChecked();
         data->getSettings()->vkcap = given_option_obsvk->isChecked();
@@ -213,6 +214,30 @@ std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_proton() {
         }
     );
     return std::move(panel_proton);
+}
+
+std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_steamrt() {
+    given_steamrt_combo = std::make_unique<SARibbonComboBox>();
+    given_steamrt_combo->setWindowTitle("SteamRTSelect");
+    given_steamrt_combo->setObjectName("SteamRTSelect");
+    // TODO: set current selected to match config that's not implemented yet
+    std::unique_ptr<SARibbonPannel> panel_steamrt = std::make_unique<SARibbonPannel>();
+    panel_steamrt->addSmallWidget(given_steamrt_combo.get());
+    panel_steamrt->setPannelName("SteamRT Runtime");
+    given_steamrt_combo->addItem(QString("None"));
+    for (auto str: vlvproton::getInstance()->get_available_steam_runtimes()) {
+        given_steamrt_combo->addItem(QString(str.c_str()));
+        if (data && data->getSettings() && str == data->getSettings()->steamrt) {
+            given_steamrt_combo->setCurrentIndex(given_steamrt_combo->count() - 1);
+        }
+    }
+    QObject::connect(
+        given_steamrt_combo.get(), &QComboBox::currentIndexChanged,
+        [this](int index) {
+            updateConfig();
+        }
+    );
+    return std::move(panel_steamrt);
 }
 
 void LauncherCommand::process_env_cb(std::map<std::string, std::string>& envs, std::unique_ptr<LauncherControlCb>& cb) {
@@ -267,6 +292,9 @@ void LauncherCommand::enlist_launch_action(std::shared_ptr<AGame> aGame) {
             steam_integration::get_steam_integration_instance()->proton()->select(
                 given_proton_combo->currentText().toStdString()
             );
+            steam_integration::get_steam_integration_instance()->proton()->select_steamrt(
+                given_steamrt_combo->currentText().toStdString()
+            );
             if (aGame) {
                 run_the_magic(aGame);
             }
@@ -286,6 +314,9 @@ void LauncherCommand::enlist_custom_action(
             [=](bool) {
                 steam_integration::get_steam_integration_instance()->proton()->select(
                     given_proton_combo->currentText().toStdString()
+                );
+                steam_integration::get_steam_integration_instance()->proton()->select_steamrt(
+                    given_steamrt_combo->currentText().toStdString()
                 );
                 steam_integration::get_steam_integration_instance()->proton()->try_run(
                     run_exec.toStdString(),
@@ -481,6 +512,20 @@ std::shared_ptr<SARibbonCategory> LauncherCommand::getSocialsCat() {
     return socials_cat;
 }
 
+std::shared_ptr<SARibbonCategory> LauncherCommand::getToolsCat() {
+    if (!given_panel_wine)
+        given_panel_wine = std::move(get_panel_wine());
+
+    if (!tools_cat) {
+        tools_cat = std::make_shared<SARibbonCategory>();
+        tools_cat->setCategoryName("Tools");
+        tools_cat->setObjectName("tools_general");
+
+        tools_cat->addPannel(given_panel_wine.get());
+    }
+    return tools_cat;
+}
+
 void LauncherCommand::show_wishes_getter() {}
 
 std::shared_ptr<SARibbonCategory> LauncherCommand::getLauncherCat() {
@@ -488,14 +533,16 @@ std::shared_ptr<SARibbonCategory> LauncherCommand::getLauncherCat() {
     if (!given_panel_game)
         given_panel_game = std::move(get_panel_game());
     */
-    if (!given_panel_proton)
-        given_panel_proton = std::move(get_panel_proton());
-    if (!given_panel_options)
-        given_panel_options = std::move(get_panel_options());
     if (!given_panel_run)
         given_panel_run = std::move(get_panel_run());
-    if (!given_panel_wine)
-        given_panel_wine = std::move(get_panel_wine());
+    if (!given_panel_proton)
+        given_panel_proton = std::move(get_panel_proton());
+    if (!given_panel_steamrt)
+        given_panel_steamrt = std::move(get_panel_steamrt());
+    if (!given_panel_options)
+        given_panel_options = std::move(get_panel_options());
+    //if (!given_panel_wine)
+    //    given_panel_wine = std::move(get_panel_wine());
     //if (!given_panel_wishes)
     //    given_panel_wishes = std::move(get_panel_wishes());
 
@@ -508,10 +555,10 @@ std::shared_ptr<SARibbonCategory> LauncherCommand::getLauncherCat() {
             show_wishes_getter();
         //else
         //    given_cat->addPannel(given_panel_game.get()); // launch sig?
-        given_cat->addPannel(given_panel_proton.get());
-        given_cat->addPannel(given_panel_options.get());
         given_cat->addPannel(given_panel_run.get());
-        given_cat->addPannel(given_panel_wine.get());
+        given_cat->addPannel(given_panel_proton.get());
+        given_cat->addPannel(given_panel_steamrt.get());
+        given_cat->addPannel(given_panel_options.get());
     }
     return given_cat;
 }
@@ -526,6 +573,7 @@ void LauncherCommand::setupRibbonWindow(std::shared_ptr<SARibbonMainWindow> targ
     target->ribbonBar()->setApplicationButton(nullptr);
     target->ribbonBar()->addCategoryPage(getLauncherCat().get());
     target->ribbonBar()->addCategoryPage(getSocialsCat().get());
+    target->ribbonBar()->addCategoryPage(getToolsCat().get());
 
     target->windowButtonBar()->setupMaximizeButton(false);
 }
@@ -706,6 +754,7 @@ void LauncherCommand::quit() {
 
     // Panel yeets
     if (given_proton_combo) given_proton_combo.reset();
+    if (given_steamrt_combo) given_steamrt_combo.reset();
     remove_panel_and_action(socials_cat, std::move(given_panel_socials), nullptr);
     remove_panel_and_action(given_cat, std::move(given_panel_proton), nullptr);
     //remove_panel_and_action(given_cat, std::move(given_panel_game), std::move(given_action_game));
@@ -784,7 +833,7 @@ void LauncherCommand::discord_report(QString message) {
 
 int LauncherCommand::command_run() {
     this->discord_report("qishes loading");
-    vlvproton::getInstance()->identify_installs();
+    vlvproton::getInstance()->identify_proton_installs();
 
     qishes_launcher->setWindowIcon(*icon);
 

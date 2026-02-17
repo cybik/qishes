@@ -26,6 +26,7 @@ public:
     void                        parse(const YAML::Node& file) override;
     std::unique_ptr<YAML::Node> generate() override;
     std::string                 runner; // enum?
+    std::string                 steamrt; // enum?
     bool                        hud;    // enum?
     bool                        vkcap;  // enum?
     bool                        gamemode;

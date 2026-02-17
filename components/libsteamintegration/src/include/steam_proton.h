@@ -30,6 +30,7 @@ public:
                     const QString prefix = ""
     );
     void                                          select(const std::string& key);
+    void                                          select_steamrt(const std::string& key);
     static std::string get_compat_dir_path();
     static std::string get_compat_c_drive();
 
@@ -38,6 +39,7 @@ private:
     steam_proton();
     static std::shared_ptr<steam_proton>          mInstance;
     std::shared_ptr<vlvproton>                    mProton;
+    std::shared_ptr<vlvproton>                    mSteamRt;
     std::string                                   mSelected;
     std::shared_ptr<QProcess>                     mProcess;
     std::shared_ptr<QProcessEnvironment>          mProcessEnvironment;

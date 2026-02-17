@@ -20,6 +20,8 @@
 
 #include "egachafs.h"
 
+#include <exception>
+
 std::shared_ptr<std::list<std::shared_ptr<QFile>>> AbstractCommand::getGameWishesCache(QString path) {
     try {
         return std::move(gachafs::getFiles(
@@ -69,19 +71,23 @@ std::unique_ptr<QStringList> AbstractCommand::runUrlSearch(std::shared_ptr<QFile
 
 std::unique_ptr<QStringList> AbstractCommand::runUrlCleanup(std::unique_ptr<QStringList> ptr) {
     std::unique_ptr<QStringList> retList; // don't initialize unless necessary
-    for(const auto& single_string: (*ptr)) {
-        for(const auto& split_string_1: single_string.split("1/0/")) { /** cut on 1/0/ **/
-            for(const auto& split_string_2: split_string_1.split(QChar('\0'), Qt::SkipEmptyParts)) {
-                if(split_string_2.startsWith("http")) {
-                    if(!retList) retList = std::make_unique<QStringList>();
-                    // always split after a cache entry, defined by nullchars
-                    retList->append(split_string_2); // first of the second level
+    try {
+        for(const auto& single_string: (*ptr)) {
+            for(const auto& split_string_1: single_string.split("1/0/")) { /** cut on 1/0/ **/
+                for(const auto& split_string_2: split_string_1.split(QChar('\0'), Qt::SkipEmptyParts)) {
+                    if(split_string_2.startsWith("http")) {
+                        if(!retList) retList = std::make_unique<QStringList>();
+                        // always split after a cache entry, defined by nullchars
+                        retList->append(split_string_2); // first of the second level
+                    }
                 }
             }
         }
+        ptr->clear(); /** cleanup **/
+        return std::move(retList);
+    } catch (std::exception e) {
+        warnHelp(0);
     }
-    ptr->clear(); /** cleanup **/
-    return std::move(retList);
 }
 
 std::unique_ptr<QStringList> AbstractCommand::runUrlCheckOnCache(std::shared_ptr<QFile> file) {
