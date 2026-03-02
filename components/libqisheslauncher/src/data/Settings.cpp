@@ -22,6 +22,7 @@ std::string getStringFromNode(const YAML::Node &file, const char* key) {
 
 void Settings::parse(const YAML::Node &file) {
     runner = getStringFromNode(file, "runner");
+    steamrt = getStringFromNode(file, "steamrt");
     hud = getBoolFromNode(file, "hud");
     vkcap = getBoolFromNode(file, "vkcap");
     wayland = getBoolFromNode(file, "wayland");
@@ -47,6 +48,7 @@ std::string Settings::to_string() {
 std::unique_ptr<YAML::Node> Settings::generate() {
     auto out           = std::make_unique<YAML::Node>();
     (*out)["runner"]   = runner;
+    (*out)["steamrt"]  = steamrt;
     (*out)["hud"]      = hud;
     (*out)["vkcap"]    = vkcap;
     (*out)["wayland"]  = wayland;
