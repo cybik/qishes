@@ -27,6 +27,7 @@ public:
     std::vector<std::string> get_available_protons();
     std::vector<std::string> get_available_steam_runtimes();
     void select(const std::string& key);
+    void selectSteamRt(const std::string& key);
     void identify_proton_installs();
     void identify_steamrt_installs();
 
@@ -45,4 +46,6 @@ private:
     std::map<std::string, std::shared_ptr<steamrt>> mSteamRTs;
     std::string mSelectedProton;
     std::string mSelectedSteamRT;
+    std::shared_ptr<proton> mSelectedProtonptr;
+    std::shared_ptr<steamrt> mSelectedSteamRTptr;
 };

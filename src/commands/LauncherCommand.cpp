@@ -224,7 +224,6 @@ std::unique_ptr<SARibbonPannel> LauncherCommand::get_panel_steamrt() {
     std::unique_ptr<SARibbonPannel> panel_steamrt = std::make_unique<SARibbonPannel>();
     panel_steamrt->addSmallWidget(given_steamrt_combo.get());
     panel_steamrt->setPannelName("SteamRT Runtime");
-    given_steamrt_combo->addItem(QString("None"));
     for (auto str: vlvproton::getInstance()->get_available_steam_runtimes()) {
         given_steamrt_combo->addItem(QString(str.c_str()));
         if (data && data->getSettings() && str == data->getSettings()->steamrt) {

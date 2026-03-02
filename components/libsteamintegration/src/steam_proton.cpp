@@ -42,7 +42,7 @@ void steam_proton::select(const std::string& key) {
 }
 
 void steam_proton::select_steamrt(const std::string& key) {
-    mSteamRt->select(key);
+    mProton->selectSteamRt(key);
 }
 
 void steam_proton::try_setup() {
@@ -109,26 +109,31 @@ void steam_proton::try_run(
         lArguments.append(prefix);
     }
 #endif
+    // Always launch through steam-launch-wrapper
     QString _steam_base_folder = QString(qgetenv("STEAM_BASE_FOLDER"));
     mProcess->setProgram(_steam_base_folder+"/ubuntu12_32/steam-launch-wrapper");
 
     // What we cookin'
+    QString selected_proton_verb = "waitforexitandrun";
     QStringList lArguments = QStringList();
-    QString selected_verb = "waitforexitandrun";
-    lArguments.append(QStringList({
-        "--",
-        _steam_base_folder + "/ubuntu12_32/reaper",
-        "SteamLaunch",
-        "AppId="+qgetenv("SteamGameId"),
-        "--",
-        _steam_base_folder+"/steamapps/common/SteamLinuxRuntime_sniper/_v2-entry-point",
-        "--verb="+selected_verb,
-        "--"
-    }));
+    auto selectedrt = mProton->get_selected_steamrt();
+    auto selected = mProton->get_selected_proton();
+    if (mProton->get_selected_steamrt() && mProton->get_selected_steamrt()->type() != steamrt::SteamRT_Type::None) {
+        lArguments.append(QStringList({
+            "--",
+            _steam_base_folder + "/ubuntu12_32/reaper",
+            "SteamLaunch",
+            "AppId="+qgetenv("SteamGameId"),
+            "--",
+            _steam_base_folder+"/steamapps/common/SteamLinuxRuntime_sniper/_v2-entry-point",
+            "--verb="+selected_proton_verb,
+            "--"
+        }));
+    }
 
     lArguments.append(mProton->get_selected_proton()->exec().c_str());
 
-    lArguments.append(selected_verb); // always this
+    lArguments.append(selected_proton_verb); // always this
     if (decorated_executable.empty()) {
         lArguments.append(target_executable.c_str());
     } else {

@@ -41,15 +41,19 @@ std::vector<std::string> vlvproton::get_available_steam_runtimes() {
 }
 
 std::shared_ptr<proton> vlvproton::get_selected_proton() {
-    return mProtons.at(mSelectedProton);
+    return mProtons[mSelectedProton];
 }
 
 std::shared_ptr<steamrt> vlvproton::get_selected_steamrt() {
-    return mSteamRTs.at(mSelectedSteamRT);
+    return mSteamRTs[mSelectedSteamRT];
 }
 
 void vlvproton::select(const std::string& key) {
     mSelectedProton = key;
+}
+
+void vlvproton::selectSteamRt(const std::string& key) {
+    mSelectedSteamRT = key;
 }
 
 void vlvproton::identify_proton_installs() {
@@ -102,9 +106,10 @@ vlvproton::vlvproton(std::list<std::filesystem::path> base_dirs) {
 
 void vlvproton::identify_steamrt(const std::filesystem::directory_iterator& path) {
     // skip symlinks and determine if proton runtime is present
+    mSteamRTs.emplace("None", std::make_shared<steamrt>("None", ""));
     for (const auto& dir : std::filesystem::directory_iterator(path))
         if (dir.is_directory() && !is_symlink(dir) && is_regular_file(dir.path() / "_v2-entry-point") )
-            mSteamRTs.emplace(dir.path().filename(), std::make_shared<steamrt>(dir));
+            mSteamRTs.emplace(dir.path().filename(), std::make_shared<steamrt>(dir.path().filename(), dir));
 }
 
 
